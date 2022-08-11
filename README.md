@@ -1,3 +1,2 @@
 # gipBulletPhysics
-BulletPhysics plugin for GlistEngine
-Work in progress.
+BulletPhysics plugin for GlistEngine. Work in progress.
