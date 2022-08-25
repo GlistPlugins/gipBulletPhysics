@@ -12,6 +12,7 @@ set(PLUGIN_LIBS_DIR ${PLUGIN_DIR}/libs)
 ##### PLUGIN SOURCES #####
 list(APPEND PLUGIN_SRCS
 			${PLUGIN_DIR}/src/gipBulletPhysics.cpp
+			${PLUGIN_DIR}/src/gImageGameObject.cpp
 )
 
 
