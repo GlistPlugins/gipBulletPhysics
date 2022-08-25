@@ -19,129 +19,134 @@ void gipBulletPhysics::update() {
 }
 
 void gipBulletPhysics::initialize() {
-	collisionConfiguration = new btDefaultCollisionConfiguration();
-	dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	overlappingPairCache = new btDbvtBroadphase();
+	collisionconfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionconfiguration);
+	overlappingpaircache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver ;
-	dynamicsWorld = new btDiscreteDynamicsWorld (dispatcher, overlappingPairCache, solver, collisionConfiguration);
+	dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
 }
 
-void gipBulletPhysics::setGravity(float gravityValue) {
-	dynamicsWorld->setGravity(btVector3 (0, gravityValue, 0));
+void gipBulletPhysics::setGravity(float gravityvalue) {
+	dynamicsworld->setGravity(btVector3 (0, gravityvalue, 0));
 }
 
 void gipBulletPhysics::addRigidBody(btRigidBody* rb) {
-	dynamicsWorld->addRigidBody(rb);
+	dynamicsworld->addRigidBody(rb);
 }
 
-void gipBulletPhysics::create2dBoxObject(gImage img, float x, float y, float objMass) {
-	btTransform box2dTransform;
+void gipBulletPhysics::create2dBoxObject(gImageGameObject* imgobject, float objmass) {
+	btTransform box2dtransform;
 
-	btCollisionShape* box2dShape = new btBoxShape(btVector3(img.getWidth(), img.getHeight(), 1.0f));
-	collisionShapes.push_back(box2dShape);
+	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgobject->image.getWidth(), imgobject->image.getHeight(), 1.0f));
+	collisionshapes.push_back(box2dshape);
 
-	box2dTransform.setIdentity();
+	box2dtransform.setIdentity();
 	/*
 	 * The Glist Engine references the top left corner for object positions;
 	 * but the bullet3 library references the bottom left for object positions.
 	 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
 	 */
-	box2dTransform.setOrigin(btVector3(x, -(y + img.getHeight()), 0));
-	btScalar mass(objMass);
+	box2dtransform.setOrigin(btVector3(imgobject->positionx, -(imgobject->positiony + imgobject->image.getHeight()), 0));
+	btScalar mass(objmass);
 
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isDynamic = (mass != 0.f);
 
 	btVector3 localInertia(0, 0, 0);
 	if (isDynamic)
-		box2dShape->calculateLocalInertia(mass, localInertia);
+		box2dshape->calculateLocalInertia(mass, localInertia);
 
 	//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(box2dTransform);
-	btRigidBody::btRigidBodyConstructionInfo box2dRbInfo(mass, myMotionState, box2dShape, localInertia);
-	btRigidBody* box2dRigidBody = new btRigidBody(box2dRbInfo);
+	btDefaultMotionState* mymotionstate = new btDefaultMotionState(box2dtransform);
+	btRigidBody::btRigidBodyConstructionInfo box2drbinfo(mass, mymotionstate, box2dshape, localInertia);
+	btRigidBody* box2drigidbody = new btRigidBody(box2drbinfo);
 
-	addRigidBody(box2dRigidBody);
+	addRigidBody(box2drigidbody);
 
 	// gLogi("box") << float(box2dTransform.getOrigin().getX()) << " " << float(box2dTransform.getOrigin().getY());
 }
 
-void gipBulletPhysics::create2dCircleObject(gImage img, float x, float y, float objMass) {
-	btTransform circle2dTransform;
+void gipBulletPhysics::create2dCircleObject(gImageGameObject* imgobject, float objmass) {
+	btTransform circle2dtransform;
 
 	// parameter is circle radius
-	btCollisionShape* circle2dShape = new btSphereShape(img.getWidth() / 2);
-	collisionShapes.push_back(circle2dShape);
+	btCollisionShape* circle2dshape = new btSphereShape(imgobject->image.getWidth() / 2);
+	collisionshapes.push_back(circle2dshape);
 
-	circle2dTransform.setIdentity();
+	circle2dtransform.setIdentity();
 	/*
 	 * The Glist Engine references the top left corner for object positions;
 	 * but the bullet3 library references the center for circle object positions.
 	 * so we should convert Glist positions to bullet3 positions with (+img.getWidth() / 2 and +img.getHeight() / 2).
 	 */
-	circle2dTransform.setOrigin(btVector3(x + (img.getWidth() / 2), -(y + img.getHeight() / 2), 0));
+	circle2dtransform.setOrigin(
+			btVector3(imgobject->positionx + (imgobject->image.getWidth() / 2),
+			-(imgobject->positiony + imgobject->image.getHeight() / 2), 0)
+	);
 
-	btScalar mass(objMass);
+	btScalar mass(objmass);
 
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
-	bool isDynamic = (mass != 0.f);
+	bool isdynamic = (mass != 0.f);
 
 	btVector3 localInertia(0, 0, 0);
-	if (isDynamic)
-		circle2dShape->calculateLocalInertia(mass, localInertia);
+	if (isdynamic)
+		circle2dshape->calculateLocalInertia(mass, localInertia);
 
 	//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
-	btDefaultMotionState* myMotionState = new btDefaultMotionState(circle2dTransform);
-	btRigidBody::btRigidBodyConstructionInfo circle2dRbInfo(mass, myMotionState, circle2dShape, localInertia);
-	btRigidBody* circle2dRigidBody = new btRigidBody(circle2dRbInfo);
+	btDefaultMotionState* mymotionstate = new btDefaultMotionState(circle2dtransform);
+	btRigidBody::btRigidBodyConstructionInfo circle2drbinfo(mass, mymotionstate, circle2dshape, localInertia);
+	btRigidBody* circle2drigidbody = new btRigidBody(circle2drbinfo);
 
-	addRigidBody(circle2dRigidBody);
+	addRigidBody(circle2drigidbody);
 
 	// gLogi("circle") << float(circle2dTransform.getOrigin().getX()) << " " << float(circle2dTransform.getOrigin().getY());
 }
 
-int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScalar fixedTimeStep) {
-	return dynamicsWorld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+int gipBulletPhysics::stepSimulation(btScalar timestep, int maxsubsteps , btScalar fixedtimestep) {
+	return dynamicsworld->stepSimulation(timestep, maxsubsteps, fixedtimestep);
 }
 
 int gipBulletPhysics::getNumCollisionObjects() {
-	return dynamicsWorld->getNumCollisionObjects();
+	return dynamicsworld->getNumCollisionObjects();
 }
 
 btCollisionObjectArray& gipBulletPhysics::getCollisionObjectArray() {
-	return dynamicsWorld->getCollisionObjectArray();
+	return dynamicsworld->getCollisionObjectArray();
 }
 
-btVector3& gipBulletPhysics::getOrigin(btTransform* trans) {
-	return trans->getOrigin();
+glm::vec2 gipBulletPhysics::getOrigin2d(btTransform* trans) {
+	btVector3& position = trans->getOrigin();
+	return glm::vec2 (
+			position.getX(),
+			position.getY()
+	);
 }
 
 // convert bullet3 positions to Glist Engine positions and return for circle objects.
-btVector3 gipBulletPhysics::getCircle2dObjectPosition(btTransform trans, float imgWidth, float imgHeight) {
+glm::vec2 gipBulletPhysics::getCircle2dObjectPosition(btTransform transform, float imgwidth, float imgheight) {
 	// gLogi("circle (x,y)") << trans.getOrigin().getX() - (imgWidth / 2) << " " << -(trans.getOrigin().getY() + imgHeight / 2);
-	return btVector3(
-			trans.getOrigin().getX() - (imgWidth / 2),
-			-(trans.getOrigin().getY() + imgHeight / 2),
-			0.0f
+	return glm::vec2 (
+			transform.getOrigin().getX() - (imgwidth / 2),
+			-(transform.getOrigin().getY() + imgheight / 2)
 	);
 }
 
 // convert bullet3 positions to Glist Engine positions and return for box objects.
-btVector3 gipBulletPhysics::getBox2dObjectPosition(btTransform trans, float imgWidth, float imgHeight) {
+glm::vec2 gipBulletPhysics::getBox2dObjectPosition(btTransform trans, float imgwidth, float imgheight) {
 	// gLogi("box (x,y)") << trans.getOrigin().getX() << " " << -(trans.getOrigin().getY() + imgHeight);
-	return btVector3(
+	return glm::vec2 (
 			trans.getOrigin().getX(),
-			-(trans.getOrigin().getY() + imgHeight),
-			0.0f
+			-(trans.getOrigin().getY() + imgheight)
 	);
 }
 
 void gipBulletPhysics::clean() {
-	delete collisionConfiguration;
+	delete collisionconfiguration;
 	delete dispatcher;
-	delete overlappingPairCache;
+	delete overlappingpaircache;
 	delete solver;
-	delete dynamicsWorld;
+	delete dynamicsworld;
 }
 
 
