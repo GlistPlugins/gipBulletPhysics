@@ -26,18 +26,18 @@ void gipBulletPhysics::initialize() {
 	dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
 }
 
-void gipBulletPhysics::setGravity(float gravityvalue) {
-	dynamicsworld->setGravity(btVector3 (0, gravityvalue, 0));
+void gipBulletPhysics::setGravity(float gravityValue) {
+	dynamicsworld->setGravity(btVector3 (0, gravityValue, 0));
 }
 
-void gipBulletPhysics::addRigidBody(btRigidBody* rb) {
-	dynamicsworld->addRigidBody(rb);
+void gipBulletPhysics::createRigidBody(btRigidBody* rigidBody) {
+	dynamicsworld->addRigidBody(rigidBody);
 }
 
-void gipBulletPhysics::create2dBoxObject(gImageGameObject* imgobject, float objmass) {
+void gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objMass) {
 	btTransform box2dtransform;
 
-	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgobject->image.getWidth(), imgobject->image.getHeight(), 1.0f));
+	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->image.getWidth(), imgObject->image.getHeight(), 1.0f));
 	collisionshapes.push_back(box2dshape);
 
 	box2dtransform.setIdentity();
@@ -46,8 +46,8 @@ void gipBulletPhysics::create2dBoxObject(gImageGameObject* imgobject, float objm
 	 * but the bullet3 library references the bottom left for object positions.
 	 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
 	 */
-	box2dtransform.setOrigin(btVector3(imgobject->positionx, -(imgobject->positiony + imgobject->image.getHeight()), 0));
-	btScalar mass(objmass);
+	box2dtransform.setOrigin(btVector3(imgObject->positionx, -(imgObject->positiony + imgObject->image.getHeight()), 0));
+	btScalar mass(objMass);
 
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isDynamic = (mass != 0.f);
@@ -61,16 +61,16 @@ void gipBulletPhysics::create2dBoxObject(gImageGameObject* imgobject, float objm
 	btRigidBody::btRigidBodyConstructionInfo box2drbinfo(mass, mymotionstate, box2dshape, localInertia);
 	btRigidBody* box2drigidbody = new btRigidBody(box2drbinfo);
 
-	addRigidBody(box2drigidbody);
+	createRigidBody(box2drigidbody);
 
 	// gLogi("box") << float(box2dTransform.getOrigin().getX()) << " " << float(box2dTransform.getOrigin().getY());
 }
 
-void gipBulletPhysics::create2dCircleObject(gImageGameObject* imgobject, float objmass) {
+void gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float objMass) {
 	btTransform circle2dtransform;
 
 	// parameter is circle radius
-	btCollisionShape* circle2dshape = new btSphereShape(imgobject->image.getWidth() / 2);
+	btCollisionShape* circle2dshape = new btSphereShape(imgObject->image.getWidth() / 2);
 	collisionshapes.push_back(circle2dshape);
 
 	circle2dtransform.setIdentity();
@@ -80,11 +80,11 @@ void gipBulletPhysics::create2dCircleObject(gImageGameObject* imgobject, float o
 	 * so we should convert Glist positions to bullet3 positions with (+img.getWidth() / 2 and +img.getHeight() / 2).
 	 */
 	circle2dtransform.setOrigin(
-			btVector3(imgobject->positionx + (imgobject->image.getWidth() / 2),
-			-(imgobject->positiony + imgobject->image.getHeight() / 2), 0)
+			btVector3(imgObject->positionx + (imgObject->image.getWidth() / 2),
+			-(imgObject->positiony + imgObject->image.getHeight() / 2), 0)
 	);
 
-	btScalar mass(objmass);
+	btScalar mass(objMass);
 
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isdynamic = (mass != 0.f);
@@ -98,13 +98,13 @@ void gipBulletPhysics::create2dCircleObject(gImageGameObject* imgobject, float o
 	btRigidBody::btRigidBodyConstructionInfo circle2drbinfo(mass, mymotionstate, circle2dshape, localInertia);
 	btRigidBody* circle2drigidbody = new btRigidBody(circle2drbinfo);
 
-	addRigidBody(circle2drigidbody);
+	createRigidBody(circle2drigidbody);
 
 	// gLogi("circle") << float(circle2dTransform.getOrigin().getX()) << " " << float(circle2dTransform.getOrigin().getY());
 }
 
-int gipBulletPhysics::stepSimulation(btScalar timestep, int maxsubsteps , btScalar fixedtimestep) {
-	return dynamicsworld->stepSimulation(timestep, maxsubsteps, fixedtimestep);
+int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScalar fixedTimeStep) {
+	return dynamicsworld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
 }
 
 int gipBulletPhysics::getNumCollisionObjects() {
@@ -115,29 +115,32 @@ btCollisionObjectArray& gipBulletPhysics::getCollisionObjectArray() {
 	return dynamicsworld->getCollisionObjectArray();
 }
 
-glm::vec2 gipBulletPhysics::getOrigin2d(btTransform* trans) {
-	btVector3& position = trans->getOrigin();
+glm::vec2 gipBulletPhysics::getOrigin2d(int gameObjectNo) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[gameObjectNo];
+	btTransform transform = gameobject->getWorldTransform();
 	return glm::vec2 (
-			position.getX(),
-			position.getY()
+			transform.getOrigin().getX(),
+			transform.getOrigin().getY()
 	);
 }
 
-// convert bullet3 positions to Glist Engine positions and return for circle objects.
-glm::vec2 gipBulletPhysics::getCircle2dObjectPosition(btTransform transform, float imgwidth, float imgheight) {
+glm::vec2 gipBulletPhysics::getCircle2dObjectPosition(int gameObjectNo, gImageGameObject* imgObject) {
 	// gLogi("circle (x,y)") << trans.getOrigin().getX() - (imgWidth / 2) << " " << -(trans.getOrigin().getY() + imgHeight / 2);
+	btCollisionObject* gameobject = getCollisionObjectArray()[gameObjectNo];
+	btTransform transform = gameobject->getWorldTransform();
 	return glm::vec2 (
-			transform.getOrigin().getX() - (imgwidth / 2),
-			-(transform.getOrigin().getY() + imgheight / 2)
+			transform.getOrigin().getX() - (imgObject->image.getWidth() / 2),
+			-(transform.getOrigin().getY() + imgObject->image.getHeight() / 2)
 	);
 }
 
-// convert bullet3 positions to Glist Engine positions and return for box objects.
-glm::vec2 gipBulletPhysics::getBox2dObjectPosition(btTransform trans, float imgwidth, float imgheight) {
+glm::vec2 gipBulletPhysics::getBox2dObjectPosition(int gameObjectNo, gImageGameObject* imgObject) {
 	// gLogi("box (x,y)") << trans.getOrigin().getX() << " " << -(trans.getOrigin().getY() + imgHeight);
+	btCollisionObject* gameobject = getCollisionObjectArray()[gameObjectNo];
+	btTransform transform = gameobject->getWorldTransform();
 	return glm::vec2 (
-			trans.getOrigin().getX(),
-			-(trans.getOrigin().getY() + imgheight)
+			transform.getOrigin().getX(),
+			-(transform.getOrigin().getY() + imgObject->image.getHeight())
 	);
 }
 
