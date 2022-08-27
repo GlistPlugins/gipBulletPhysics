@@ -2,7 +2,7 @@
  * gImageGameObject.h
  *
  *  Created on: 24 Aðu 2022
- *      Author: Faruk
+ *      Author: Faruk Aygun
  */
 
 #ifndef SRC_GIMAGEGAMEOBJECT_H_
@@ -21,6 +21,7 @@ public:
 
 	gImage image;
 
+	int id = -1;
 	float positionx;
 	float positiony;
 	float rotationx;

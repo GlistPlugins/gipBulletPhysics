@@ -34,7 +34,7 @@ void gipBulletPhysics::createRigidBody(btRigidBody* rigidBody) {
 	dynamicsworld->addRigidBody(rigidBody);
 }
 
-void gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objMass) {
+int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objMass) {
 	btTransform box2dtransform;
 
 	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->image.getWidth(), imgObject->image.getHeight(), 1.0f));
@@ -63,10 +63,13 @@ void gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objM
 
 	createRigidBody(box2drigidbody);
 
+	gameobjectid.push_back(gameobjectid.size());
 	// gLogi("box") << float(box2dTransform.getOrigin().getX()) << " " << float(box2dTransform.getOrigin().getY());
+
+	return gameobjectid.back();
 }
 
-void gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float objMass) {
+int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float objMass) {
 	btTransform circle2dtransform;
 
 	// parameter is circle radius
@@ -100,7 +103,10 @@ void gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float o
 
 	createRigidBody(circle2drigidbody);
 
+	gameobjectid.push_back(gameobjectid.size());
 	// gLogi("circle") << float(circle2dTransform.getOrigin().getX()) << " " << float(circle2dTransform.getOrigin().getY());
+
+	return gameobjectid.back();
 }
 
 int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScalar fixedTimeStep) {

@@ -3,7 +3,7 @@
  *
  *  Created on: 5 Aug 2022
  *      Author: Faruk Aygun,
- *      		Emirhan Limon<
+ *      		Emirhan Limon
  */
 
 #ifndef SRC_GIPBULLETPHYSICS_H_
@@ -29,9 +29,10 @@ public:
 	// Delete initialized objects
 	void clean();
 	void setGravity(float gravityValue);
-	void createBox2dObject(gImageGameObject* imgObject, float objMass);
-	void createCircle2dObject(gImageGameObject* imgObject, float objMass);
 
+	// Create methods return created object id
+	int createBox2dObject(gImageGameObject* imgObject, float objMass);
+	int createCircle2dObject(gImageGameObject* imgObject, float objMass);
 	// The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 	int  stepSimulation(btScalar timeStep, int maxSubSteps = 1, btScalar fixedTimeStep = btScalar(1.) / btScalar(60.));
 	int  getNumCollisionObjects();
@@ -49,6 +50,8 @@ public:
 	// keep track of the shapes, we release memory at exit.
 	// make sure to re-use collision shapes among rigid bodies whenever possible!
 	btAlignedObjectArray<btCollisionShape*> collisionshapes;
+	// keep track of the created game object ids
+	std::vector<int> gameobjectid;
 private:
 	void createRigidBody(btRigidBody* rigidBody);
 
