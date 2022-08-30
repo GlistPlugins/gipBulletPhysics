@@ -1,8 +1,8 @@
 /*
  * gImageGameObject.h
  *
- *  Created on: 24 Aðu 2022
- *      Author: Faruk
+ *  Created on: 24 Aug 2022
+ *      Author: Faruk Aygun
  */
 
 #ifndef SRC_GIMAGEGAMEOBJECT_H_
@@ -18,9 +18,14 @@ public:
 	virtual ~gImageGameObject();
 
 	void draw();
+	// TODO: create method body.
+	void loadImage(std::string imageName);
 
+	// TODO: set access modifier private and create get-set methods
+	// TODO: create (float)objMass variable
 	gImage image;
 
+	int id = -1;
 	float positionx;
 	float positiony;
 	float rotationx;
