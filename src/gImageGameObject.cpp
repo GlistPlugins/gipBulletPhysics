@@ -1,7 +1,7 @@
 /*
  * gImageGameObject.cpp
  *
- *  Created on: 24 Aðu 2022
+ *  Created on: 24 Aug 2022
  *      Author: Faruk Aygun
  */
 
@@ -22,4 +22,3 @@ gImageGameObject::~gImageGameObject() {
 void gImageGameObject::draw() {
 
 }
-

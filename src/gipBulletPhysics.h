@@ -23,8 +23,10 @@ public:
 
 	void update();
 
-	// initialize worlds
-	void initialize();
+	// RigidWorld should be initialized if all objects have rigidbody.
+	void initializeRigidWorld();
+	// SoftRigidWorld should be initialized if some objects have softbody.
+	void initializeSoftRigidWorld();
 
 	// Delete initialized objects
 	void clean();
@@ -33,17 +35,22 @@ public:
 	// Create methods return created object id
 	int createBox2dObject(gImageGameObject* imgObject, float objMass);
 	int createCircle2dObject(gImageGameObject* imgObject, float objMass);
+	int createSoftContactBox2dObject(gImageGameObject* imgObject, float objMass, float stiffness = 300.0f, float damping = 10.0f);
+	int createSoftCircle2dObject(gImageGameObject* imgObject, float objMass);
 	// The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 	int  stepSimulation(btScalar timeStep, int maxSubSteps = 1, btScalar fixedTimeStep = btScalar(1.) / btScalar(60.));
 	int  getNumCollisionObjects();
 
 	// Return the origin vector translation
 	glm::vec2 getOrigin2d(int gameObjectNo);
-	// Unlike getOrigin, these two methods arranges and returns positions according to the Glist Engine.
+	/*
+	 * Unlike getOrigin, these two methods arranges and returns positions according to the Glist Engine.
+	 * These get methods works for soft objects.
+	 */
 	// convert bullet3 positions to Glist Engine positions and return for circle objects.
-	glm::vec2 getCircle2dObjectPosition(int gameObjectNo, gImageGameObject* imgObject);
-	// convert bullet3 positions to Glist Engine positions and return for box objects.
-	glm::vec2 getBox2dObjectPosition(int gameObjectNo, gImageGameObject* imgObject);
+	glm::vec2 getCircle2dObjectPosition(gImageGameObject* imgObject);
+	// convert> a bullet3 positions to Glist Engine positions and return for box objects.
+	glm::vec2 getBox2dObjectPosition(gImageGameObject* imgObject);
 
 	btCollisionObjectArray& getCollisionObjectArray();
 
@@ -52,14 +59,17 @@ public:
 	btAlignedObjectArray<btCollisionShape*> collisionshapes;
 	// keep track of the created game object ids
 	std::vector<int> gameobjectid;
-private:
-	void createRigidBody(btRigidBody* rigidBody);
 
+private:
 	btDefaultCollisionConfiguration* collisionconfiguration;
 	btCollisionDispatcher* dispatcher;
 	btBroadphaseInterface* overlappingpaircache;
 	btSequentialImpulseConstraintSolver* solver;
 	btDiscreteDynamicsWorld* dynamicsworld;
+
+	//soft contact
+	btConstraintSolver* constraintsolver;
+	btBroadphaseInterface* broadphase;
 };
 
 #endif /* SRC_GIPBULLETPHYSICS_H_ */
