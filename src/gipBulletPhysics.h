@@ -30,13 +30,21 @@ public:
 
 	// Delete initialized objects
 	void clean();
-	void setGravity(float gravityValue);
+	// for 2d set z axis 0
+	void setGravity(glm::vec3 gravityValue);
+	// These 6 methods should be used in update method.
+	void setCentralForce(gImageGameObject* imgObject, glm::vec3 forceValue);
+	void setCentralImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue);
+	void setForce(gImageGameObject* imgObject, glm::vec3 forceValue, glm::vec3 relPos);
+	void setImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue, glm::vec3 relPos);
+	void setTorque(gImageGameObject* imgObject, glm::vec3 torqueValue);
+	void setTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue);
 
 	// Create methods return created object id
-	int createBox2dObject(gImageGameObject* imgObject, float objMass);
-	int createCircle2dObject(gImageGameObject* imgObject, float objMass);
-	int createSoftContactBox2dObject(gImageGameObject* imgObject, float objMass, float stiffness = 300.0f, float damping = 10.0f);
-	int createSoftCircle2dObject(gImageGameObject* imgObject, float objMass);
+	int createBox2dObject(gImageGameObject* imgObject);
+	int createCircle2dObject(gImageGameObject* imgObject);
+	int createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness = 300.0f, float damping = 10.0f);
+	int createSoftCircle2dObject(gImageGameObject* imgObject);
 	// The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 	int  stepSimulation(btScalar timeStep, int maxSubSteps = 1, btScalar fixedTimeStep = btScalar(1.) / btScalar(60.));
 	int  getNumCollisionObjects();

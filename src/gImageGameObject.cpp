@@ -7,8 +7,9 @@
 
 #include <gImageGameObject.h>
 
-gImageGameObject::gImageGameObject(gImage image, float positionx, float positiony, float rotationx, float rotationy) {
+gImageGameObject::gImageGameObject(gImage image, float mass, float positionx, float positiony, float rotationx, float rotationy) {
 	this->image = image;
+	this->mass = mass;
 	this->positionx = positionx;
 	this->positiony = positiony;
 	this->rotationx = rotationx;
