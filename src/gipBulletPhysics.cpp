@@ -41,11 +41,53 @@ void gipBulletPhysics::initializeSoftRigidWorld() {
 	dynamicsworld->getSolverInfo().m_splitImpulse = false;
 }
 
-void gipBulletPhysics::setGravity(float gravityValue) {
-	dynamicsworld->setGravity(btVector3 (0, gravityValue, 0));
+void gipBulletPhysics::setGravity(glm::vec3 gravityValue) {
+	dynamicsworld->setGravity(btVector3 (gravityValue.x, gravityValue.y, gravityValue.z));
 }
 
-int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objMass) {
+void gipBulletPhysics::setCentralForce(gImageGameObject* imgObject, glm::vec3 forceValue) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->id];
+	btRigidBody* rb = btRigidBody::upcast(gameobject);
+
+	rb->applyCentralForce(btVector3(forceValue.x, forceValue.y, forceValue.z));
+}
+
+void gipBulletPhysics::setCentralImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->id];
+	btRigidBody* rb = btRigidBody::upcast(gameobject);
+
+	rb->applyCentralImpulse(btVector3(impulseValue.x, impulseValue.y, impulseValue.z));
+}
+
+void gipBulletPhysics::setForce(gImageGameObject* imgObject, glm::vec3 forceValue, glm::vec3 relPos) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->id];
+	btRigidBody* rb = btRigidBody::upcast(gameobject);
+
+	rb->applyForce(btVector3(forceValue.x, forceValue.y, forceValue.z), btVector3(relPos.x, relPos.y, relPos.z));
+}
+
+void gipBulletPhysics::setImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue, glm::vec3 relPos) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->id];
+	btRigidBody* rb = btRigidBody::upcast(gameobject);
+
+	rb->applyImpulse(btVector3(impulseValue.x, impulseValue.y, impulseValue.z), btVector3(relPos.x, relPos.y, relPos.z));
+}
+
+void gipBulletPhysics::setTorque(gImageGameObject* imgObject, glm::vec3 torqueValue) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->id];
+	btRigidBody* rb = btRigidBody::upcast(gameobject);
+
+	rb->applyTorque(btVector3(torqueValue.x, torqueValue.y, torqueValue.z));
+}
+
+void gipBulletPhysics::setTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue) {
+	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->id];
+	btRigidBody* rb = btRigidBody::upcast(gameobject);
+
+	rb->applyTorqueImpulse(btVector3(torqueValue.x, torqueValue.y, torqueValue.z));
+}
+
+int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	btTransform box2dtransform;
 	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->image.getWidth(), imgObject->image.getHeight(), 1.0f));
 	// TODO: btBox2dShape* box2dshape = new btBox2dShape(btVector3(imgObject->image.getWidth(), imgObject->image.getHeight(), 0.0f));
@@ -65,7 +107,7 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objMa
 			)
 	);
 
-	btScalar mass(objMass);
+	btScalar mass(imgObject->mass);
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isDynamic = (mass != 0.f);
 
@@ -86,7 +128,7 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float objMa
 	return gameobjectid.back();
 }
 
-int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float objMass) {
+int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 	btTransform circle2dtransform;
 	// parameter is circle radius
 	btCollisionShape* circle2dshape = new btSphereShape(imgObject->image.getWidth() / 2);
@@ -106,7 +148,7 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float ob
 			)
 	);
 
-	btScalar mass(objMass);
+	btScalar mass(imgObject->mass);
 
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isdynamic = (mass != 0.f);
@@ -129,7 +171,7 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float ob
 }
 
 // increase stiffness, reduce dumping for harder floor.
-int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float objMass, float stiffness, float damping) {
+int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping) {
 	btTransform softbox2dtransform;
 	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->image.getWidth(), imgObject->image.getHeight(), 0.0f));
 
@@ -149,7 +191,7 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 			)
 	);
 
-	btScalar mass(objMass);
+	btScalar mass(imgObject->mass);
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isDynamic = (mass != 0.f);
 
@@ -165,6 +207,7 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	dynamicsworld->addRigidBody(softbox2drigidbody);
 
 	softbox2drigidbody->setContactStiffnessAndDamping(stiffness, damping);
+	softbox2drigidbody->setFriction(1);
 
 	gameobjectid.push_back(gameobjectid.size());
 	// gLogi("soft contact box") << float(softbox2dtransform.getOrigin().getX()) << " " << float(softbox2dtransform.getOrigin().getY());
@@ -172,7 +215,7 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	return gameobjectid.back();
 }
 
-int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject, float objMass) {
+int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
 	btCollisionShape* softball2dchildshape = new btSphereShape(imgObject->image.getWidth() / 2); // child shape
 	btCompoundShape* softball2dcolshape = new btCompoundShape(); // parent shape
 
@@ -183,7 +226,7 @@ int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject, floa
 	softball2dTransform.setIdentity();
 
 	// ballTransform.setRotation(btQuaternion(btVector3(1.0f, 1.0f, 1.0f), SIMD_PI / 10.0));
-	btScalar mass(1.0f);
+	btScalar mass(imgObject->mass);
 	bool isDynamic = (mass != 0.0f);
 
 	btVector3 localInertia(0, 0, 0);

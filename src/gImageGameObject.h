@@ -14,7 +14,7 @@
 
 class gImageGameObject {
 public:
-	gImageGameObject(gImage image, float positionx, float positiony, float rotationx, float rotationy);
+	gImageGameObject(gImage image, float mass, float positionx, float positiony, float rotationx, float rotationy);
 	virtual ~gImageGameObject();
 
 	void draw();
@@ -26,6 +26,7 @@ public:
 	gImage image;
 
 	int id = -1;
+	float mass;
 	float positionx;
 	float positiony;
 	float rotationx;
