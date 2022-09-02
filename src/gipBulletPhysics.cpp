@@ -104,7 +104,7 @@ void gipBulletPhysics::applyTorqueImpulse(gImageGameObject* imgObject, glm::vec3
 int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	btTransform box2dtransform;
 	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 1.0f));
-	// TODO: btBox2dShape* box2dshape = new btBox2dShape(btVector3(imgObject->image.getWidth(), imgObject->image.getHeight(), 0.0f));
+	// TODO: btBox2dShape* box2dshape = new btBox2dShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 0.0f));
 	collisionshapes.push_back(box2dshape);
 
 	box2dtransform.setIdentity();
@@ -116,7 +116,7 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	box2dtransform.setOrigin(
 			btVector3(
 					imgObject->getPosition().x,
-					-(imgObject->getPosition().y + imgObject->getImage().getHeight()),
+					-(imgObject->getPosition().y + imgObject->getHeight()),
 					0
 			)
 	);
