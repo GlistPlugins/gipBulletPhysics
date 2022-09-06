@@ -21,6 +21,12 @@ public:
 	gipBulletPhysics();
 	virtual ~gipBulletPhysics();
 
+	// keep track of the shapes, we release memory at exit.
+	// make sure to re-use collision shapes among rigid bodies whenever possible!
+	btAlignedObjectArray<btCollisionShape*> collisionshapes;
+	// keep track of the created game object ids
+	std::vector<int> gameobjectid;
+
 	void update();
 
 	// RigidWorld should be initialized if all objects have rigidbody.
@@ -32,13 +38,18 @@ public:
 	void clean();
 	// for 2d set z axis 0
 	void setGravity(glm::vec3 gravityValue);
-	// These 6 methods should be used in update method.
-	void setCentralForce(gImageGameObject* imgObject, glm::vec3 forceValue);
-	void setCentralImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue);
-	void setForce(gImageGameObject* imgObject, glm::vec3 forceValue, glm::vec3 relPos);
-	void setImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue, glm::vec3 relPos);
-	void setTorque(gImageGameObject* imgObject, glm::vec3 torqueValue);
-	void setTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue);
+	void setFriction(gImageGameObject* imgObject, float frictionValue);
+	void setRollingFriction(gImageGameObject* imgObject, float frictionValue);
+	void setSpinningFriction(gImageGameObject* imgObject, float frictionValue);
+	void setAnisotropicFriction(gImageGameObject* imgObject, glm::vec3 frictionValue, int frictionMode);
+
+	// These apply methods should be used in update method.
+	void applyCentralForce(gImageGameObject* imgObject, glm::vec3 forceValue);
+	void applyCentralImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue);
+	void applyForce(gImageGameObject* imgObject, glm::vec3 forceValue, glm::vec3 relPos);
+	void applyImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue, glm::vec3 relPos);
+	void applyTorque(gImageGameObject* imgObject, glm::vec3 torqueValue);
+	void applyTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue);
 
 	// Create methods return created object id
 	int createBox2dObject(gImageGameObject* imgObject);
@@ -62,12 +73,6 @@ public:
 
 	btCollisionObjectArray& getCollisionObjectArray();
 
-	// keep track of the shapes, we release memory at exit.
-	// make sure to re-use collision shapes among rigid bodies whenever possible!
-	btAlignedObjectArray<btCollisionShape*> collisionshapes;
-	// keep track of the created game object ids
-	std::vector<int> gameobjectid;
-
 private:
 	btDefaultCollisionConfiguration* collisionconfiguration;
 	btCollisionDispatcher* dispatcher;
@@ -78,6 +83,8 @@ private:
 	//soft contact
 	btConstraintSolver* constraintsolver;
 	btBroadphaseInterface* broadphase;
+
+	btRigidBody* getRigidBody(gImageGameObject* imgObject);
 };
 
 #endif /* SRC_GIPBULLETPHYSICS_H_ */

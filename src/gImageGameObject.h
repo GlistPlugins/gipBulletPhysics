@@ -14,23 +14,42 @@
 
 class gImageGameObject {
 public:
-	gImageGameObject(gImage image, float mass, float positionx, float positiony, float rotationx, float rotationy);
+	gImageGameObject(gImage image, float mass, glm::vec2 position, glm::vec2 rotation);
 	virtual ~gImageGameObject();
 
 	void draw();
-	// TODO: create method body.
-	void loadImage(std::string imageName);
+	void loadImage(std::string imagePath);
+	void setImage(gImage image);
+	void setId(int id);
+	void setMass(float mass);
+	void setPosition(glm::vec2 position);
+	void setRotation(glm::vec2 rotation);
 
-	// TODO: set access modifier private and create get-set methods
-	// TODO: create (float)objMass variable
+	gImage getImage();
+
+	int getId();
+
+	float getMass();
+	/*
+	 * If you use image.getWidth() or getHeight() instead of these methods,
+	 * you will get <terminated> (exit value: -1.073.740.940)
+	 * see FIXME on createSoftContactBox2dObject method in gipBulletPhysics.cpp.
+	 */
+	float getWidth();
+	float getHeight();
+
+	glm::vec2 getPosition();
+	glm::vec2 getRotation();
+
+private:
 	gImage image;
 
-	int id = -1;
 	float mass;
-	float positionx;
-	float positiony;
-	float rotationx;
-	float rotationy;
+
+	glm::vec2 position;
+	glm::vec2 rotation;
+
+	int id = -1;
 };
 
 #endif /* SRC_GIMAGEGAMEOBJECT_H_ */
