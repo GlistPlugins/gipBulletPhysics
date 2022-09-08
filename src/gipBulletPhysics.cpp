@@ -13,32 +13,48 @@ gipBulletPhysics::gipBulletPhysics() {
 }
 
 gipBulletPhysics::~gipBulletPhysics() {
+	clean();
 }
 
 void gipBulletPhysics::update() {
 }
 
-void gipBulletPhysics::initializeRigidWorld() {
+void gipBulletPhysics::initializeWorld(int type) {
 	collisionconfiguration = new btDefaultCollisionConfiguration();
 	dispatcher = new btCollisionDispatcher(collisionconfiguration);
 	overlappingpaircache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
-	dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
+
+	if (type == rigidWorld) {
+		dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
+	}
+	else if (type == softRigidWorld) {
+		broadphase = new btDbvtBroadphase();
+		constraintsolver = solver;
+		dynamicsworld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintsolver, collisionconfiguration);
+	}
 }
 
-void gipBulletPhysics::initializeSoftRigidWorld() {
-	collisionconfiguration = new btDefaultCollisionConfiguration();
-	dispatcher = new btCollisionDispatcher(collisionconfiguration);
-	broadphase = new btDbvtBroadphase();
-	solver = new btSequentialImpulseConstraintSolver;
-	constraintsolver = solver;
-	dynamicsworld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintsolver, collisionconfiguration);
+void gipBulletPhysics::setErp2(float value) {
+	dynamicsworld->getSolverInfo().m_erp2 = value;
+}
 
-	dynamicsworld->getSolverInfo().m_erp2 = 0.f;
-	dynamicsworld->getSolverInfo().m_globalCfm = 0.f;
-	dynamicsworld->getSolverInfo().m_numIterations = 3;
-	dynamicsworld->getSolverInfo().m_solverMode = SOLVER_SIMD;  // | SOLVER_RANDMIZE_ORDER;
-	dynamicsworld->getSolverInfo().m_splitImpulse = false;
+void gipBulletPhysics::setglobalCfm(float value) {
+	dynamicsworld->getSolverInfo().m_globalCfm = value;
+
+}
+
+void gipBulletPhysics::setNumIterations(int value) {
+	dynamicsworld->getSolverInfo().m_numIterations = value;
+
+}
+
+void gipBulletPhysics::setSolverMode(int solverMode) {
+	dynamicsworld->getSolverInfo().m_solverMode = solverMode;  // | SOLVER_RANDMIZE_ORDER;
+}
+
+void gipBulletPhysics::setSplitImpulse(int splitImpulse) {
+	dynamicsworld->getSolverInfo().m_splitImpulse = splitImpulse;
 }
 
 void gipBulletPhysics::setGravity(glm::vec3 gravityValue) {
@@ -46,9 +62,15 @@ void gipBulletPhysics::setGravity(glm::vec3 gravityValue) {
 }
 
 btRigidBody* gipBulletPhysics::getRigidBody(gImageGameObject* imgObject) {
-	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->getId()];
+	btCollisionObject* gameobject = dynamicsworld->getCollisionObjectArray()[imgObject->getId()];
 
 	return btRigidBody::upcast(gameobject);
+}
+
+btTransform gipBulletPhysics::getTransform(int imgObjectId) {
+	btCollisionObject* gameobject = dynamicsworld->getCollisionObjectArray()[imgObjectId];
+
+	return gameobject->getWorldTransform();
 }
 
 void gipBulletPhysics::setFriction(gImageGameObject* imgObject, float frictionValue) {
@@ -101,6 +123,67 @@ void gipBulletPhysics::applyTorqueImpulse(gImageGameObject* imgObject, glm::vec3
 	rb->applyTorqueImpulse(btVector3(torqueValue.x, torqueValue.y, torqueValue.z));
 }
 
+float gipBulletPhysics::getErp2() {
+	return dynamicsworld->getSolverInfo().m_erp2;
+}
+
+float gipBulletPhysics::getglobalCfm() {
+	return dynamicsworld->getSolverInfo().m_globalCfm;
+}
+
+int gipBulletPhysics::getNumIterations() {
+	return dynamicsworld->getSolverInfo().m_numIterations;
+}
+
+int gipBulletPhysics::getSolverMode() {
+	return dynamicsworld->getSolverInfo().m_solverMode;
+}
+
+int gipBulletPhysics::getSplitImpulse() {
+	return dynamicsworld->getSolverInfo().m_splitImpulse;
+}
+
+void gipBulletPhysics::printObjectTransform() {
+	std::vector<btCollisionObject*> colobjarray;
+	std::vector<btRigidBody*> rbarray;
+
+	for (auto object : gameobjects) {
+		int id = object->getId();
+		// get created obj and add to vector
+		colobjarray.push_back(dynamicsworld->getCollisionObjectArray()[id]);
+		// create rb for obj and add to vector
+		rbarray.push_back(btRigidBody::upcast(colobjarray[id]));
+
+		btTransform transform;
+		btRigidBody* rb = rbarray[id];
+
+		if (rb && rb->getMotionState()) {
+			rb->getMotionState()->getWorldTransform(transform);
+		}
+		else {
+			transform = colobjarray[id]->getWorldTransform();
+		}
+
+		if (id == 1) {
+			gLogi("gipBulletPhysics") << "id: " << id
+					<< "\n\t\t\t pos(x,y,z): "
+					<< " (" << float(transform.getOrigin().getX())
+					<< ", " << float(transform.getOrigin().getY())
+					<< ", " << float(transform.getOrigin().getZ()) << ")"
+					<< "\n\t\t\t rot(x,y,z,w): "
+					<< " (" << float(transform.getRotation().getX())
+					<< ", " << float(transform.getRotation().getY())
+					<< ", " << float(transform.getRotation().getZ())
+					<< ", " << float(transform.getRotation().getW()) << ")"
+					<< "\n\t\t\t radian angle: "
+					<< transform.getRotation().getAngle()
+					<< "\n\t\t\t degree angle: "
+					<< gRadToDeg(transform.getRotation().getAngle())
+					<< "\n";
+		}
+	}
+}
+
 int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	btTransform box2dtransform;
 	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 1.0f));
@@ -136,10 +219,11 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 
 	dynamicsworld->addRigidBody(box2drigidbody);
 
-	gameobjectid.push_back(gameobjectid.size());
+	gameobjects.push_back(imgObject);
+	imgObject->setId(gameobjects.size() - 1);
 	// gLogi("box") << float(box2dTransform.getOrigin().getX()) << " " << float(box2dTransform.getOrigin().getY());
 
-	return gameobjectid.back();
+	return imgObject->getId();
 }
 
 int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
@@ -156,8 +240,8 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 	 */
 	circle2dtransform.setOrigin(
 			btVector3(
-					imgObject->getPosition().x + (imgObject->getImage().getWidth() / 2),
-					-(imgObject->getPosition().y + imgObject->getImage().getHeight() / 2),
+					imgObject->getPosition().x + (imgObject->getWidth() / 2),
+					-(imgObject->getPosition().y + imgObject->getHeight() / 2),
 					0
 			)
 	);
@@ -178,21 +262,13 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 
 	dynamicsworld->addRigidBody(circle2drigidbody);
 
-	gameobjectid.push_back(gameobjectid.size());
+	gameobjects.push_back(imgObject);
+	imgObject->setId(gameobjects.size() - 1);
 	// gLogi("circle") << float(circle2dTransform.getOrigin().getX()) << " " << float(circle2dTransform.getOrigin().getY());
 
-	return gameobjectid.back();
+	return imgObject->getId();
 }
 
-/*
- * FIXME: imgObject->getImage().<any gImage method name>() or
- * 		  image.<any gImage method name>() doesn't work.
- * 		  <terminated> (exit value: -1.073.740.940)
- * auto image = imgObject->getImage();
- * gLogi("gipBulletPhysics") << image.getFilename();
- */
-
-// increase stiffness, reduce dumping for harder floor.
 int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping) {
 	btTransform softbox2dtransform;
 
@@ -230,17 +306,18 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 
 	softbox2drigidbody->setContactStiffnessAndDamping(stiffness, damping);
 
-	gameobjectid.push_back(gameobjectid.size());
+	gameobjects.push_back(imgObject);
+	imgObject->setId(gameobjects.size() - 1);
 	// gLogi("soft contact box") << float(softbox2dtransform.getOrigin().getX()) << " " << float(softbox2dtransform.getOrigin().getY());
 
-	return gameobjectid.back();
+	return imgObject->getId();
 }
 
 int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
-	btCollisionShape* softball2dchildshape = new btSphereShape(imgObject->getWidth() / 2); // child shape
-	btCompoundShape* softball2dcolshape = new btCompoundShape(); // parent shape
+	btCollisionShape* softball2dcolshape = new btSphereShape(imgObject->getWidth() / 2); // child shape
+	//btCompoundShape* softball2dcolshape = new btCompoundShape(); // parent shape
 
-	softball2dcolshape->addChildShape(btTransform::getIdentity(), softball2dchildshape);
+	//softball2dcolshape->addChildShape(btTransform::getIdentity(), softball2dchildshape);
 	collisionshapes.push_back(softball2dcolshape);
 
 	btTransform softball2dTransform;
@@ -254,12 +331,9 @@ int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
 	if (isDynamic)
 		softball2dcolshape->calculateLocalInertia(mass, localInertia);
 
-	for (int k = 0; k < 1; k++)
-	{
-		for (int i = 0; i < 1; i++)
-		{
-			for (int j = 0; j < 1; j++)
-			{
+	for (int k = 0; k < 1; k++) {
+		for (int i = 0; i < 1; i++) {
+			for (int j = 0; j < 1; j++) {
 				/*
 				 * The Glist Engine references the top left corner for object positions;
 				 * but the bullet3 library references the bottom left for object positions.
@@ -284,33 +358,54 @@ int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
 				btRigidBody::btRigidBodyConstructionInfo softball2drbinfo(mass, mymotionstate, softball2dcolshape, localInertia);
 				btRigidBody* softball2drb = new btRigidBody(softball2drbinfo);
 
-				softball2drb->setUserIndex(-1);
-
 				dynamicsworld->addRigidBody(softball2drb);
 			}
 		}
 	}
-	gameobjectid.push_back(gameobjectid.size());
+
+	gameobjects.push_back(imgObject);
+	imgObject->setId(gameobjects.size() - 1);
 	// gLogi("box") << float(softball2dTransform.getOrigin().getX()) << " " << float(softball2dTransform.getOrigin().getY());
 
-	return gameobjectid.back();
+	return imgObject->getId();
 }
 
 int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScalar fixedTimeStep) {
-	return dynamicsworld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+	// Physics calculations doing here.
+	int step = dynamicsworld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+
+	// update objects position
+	for (auto object : gameobjects) {
+		btCollisionObject* colobj = dynamicsworld->getCollisionObjectArray()[object->getId()];
+		btTransform transform = colobj->getWorldTransform();
+		btQuaternion rotation = transform.getRotation();
+		/*
+		 * Box = 0
+		 * Sphere = 8
+		 * Compound = 31
+		 */
+		int shapetype = colobj->getCollisionShape()->getShapeType();
+
+		// don't update if object is static rb.
+		if (!colobj->isStaticObject()) {
+			if (shapetype == 0) { // box
+				object->setPosition(getBox2dObjectPosition(object));
+			} else if (shapetype == 8) { // sphere
+				object->setPosition(getCircle2dObjectPosition(object));
+			}
+		}
+		// update rotation
+		object->setRotationAngle(gRadToDeg(-rotation.getAxis().getZ() * rotation.getAngle()));
+	}
+
+	// For tests:
+	printObjectTransform();
+
+	return step;
 }
 
-int gipBulletPhysics::getNumCollisionObjects() {
-	return dynamicsworld->getNumCollisionObjects();
-}
-
-btCollisionObjectArray& gipBulletPhysics::getCollisionObjectArray() {
-	return dynamicsworld->getCollisionObjectArray();
-}
-
-glm::vec2 gipBulletPhysics::getOrigin2d(int gameObjectNo) {
-	btCollisionObject* gameobject = getCollisionObjectArray()[gameObjectNo];
-	btTransform transform = gameobject->getWorldTransform();
+glm::vec2 gipBulletPhysics::getOrigin2d(int imgObjectId) {
+	btTransform transform = getTransform(imgObjectId);
 
 	return glm::vec2 (
 			transform.getOrigin().getX(),
@@ -320,8 +415,7 @@ glm::vec2 gipBulletPhysics::getOrigin2d(int gameObjectNo) {
 
 glm::vec2 gipBulletPhysics::getCircle2dObjectPosition(gImageGameObject* imgObject) {
 	// gLogi("circle (x,y)") << trans.getOrigin().getX() - (imgWidth / 2) << " " << -(trans.getOrigin().getY() + imgHeight / 2);
-	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->getId()];
-	btTransform transform = gameobject->getWorldTransform();
+	btTransform transform = getTransform(imgObject->getId());
 
 	return glm::vec2 (
 			transform.getOrigin().getX() - (imgObject->getWidth() / 2),
@@ -331,12 +425,22 @@ glm::vec2 gipBulletPhysics::getCircle2dObjectPosition(gImageGameObject* imgObjec
 
 glm::vec2 gipBulletPhysics::getBox2dObjectPosition(gImageGameObject* imgObject) {
 	// gLogi("box (x,y)") << trans.getOrigin().getX() << " " << -(trans.getOrigin().getY() + imgHeight);
-	btCollisionObject* gameobject = getCollisionObjectArray()[imgObject->getId()];
-	btTransform transform = gameobject->getWorldTransform();
+	btTransform transform = getTransform(imgObject->getId());
 
 	return glm::vec2 (
 			transform.getOrigin().getX(),
 			-(transform.getOrigin().getY() + imgObject->getHeight())
+	);
+}
+
+glm::vec3 gipBulletPhysics::get2dObjectRotation(gImageGameObject* imgObject) {
+	btTransform transform = getTransform(imgObject->getId());
+	btQuaternion rotation = transform.getRotation();
+
+	return glm::vec3 (
+			rotation.getX(),
+			rotation.getY(),
+			rotation.getZ()
 	);
 }
 
@@ -349,7 +453,7 @@ void gipBulletPhysics::clean() {
 			dynamicsworld->removeConstraint(dynamicsworld->getConstraint(i));
 		}
 		for (i = dynamicsworld->getNumCollisionObjects() - 1; i >= 0; i--) {
-			btCollisionObject* obj = getCollisionObjectArray()[i];
+			btCollisionObject* obj = dynamicsworld->getCollisionObjectArray()[i];
 			btRigidBody* body = btRigidBody::upcast(obj);
 			if (body && body->getMotionState()) {
 				delete body->getMotionState();
@@ -366,6 +470,14 @@ void gipBulletPhysics::clean() {
 		delete shape;
 	}
 	collisionshapes.clear();
+
+	//delete gameobjects
+	for (int j = 0; j < gameobjects.size(); j++)
+	{
+		gImageGameObject* gameobject = gameobjects[j];
+		delete gameobject;
+	}
+	gameobjects.clear();
 
 	delete dynamicsworld;
 	dynamicsworld = 0;
