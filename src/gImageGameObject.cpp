@@ -7,11 +7,13 @@
 
 #include <gImageGameObject.h>
 
-gImageGameObject::gImageGameObject(gImage image, float mass, glm::vec2 position, glm::vec2 rotation) {
+gImageGameObject::gImageGameObject(gImage image, float mass, glm::vec2 position, float rotationAngle) {
 	this->image = image;
 	this->mass = mass;
 	this->position = position;
-	this->rotation = rotation;
+	this->rotationAngle = rotationAngle;
+	width = image.getWidth();
+	height = image.getHeight();
 }
 
 gImageGameObject::~gImageGameObject() {
@@ -23,11 +25,15 @@ void gImageGameObject::draw() {
 }
 
 void gImageGameObject::loadImage(std::string imagePath) {
-	this->image.loadImage(imagePath);
+	image.loadImage(imagePath);
+	width = image.getWidth();
+	height = image.getHeight();
 }
 
 void gImageGameObject::setImage(gImage image) {
 	this->image = image;
+	width = image.getWidth();
+	height = image.getHeight();
 }
 
 void gImageGameObject::setId(int id) {
@@ -42,34 +48,35 @@ void gImageGameObject::setPosition(glm::vec2 position) {
 	this->position = position;
 }
 
-void gImageGameObject::setRotation(glm::vec2 rotation) {
-	this->rotation = rotation;
+void gImageGameObject::setRotationAngle(float rotationAngle) {
+	this->rotationAngle = rotationAngle;
 }
 
-gImage gImageGameObject::getImage() {
-	return this->image;
+
+gImage* gImageGameObject::getImage() {
+	return &image;
 }
 
 int gImageGameObject::getId() {
-	return this->id;
+	return id;
 }
 
 float gImageGameObject::getMass() {
-	return this->mass;
+	return mass;
 }
 
 float gImageGameObject::getWidth() {
-	return this->image.getWidth();
+	return width;
 }
 
 float gImageGameObject::getHeight() {
-	return this->image.getHeight();
+	return height;
+}
+
+float gImageGameObject::getRotationAngle() {
+	return rotationAngle;
 }
 
 glm::vec2 gImageGameObject::getPosition() {
-	return this->position;
-}
-
-glm::vec2 gImageGameObject::getRotation() {
-	return this->rotation;
+	return position;
 }
