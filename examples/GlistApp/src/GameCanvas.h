@@ -1,9 +1,13 @@
- /*
- * GameCanvas.h
+/*
+ * GameCanvas.cpp
  *
  *  Created on: 12 Sep 2022
  *      Author: Faruk Aygun
+ *
+ *  Edited on : 16.02.2023
+ *  	Author: Remzi ÝÞÇÝ
  */
+
 
 #ifndef GAMECANVAS_H_
 #define GAMECANVAS_H_
@@ -47,34 +51,47 @@ private:
     gImage sky;
     gImage mountain;
     gImage ground;
+    gImage ramp;
     gImage ball;
-
-    gModel ball3d;
+    gImage gameIcon;
+    //gModel ball3d;
 
     gImageGameObject* groundobject;
+    gImageGameObject* rampobject;
     gImageGameObject* ballobject;
     gImageGameObject* softballobject;
+    gImageGameObject* gameiconobject;
 
-    gModelGameObject* ball3dobject;
+    //gModelGameObject* ball3dobject;
 
     float groundX, groundY;
+    float rampX, rampY;
+    float rampAngle;
     float ballX, ballY;
+    float gameIconX, gameIconY;
     float impulse = 1;
 
     gipBulletPhysics gBulletObj;
 
-	btCollisionShape* groundShape;
-	btCollisionShape* ballShape;
-	btCollisionShape* softBallShape;
-	btCollisionObject* groundObj;
-	btCollisionObject* ballObj;
-	btCollisionObject* softBallObj;
+	btCollisionShape* groundCollisionShape;
+	btCollisionShape* rampCollisionShape;
+	btCollisionShape* ballCollisionShape;
+	btCollisionShape* softBallCollisionShape;
+	btCollisionObject* groundCollisionObj;
+	btCollisionObject* rampCollisionObj;
+	btCollisionObject* ballCollisionObj;
+	btCollisionObject* softBallCollisionObj;
+	btCollisionObject* gameIconCollisionObj;
 	btRigidBody* groundRigidBody;
+	btRigidBody* rampRigidBody;
 	btRigidBody* ballRigidBody;
 	btRigidBody* softBallRigidBody;
+	btRigidBody* gameIconRigidBody;
 	btTransform groundTransform;
+	btTransform rampTransform;
 	btTransform ballTransform;
 	btTransform softBallTransform;
+	btTransform gameIconTransform;
 	btDefaultMotionState* myMotionState;
 
 	int worldType;
