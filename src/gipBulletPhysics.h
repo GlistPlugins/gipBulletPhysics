@@ -4,6 +4,9 @@
  *  Created on: 5 Aug 2022
  *      Author: Faruk Aygun,
  *      		Emirhan Limon
+ *
+ *	Edited 		: 16.02.2023
+ *  	Author 	: Remzi iﬁ«›
  */
 
 #ifndef SRC_GIPBULLETPHYSICS_H_
@@ -54,6 +57,9 @@ public:
 	void applyTorque(gImageGameObject* imgObject, glm::vec3 torqueValue);
 	void applyTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue);
 
+	// These apply methods should be used in draw method.
+	void drawDebug();
+
 	float getErp2();
 	float getglobalCfm();
 
@@ -63,8 +69,8 @@ public:
 	// Create methods return created object id
 	int createBox2dObject(gImageGameObject* imgObject);
 	int createCircle2dObject(gImageGameObject* imgObject);
-	// increase stiffness, reduce dumping for harder floor.
-	int createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness = 300.0f, float damping = 10.0f);
+	// increase stiffness, reduce dumping for harder floor. rotation is degree not radyan
+	int createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness = 300.0f, float damping = 10.0f, float rotation = 0.0f);
 	int createSoftCircle2dObject(gImageGameObject* imgObject);
 	// The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 	int stepSimulation(btScalar timeStep, int maxSubSteps = 1, btScalar fixedTimeStep = btScalar(1.) / btScalar(60.));

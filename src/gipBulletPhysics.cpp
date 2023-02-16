@@ -4,10 +4,13 @@
  *  Created on: 5 Aug 2022
  *      Author: Faruk Aygun
  *      		Emirhan Limon
+ *
+ *  Edited 		: 16.02.2023
+ *  	Author 	: Remzi iÞÇÝ
  */
 
 #include "gipBulletPhysics.h"
-
+#include "gDebugDraw.h"
 
 gipBulletPhysics::gipBulletPhysics() {
 }
@@ -24,6 +27,7 @@ void gipBulletPhysics::initializeWorld(int type) {
 	dispatcher = new btCollisionDispatcher(collisionconfiguration);
 	overlappingpaircache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
+	gDebugDraw* debugDrawer = new gDebugDraw();
 
 	if (type == rigidWorld) {
 		dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
@@ -33,6 +37,11 @@ void gipBulletPhysics::initializeWorld(int type) {
 		constraintsolver = solver;
 		dynamicsworld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintsolver, collisionconfiguration);
 	}
+    /*Create custom debug drawer*/
+    gDebugDraw *draw   =   new gDebugDraw;
+    draw->setDebugMode( draw->getDebugMode()
+          | btIDebugDraw::DBG_DrawWireframe );
+    dynamicsworld->setDebugDrawer(draw);
 }
 
 void gipBulletPhysics::setErp2(float value) {
@@ -186,8 +195,8 @@ void gipBulletPhysics::printObjectTransform() {
 
 int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	btTransform box2dtransform;
-	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 1.0f));
-	// TODO: btBox2dShape* box2dshape = new btBox2dShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 0.0f));
+	//You need divide source size by 2 for convertin physic metrics correctly
+	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f, imgObject->getHeight() * 0.5f, 0.0f));
 	collisionshapes.push_back(box2dshape);
 
 	box2dtransform.setIdentity();
@@ -195,11 +204,12 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	 * The Glist Engine references the top left corner for object positions;
 	 * but the bullet3 library references the bottom left for object positions.
 	 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
+	 * You need set collision center to upright of half size of source
 	 */
 	box2dtransform.setOrigin(
 			btVector3(
-					imgObject->getPosition().x,
-					-(imgObject->getPosition().y + imgObject->getHeight()),
+					imgObject->getPosition().x + imgObject->getWidth() / 2,
+					-(imgObject->getPosition().y + imgObject->getHeight() / 2),
 					0
 			)
 	);
@@ -228,7 +238,10 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 
 int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 	btTransform circle2dtransform;
-	// parameter is circle radius
+	/*  parameter is circle radius
+	*   You need divide source size by 2 for convertin physic metrics correctly
+	*	Half size of source equal to diameter of collision object
+	*/
 	btCollisionShape* circle2dshape = new btSphereShape(imgObject->getWidth() / 2);
 	collisionshapes.push_back(circle2dshape);
 
@@ -269,13 +282,15 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 	return imgObject->getId();
 }
 
-int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping) {
+int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping, float rotation) {
 	btTransform softbox2dtransform;
 
-	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 0.0f));
+	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f, imgObject->getHeight() * 0.5f, 0.0f));
 	collisionshapes.push_back(softbox2dshape);
 
 	softbox2dtransform.setIdentity();
+
+
 	/*
 	 * The Glist Engine references the top left corner for object positions;
 	 * but the bullet3 library references the bottom left for object positions.
@@ -283,17 +298,30 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	 */
 	softbox2dtransform.setOrigin(
 			btVector3(
-					imgObject->getPosition().x,
-					-(imgObject->getPosition().y + imgObject->getHeight()),
+					imgObject->getPosition().x + imgObject->getWidth() * 0.5f,
+					-(imgObject->getPosition().y + imgObject->getHeight() * 0.5f),
 					0
 			)
 	);
+
+	if(rotation > 0.0f) {
+		btQuaternion objQuat = softbox2dtransform.getRotation();
+		//objQuat.setRotation(btVector3(0.0f,0.0f,1.0f), -glm::radians(rotation));
+		//objQuat.setEuler(0.0f, 0.0f, -glm::radians(rotation));
+		objQuat.setRotation(btVector3(0.0f, 0.0f, 1.0f),-glm::radians(rotation));
+		softbox2dtransform.setRotation(objQuat);
+
+	}
+
 
 	btScalar mass(imgObject->getMass());
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isDynamic = (mass != 0.f);
 
 	btVector3 localInertia(0, 0, 0);
+
+
+
 	if (isDynamic)
 		softbox2dshape->calculateLocalInertia(mass, localInertia);
 
@@ -301,6 +329,10 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	btDefaultMotionState* mymotionstate = new btDefaultMotionState(softbox2dtransform);
 	btRigidBody::btRigidBodyConstructionInfo softbox2drbinfo(mass, mymotionstate, softbox2dshape, localInertia);
 	btRigidBody* softbox2drigidbody = new btRigidBody(softbox2drbinfo);
+
+
+
+
 
 	dynamicsworld->addRigidBody(softbox2drigidbody);
 
@@ -331,37 +363,28 @@ int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
 	if (isDynamic)
 		softball2dcolshape->calculateLocalInertia(mass, localInertia);
 
-	for (int k = 0; k < 1; k++) {
-		for (int i = 0; i < 1; i++) {
-			for (int j = 0; j < 1; j++) {
-				/*
-				 * The Glist Engine references the top left corner for object positions;
-				 * but the bullet3 library references the bottom left for object positions.
-				 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
-				 */
-				softball2dTransform.setOrigin(
-						btVector3(
-								imgObject->getPosition().x + imgObject->getWidth() / 2,
-								-(imgObject->getPosition().y + imgObject->getHeight() / 2),
-								0
-						)
-				);
+	/*
+	 * The Glist Engine references the top left corner for object positions;
+	 * but the bullet3 library references the bottom left for object positions.
+	 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
+	 */
+	softball2dTransform.setOrigin(
+			btVector3(
+					imgObject->getPosition().x + imgObject->getWidth() / 2,
+					-(imgObject->getPosition().y + imgObject->getHeight() / 2),
+					0
+			)
+	);
 
-				bool isDynamic = (mass != 0.f);
+	if (isDynamic)
+		softball2dcolshape->calculateLocalInertia(mass, localInertia);
 
-				btVector3 localInertia(0, 0, 0);
-				if (isDynamic)
-					softball2dcolshape->calculateLocalInertia(mass, localInertia);
+	//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
+	btDefaultMotionState* mymotionstate = new btDefaultMotionState(softball2dTransform);
+	btRigidBody::btRigidBodyConstructionInfo softball2drbinfo(mass, mymotionstate, softball2dcolshape, localInertia);
+	btRigidBody* softball2drb = new btRigidBody(softball2drbinfo);
 
-				//using motionstate is optional, it provides interpolation capabilities, and only synchronizes 'active' objects
-				btDefaultMotionState* mymotionstate = new btDefaultMotionState(softball2dTransform);
-				btRigidBody::btRigidBodyConstructionInfo softball2drbinfo(mass, mymotionstate, softball2dcolshape, localInertia);
-				btRigidBody* softball2drb = new btRigidBody(softball2drbinfo);
-
-				dynamicsworld->addRigidBody(softball2drb);
-			}
-		}
-	}
+	dynamicsworld->addRigidBody(softball2drb);
 
 	gameobjects.push_back(imgObject);
 	imgObject->setId(gameobjects.size() - 1);
@@ -399,7 +422,7 @@ int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScal
 	}
 
 	// For tests:
-	printObjectTransform();
+	//printObjectTransform();
 
 	return step;
 }
@@ -442,6 +465,10 @@ glm::vec3 gipBulletPhysics::get2dObjectRotation(gImageGameObject* imgObject) {
 			rotation.getY(),
 			rotation.getZ()
 	);
+}
+
+void gipBulletPhysics::drawDebug(){
+	dynamicsworld->debugDrawWorld();
 }
 
 //cleanup in the reverse order of creation/initialization
