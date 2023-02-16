@@ -7,7 +7,7 @@
  */
 
 #include "gipBulletPhysics.h"
-
+#include "gDebugDraw.h"
 
 gipBulletPhysics::gipBulletPhysics() {
 }
@@ -24,6 +24,7 @@ void gipBulletPhysics::initializeWorld(int type) {
 	dispatcher = new btCollisionDispatcher(collisionconfiguration);
 	overlappingpaircache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
+	gDebugDraw* debugDrawer = new gDebugDraw();
 
 	if (type == rigidWorld) {
 		dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
@@ -33,6 +34,11 @@ void gipBulletPhysics::initializeWorld(int type) {
 		constraintsolver = solver;
 		dynamicsworld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintsolver, collisionconfiguration);
 	}
+    /*Create custom debug drawer*/
+    gDebugDraw *draw   =   new gDebugDraw;
+    draw->setDebugMode( draw->getDebugMode()
+          | btIDebugDraw::DBG_DrawWireframe );
+    dynamicsworld->setDebugDrawer(draw);
 }
 
 void gipBulletPhysics::setErp2(float value) {
@@ -272,7 +278,7 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping) {
 	btTransform softbox2dtransform;
 
-	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->getWidth(), imgObject->getHeight(), 0.0f));
+	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f, imgObject->getHeight() * 0.5f, 0.0f));
 	collisionshapes.push_back(softbox2dshape);
 
 	softbox2dtransform.setIdentity();
@@ -283,11 +289,12 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	 */
 	softbox2dtransform.setOrigin(
 			btVector3(
-					imgObject->getPosition().x,
-					-(imgObject->getPosition().y + imgObject->getHeight()),
+					imgObject->getPosition().x + imgObject->getWidth() / 2,
+					-(imgObject->getPosition().y + imgObject->getHeight() / 2),
 					0
 			)
 	);
+
 
 	btScalar mass(imgObject->getMass());
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
@@ -301,6 +308,12 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	btDefaultMotionState* mymotionstate = new btDefaultMotionState(softbox2dtransform);
 	btRigidBody::btRigidBodyConstructionInfo softbox2drbinfo(mass, mymotionstate, softbox2dshape, localInertia);
 	btRigidBody* softbox2drigidbody = new btRigidBody(softbox2drbinfo);
+	if(imgObject->getRotationAngle() > 0.0f) {
+		btQuaternion objQuat = btQuaternion();
+		objQuat.setRotation(btVector3(0.0f,0.0f,0.0f),0.0f);
+		softbox2dtransform.setRotation(objQuat);
+	}
+
 
 	dynamicsworld->addRigidBody(softbox2drigidbody);
 
@@ -399,7 +412,7 @@ int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScal
 	}
 
 	// For tests:
-	printObjectTransform();
+	//printObjectTransform();
 
 	return step;
 }
@@ -442,6 +455,10 @@ glm::vec3 gipBulletPhysics::get2dObjectRotation(gImageGameObject* imgObject) {
 			rotation.getY(),
 			rotation.getZ()
 	);
+}
+
+void gipBulletPhysics::drawDebug(){
+	dynamicsworld->debugDrawWorld();
 }
 
 //cleanup in the reverse order of creation/initialization

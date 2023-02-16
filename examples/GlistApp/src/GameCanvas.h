@@ -12,6 +12,7 @@
 #include "gApp.h"
 #include "gipBulletPhysics.h"
 #include "gImageGameObject.h"
+#include "gModel.h"
 #include "gModelGameObject.h"
 
 
@@ -55,7 +56,7 @@ private:
     gImageGameObject* ballobject;
     gImageGameObject* softballobject;
 
-    gModelGameObject* ball3dobject;
+    //gModelGameObject* ball3dobject;
 
     float groundX, groundY;
     float ballX, ballY;
@@ -63,12 +64,12 @@ private:
 
     gipBulletPhysics gBulletObj;
 
-	btCollisionShape* groundShape;
-	btCollisionShape* ballShape;
-	btCollisionShape* softBallShape;
-	btCollisionObject* groundObj;
-	btCollisionObject* ballObj;
-	btCollisionObject* softBallObj;
+	btCollisionShape* groundCollisionShape;
+	btCollisionShape* ballCollisionShape;
+	btCollisionShape* softBallCollisionShape;
+	btCollisionObject* groundCollisionObj;
+	btCollisionObject* ballCollisionObj;
+	btCollisionObject* softBallCollisionObj;
 	btRigidBody* groundRigidBody;
 	btRigidBody* ballRigidBody;
 	btRigidBody* softBallRigidBody;

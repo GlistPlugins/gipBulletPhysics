@@ -54,6 +54,9 @@ public:
 	void applyTorque(gImageGameObject* imgObject, glm::vec3 torqueValue);
 	void applyTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue);
 
+	// These apply methods should be used in draw method.
+	void drawDebug();
+
 	float getErp2();
 	float getglobalCfm();
 
