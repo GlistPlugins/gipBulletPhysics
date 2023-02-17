@@ -66,12 +66,15 @@ public:
 	int getNumIterations();
 	int getSolverMode();
 	int getSplitImpulse();
-	// Create methods return created object id
-	int createBox2dObject(gImageGameObject* imgObject);
-	int createCircle2dObject(gImageGameObject* imgObject);
+	/* Create methods return created object id
+	 * rotation is degree format
+	 * size need become beatween 0.04 nad 100000
+	 */
+	int createBox2dObject(gImageGameObject* imgObject, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f,1.0f));
+	int createCircle2dObject(gImageGameObject* imgObject, float rotation = 0.0f, float radius = 1.0f);
 	// increase stiffness, reduce dumping for harder floor. rotation is degree not radyan
-	int createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness = 300.0f, float damping = 10.0f, float rotation = 0.0f);
-	int createSoftCircle2dObject(gImageGameObject* imgObject);
+	int createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness = 300.0f, float damping = 10.0f, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f,1.0f));
+	int createSoftCircle2dObject(gImageGameObject* imgObject, float rotation = 0.0f, float radius = 1.0f);
 	// The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
 	int stepSimulation(btScalar timeStep, int maxSubSteps = 1, btScalar fixedTimeStep = btScalar(1.) / btScalar(60.));
 
