@@ -39,8 +39,10 @@ void gipBulletPhysics::initializeWorld(int type) {
 	}
     /*Create custom debug drawer*/
     gDebugDraw *draw   =   new gDebugDraw;
+    draw->clearLines();
     draw->setDebugMode( draw->getDebugMode()
           | btIDebugDraw::DBG_DrawWireframe );
+
     dynamicsworld->setDebugDrawer(draw);
 }
 
@@ -192,11 +194,13 @@ void gipBulletPhysics::printObjectTransform() {
 		}
 	}
 }
-
-int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
+/*
+ * rotation is degree format
+ */
+int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float rotation, glm::vec2 size) {
 	btTransform box2dtransform;
 	//You need divide source size by 2 for convertin physic metrics correctly
-	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f, imgObject->getHeight() * 0.5f, 0.0f));
+	btCollisionShape* box2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f * size.x, imgObject->getHeight() * 0.5f * size.y, 0.0f));
 	collisionshapes.push_back(box2dshape);
 
 	box2dtransform.setIdentity();
@@ -213,7 +217,12 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 					0
 			)
 	);
+	if(rotation > 0.0f) {
+		btQuaternion objQuat = box2dtransform.getRotation();
+		objQuat.setRotation(btVector3(0.0f, 0.0f, 1.0f),-glm::radians(rotation));
+		box2dtransform.setRotation(objQuat);
 
+	}
 	btScalar mass(imgObject->getMass());
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
 	bool isDynamic = (mass != 0.f);
@@ -236,13 +245,13 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject) {
 	return imgObject->getId();
 }
 
-int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
+int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float rotation, float radius) {
 	btTransform circle2dtransform;
 	/*  parameter is circle radius
 	*   You need divide source size by 2 for convertin physic metrics correctly
 	*	Half size of source equal to diameter of collision object
 	*/
-	btCollisionShape* circle2dshape = new btSphereShape(imgObject->getWidth() / 2);
+	btCollisionShape* circle2dshape = new btSphereShape(imgObject->getWidth() * 0.5f * radius);
 	collisionshapes.push_back(circle2dshape);
 
 	circle2dtransform.setIdentity();
@@ -258,7 +267,12 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 					0
 			)
 	);
+	if(rotation > 0.0f) {
+		btQuaternion objQuat = circle2dtransform.getRotation();
+		objQuat.setRotation(btVector3(0.0f, 0.0f, 1.0f),-glm::radians(rotation));
+		circle2dtransform.setRotation(objQuat);
 
+	}
 	btScalar mass(imgObject->getMass());
 
 	//rigidbody is dynamic if and only if mass is non zero, otherwise static
@@ -282,10 +296,10 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject) {
 	return imgObject->getId();
 }
 
-int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping, float rotation) {
+int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness, float damping, float rotation, glm::vec2 size) {
 	btTransform softbox2dtransform;
 
-	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f, imgObject->getHeight() * 0.5f, 0.0f));
+	btCollisionShape* softbox2dshape = new btBoxShape(btVector3(imgObject->getWidth() * 0.5f * size.x, imgObject->getHeight() * 0.5f * size.y, 0.0f));
 	collisionshapes.push_back(softbox2dshape);
 
 	softbox2dtransform.setIdentity();
@@ -345,8 +359,8 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 	return imgObject->getId();
 }
 
-int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
-	btCollisionShape* softball2dcolshape = new btSphereShape(imgObject->getWidth() / 2); // child shape
+int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject,float rotation, float radius) {
+	btCollisionShape* softball2dcolshape = new btSphereShape(imgObject->getWidth() * 0.5f * radius); // child shape
 	//btCompoundShape* softball2dcolshape = new btCompoundShape(); // parent shape
 
 	//softball2dcolshape->addChildShape(btTransform::getIdentity(), softball2dchildshape);
@@ -375,7 +389,12 @@ int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject) {
 					0
 			)
 	);
+	if(rotation > 0.0f) {
+		btQuaternion objQuat = softball2dTransform.getRotation();
+		objQuat.setRotation(btVector3(0.0f, 0.0f, 1.0f),-glm::radians(rotation));
+		softball2dTransform.setRotation(objQuat);
 
+	}
 	if (isDynamic)
 		softball2dcolshape->calculateLocalInertia(mass, localInertia);
 
