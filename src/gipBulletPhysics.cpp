@@ -6,7 +6,7 @@
  *      		Emirhan Limon
  *
  *  Edited 		: 16.02.2023
- *  	Author 	: Remzi iÞÇÝ
+ *  	Author 	: Remzi ÝÞÇÝ
  */
 
 #include "gipBulletPhysics.h"
@@ -37,6 +37,8 @@ void gipBulletPhysics::initializeWorld(int type) {
 		constraintsolver = solver;
 		dynamicsworld = new btDiscreteDynamicsWorld(dispatcher, broadphase, constraintsolver, collisionconfiguration);
 	}
+
+
     /*Create custom debug drawer*/
     gDebugDraw *draw   =   new gDebugDraw;
     draw->clearLines();
@@ -236,10 +238,13 @@ int gipBulletPhysics::createBox2dObject(gImageGameObject* imgObject, float rotat
 	btRigidBody::btRigidBodyConstructionInfo box2drbinfo(mass, mymotionstate, box2dshape, localInertia);
 	btRigidBody* box2drigidbody = new btRigidBody(box2drbinfo);
 
+	box2drigidbody->setCollisionFlags(box2drigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+
 	dynamicsworld->addRigidBody(box2drigidbody);
 
 	gameobjects.push_back(imgObject);
 	imgObject->setId(gameobjects.size() - 1);
+	box2drigidbody->setUserIndex(imgObject->getId());
 	// gLogi("box") << float(box2dTransform.getOrigin().getX()) << " " << float(box2dTransform.getOrigin().getY());
 
 	return imgObject->getId();
@@ -287,10 +292,14 @@ int gipBulletPhysics::createCircle2dObject(gImageGameObject* imgObject, float ro
 	btRigidBody::btRigidBodyConstructionInfo circle2drbinfo(mass, mymotionstate, circle2dshape, localInertia);
 	btRigidBody* circle2drigidbody = new btRigidBody(circle2drbinfo);
 
+
+	circle2drigidbody->setCollisionFlags(circle2drigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+
 	dynamicsworld->addRigidBody(circle2drigidbody);
 
 	gameobjects.push_back(imgObject);
 	imgObject->setId(gameobjects.size() - 1);
+	circle2drigidbody->setUserIndex(imgObject->getId());
 	// gLogi("circle") << float(circle2dTransform.getOrigin().getX()) << " " << float(circle2dTransform.getOrigin().getY());
 
 	return imgObject->getId();
@@ -347,13 +356,14 @@ int gipBulletPhysics::createSoftContactBox2dObject(gImageGameObject* imgObject, 
 
 
 
-
+	softbox2drigidbody->setCollisionFlags(softbox2drigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	dynamicsworld->addRigidBody(softbox2drigidbody);
 
 	softbox2drigidbody->setContactStiffnessAndDamping(stiffness, damping);
 
 	gameobjects.push_back(imgObject);
 	imgObject->setId(gameobjects.size() - 1);
+	softbox2drigidbody->setUserIndex(imgObject->getId());
 	// gLogi("soft contact box") << float(softbox2dtransform.getOrigin().getX()) << " " << float(softbox2dtransform.getOrigin().getY());
 
 	return imgObject->getId();
@@ -402,17 +412,20 @@ int gipBulletPhysics::createSoftCircle2dObject(gImageGameObject* imgObject,float
 	btDefaultMotionState* mymotionstate = new btDefaultMotionState(softball2dTransform);
 	btRigidBody::btRigidBodyConstructionInfo softball2drbinfo(mass, mymotionstate, softball2dcolshape, localInertia);
 	btRigidBody* softball2drb = new btRigidBody(softball2drbinfo);
-
+	softball2drb->setCollisionFlags(softball2drb->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	dynamicsworld->addRigidBody(softball2drb);
+
 
 	gameobjects.push_back(imgObject);
 	imgObject->setId(gameobjects.size() - 1);
+	softball2drb->setUserIndex(imgObject->getId());
 	// gLogi("box") << float(softball2dTransform.getOrigin().getX()) << " " << float(softball2dTransform.getOrigin().getY());
 
 	return imgObject->getId();
 }
 
 int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScalar fixedTimeStep) {
+
 	// Physics calculations doing here.
 	int step = dynamicsworld->stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
 
@@ -440,6 +453,8 @@ int gipBulletPhysics::stepSimulation(btScalar timeStep, int maxSubSteps , btScal
 		object->setRotationAngle(gRadToDeg(-rotation.getAxis().getZ() * rotation.getAngle()));
 	}
 
+	//Call cehck collision for each frame
+	collisionCallbackFunction();
 	// For tests:
 	//printObjectTransform();
 
@@ -484,6 +499,34 @@ glm::vec3 gipBulletPhysics::get2dObjectRotation(gImageGameObject* imgObject) {
 			rotation.getY(),
 			rotation.getZ()
 	);
+}
+
+void gipBulletPhysics::collisionCallbackFunction() {
+
+    //Count of collision
+    int numManifolds = dynamicsworld->getDispatcher()->getNumManifolds();
+    for (int i=0;i<numManifolds;i++)
+    {
+        btPersistentManifold* contactManifold =  dynamicsworld->getDispatcher()->getManifoldByIndexInternal(i);
+
+
+        int numContacts = contactManifold->getNumContacts();
+        for (int j=0;j<numContacts;j++)
+        {
+            btManifoldPoint& pt = contactManifold->getContactPoint(j);
+            if (pt.getDistance() < 0.f)
+            {
+              //  const btVector3& ptA = pt.getPositionWorldOnA();
+              //  const btVector3& ptB = pt.getPositionWorldOnB();
+              //  const btVector3& normalOnB = pt.m_normalWorldOnB;
+
+            	gameobjects[contactManifold->getBody0()->getUserIndex()]->onCollided(contactManifold->getBody1()->getUserIndex());
+            	gameobjects[contactManifold->getBody1()->getUserIndex()]->onCollided(contactManifold->getBody0()->getUserIndex());
+            }
+        }
+    }
+
+
 }
 
 void gipBulletPhysics::drawDebug(){

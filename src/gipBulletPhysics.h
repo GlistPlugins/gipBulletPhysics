@@ -6,11 +6,13 @@
  *      		Emirhan Limon
  *
  *	Edited 		: 16.02.2023
- *  	Author 	: Remzi iﬁ«›
+ *  	Author 	: Remzi ›ﬁ«›
  */
 
 #ifndef SRC_GIPBULLETPHYSICS_H_
 #define SRC_GIPBULLETPHYSICS_H_
+
+#include <iostream>
 
 #include "gBasePlugin.h"
 #include "gImageGameObject.h"
@@ -18,6 +20,9 @@
 #include "bullet/btBulletDynamicsCommon.h"
 
 #include "glm/glm.hpp"
+
+
+
 
 class gipBulletPhysics : public gBasePlugin{
 public:
@@ -59,6 +64,11 @@ public:
 
 	// These apply methods should be used in draw method.
 	void drawDebug();
+
+	//collision dedection codes
+	void collisionCallbackFunction();
+
+
 
 	float getErp2();
 	float getglobalCfm();

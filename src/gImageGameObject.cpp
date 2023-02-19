@@ -20,6 +20,16 @@ gImageGameObject::~gImageGameObject() {
 	// TODO Auto-generated destructor stub
 }
 
+void gImageGameObject::onCollided(int targetobjectid){
+
+		if(isCollisionFunSetted) onColl(targetobjectid);
+
+}
+void gImageGameObject::setOnCollided(std::function<void(int)> onColl){
+	isCollisionFunSetted = true;
+	this->onColl = onColl;
+}
+
 void gImageGameObject::draw() {
 
 }
