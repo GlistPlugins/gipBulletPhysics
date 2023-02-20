@@ -43,6 +43,8 @@ public:
 	void showNotify();
 	void hideNotify();
 
+	void onCollided(int targetid);
+
 private:
 	int static const RIGIDWORLD = 0;
 	int static const SOFTRIGIDWORLD = 1;
@@ -67,6 +69,7 @@ private:
     float groundX, groundY;
     float rampX, rampY;
     float rampAngle;
+    float gameiconangle;
     float ballX, ballY;
     float gameIconX, gameIconY;
     float impulse = 1;

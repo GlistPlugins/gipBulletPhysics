@@ -34,8 +34,8 @@ void GameCanvas::setup() {
 	rampY = getHeight() * 0.6f;
 	rampAngle = 135.0f;
 	gameIconX = 0.0f;
-	gameIconY = getHeight() * 0.2f;
-
+	gameIconY = getHeight() * 0.6f;
+	gameiconangle = 35.0f;
 	ballX   = getWidth() - ball.getWidth();
 	ballY   = 0.0f; //getHeight() / 2 - ball.getHeight() / 2;
 
@@ -55,14 +55,21 @@ void GameCanvas::setup() {
 
 	// create object with image
 	groundobject   = new gImageGameObject(ground, 0.0f, glm::vec2(groundX, groundY), 0.0f);
+	//groundobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
+
 	rampobject   = new gImageGameObject(ramp, 0.0f, glm::vec2(rampX, rampY), rampAngle);
+	rampobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
+
 	gameiconobject   = new gImageGameObject(gameIcon, 0.0f, glm::vec2(gameIconX, gameIconY), 0.0f);
+	gameiconobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
+
 	softballobject = new gImageGameObject(ball, 5.0f, glm::vec2(ballX, ballY), 0.0f);
+	softballobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
 
 	// decrease stiffness and increase damping for softer ground. ex: 2000, 2
 	gBulletObj.createSoftContactBox2dObject(groundobject, 5000, 0.1f, 0.0f);
 	gBulletObj.createSoftContactBox2dObject(rampobject, 5000, 0.1f, rampAngle);
-	gBulletObj.createSoftContactBox2dObject(gameiconobject, 5000, 0.1f, 0.0f);
+	gBulletObj.createSoftContactBox2dObject(gameiconobject,5000, 0.1f, gameiconangle, glm::vec2(1.0f, 2.0f));
 	gBulletObj.createSoftCircle2dObject(softballobject);
 
 	// friction methods can call here.
@@ -73,7 +80,6 @@ void GameCanvas::setup() {
 	gBulletObj.setFriction(groundobject, 100.0f);
 	*/
 
-	gBulletObj.drawDebug();
 }
 
 void GameCanvas::update() {
@@ -95,7 +101,8 @@ void GameCanvas::draw() {
 	sky.draw(getWidth() / 2 - sky.getWidth() / 2, getHeight() - sky.getHeight());
 	mountain.draw(getWidth() / 2 - mountain.getWidth() / 2, getHeight() - mountain.getHeight() / 2);
 	ground.draw(groundX, groundY);
-	gameIcon.draw(gameIconX,gameIconY);
+	gameIcon.draw(gameIconX, gameIconY, gameIcon.getWidth(), gameIcon.getHeight(), gameIcon.getWidth() * 0.5f, gameIcon.getHeight() * 0.5f, gameiconangle);
+
 	ramp.draw(rampX, rampY, ramp.getWidth(), ramp.getHeight(), ramp.getWidth() * 0.5f, ramp.getHeight() * 0.5f, rampAngle);
 	// getting position and rotation values from created image object.
 	ball.draw(softballobject->getPosition().x,
@@ -106,6 +113,10 @@ void GameCanvas::draw() {
 
 	renderer->setColor(255, 0, 0);
 	gBulletObj.drawDebug();
+}
+
+void GameCanvas:: onCollided(int targetid) {
+	gLogi("Game Canvas") << "Game canvasta çarpýþma algýlandý";
 }
 
 void GameCanvas::keyPressed(int key) {

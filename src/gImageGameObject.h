@@ -10,6 +10,8 @@
 
 #include "gImage.h"
 #include "glm/glm.hpp"
+#include <functional>
+
 
 class gImageGameObject {
 public:
@@ -23,6 +25,10 @@ public:
 	void setMass(float mass);
 	void setPosition(glm::vec2 position);
 	void setRotationAngle(float angle);
+	void onCollided(int targetobjectid);
+	void setOnCollided(std::function<void(int)> onColl);
+	bool isCollisionFunSetted = false;
+	std::function<void(int)> onColl;
 
 	gImage* getImage();
 
