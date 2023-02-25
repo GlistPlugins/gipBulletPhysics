@@ -13,15 +13,16 @@ gPhysic::gPhysic() {
 
 }
 
-gPhysic* gPhysic::world(float timestep) {
+gPhysic* gPhysic::Instance() {
 	if(!m_physic) {
 		m_physic = new gPhysic();
-
-		m_physic->setTimeStep(timestep);
-		m_physic->initializeWorld();
 	}
-
 	return gPhysic::m_physic;
+}
+
+void gPhysic::startWorld(float timestep)	{
+	m_physic->setTimeStep(timestep);
+	m_physic->initializeWorld();
 }
 
 int gPhysic::addPhysicObect(gPhysicObject* object) {

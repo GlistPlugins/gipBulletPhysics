@@ -61,7 +61,7 @@ gPhysic2dBox::gPhysic2dBox(gImage* image, bool isstatic, float mass, glm::vec3 s
 	//this->_rigidbody->setRestitution(0.81f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::world()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this);
 	this->_rigidbody->setUserIndex(this->_id);
 }
 
@@ -121,7 +121,7 @@ gPhysic2dBox::gPhysic2dBox(gModel* model, bool isstatic, float mass) {
 	//this->_rigidbody->setRestitution(0.81f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::world()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }
@@ -178,7 +178,7 @@ gPhysic2dBox::gPhysic2dBox(bool isstatic, float mass, int width, int height, int
 	this->_rigidbody->setWorldTransform(_transform);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::world()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }

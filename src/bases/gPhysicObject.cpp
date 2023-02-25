@@ -38,7 +38,7 @@ void gPhysicObject::setSize(glm::vec3 newvalue) {
 	this->_size = newvalue;
 	setRendererObjectSize();
 	_rigidbody->getCollisionShape()->setLocalScaling(btVector3(newvalue.x, newvalue.y, newvalue.z));
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 
@@ -68,7 +68,7 @@ void gPhysicObject::setPosition(glm::vec3 newposition) {
 			)
 	);
 	_rigidbody->setWorldTransform(_transform);
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 
 
 }
@@ -127,7 +127,7 @@ void gPhysicObject::setRotation(btQuaternion newrotation) {
 	this->_rotation = newrotation;
 	_transform.setRotation(newrotation);
 	setRendererObjectRotation();
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 
@@ -136,7 +136,7 @@ void gPhysicObject::setMass(glm::vec3 newmassdirection, float newmass) {
 	this->_massdirection = newmassdirection;
 	_rigidbody->setMassProps(newmass, btVector3(newmassdirection.x, newmassdirection.y, newmassdirection.z));
 
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 
@@ -161,7 +161,7 @@ void gPhysicObject::setFriction(float newvalue) {
 	this->_friction = newvalue;
 	_rigidbody->setFriction(newvalue);
 
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 
@@ -174,7 +174,7 @@ void gPhysicObject::setSpinningFriction(float newvalue) {
 	this->_spinningFriction = newvalue;
 	_rigidbody->setSpinningFriction(newvalue);
 
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 
@@ -187,7 +187,7 @@ void gPhysicObject::setRollingFriction(float newvalue) {
 	this->_rollingfriction = newvalue;
 	_rigidbody->setRollingFriction(newvalue);
 
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 
@@ -201,7 +201,7 @@ void gPhysicObject::setAnisotropicFriction(glm::vec3 newvalue, int anisotropicfr
 	this->_anistropicfrictionmode = anisotropicfrictionmode;
 	_rigidbody->setAnisotropicFriction(btVector3(newvalue.x, newvalue.y, newvalue.z), anisotropicfrictionmode);
 
-	gPhysic::world()->updateSingleAabb(_rigidbody);
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
 
 

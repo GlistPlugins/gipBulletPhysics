@@ -61,7 +61,7 @@ gPhysic2dCircle::gPhysic2dCircle(gImage* image, bool isstatic, float mass, float
 	//this->_rigidbody->setRestitution(0.81f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::world()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this);
 	this->_rigidbody->setUserIndex(this->_id);
 }
 
@@ -121,7 +121,7 @@ gPhysic2dCircle::gPhysic2dCircle(gModel* model, bool isstatic, float mass) {
 	//this->_rigidbody->setRestitution(0.81f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::world()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }
@@ -178,7 +178,7 @@ gPhysic2dCircle::gPhysic2dCircle(bool isstatic, float mass, float radius, glm::v
 	this->_rigidbody->setWorldTransform(_transform);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::world()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }

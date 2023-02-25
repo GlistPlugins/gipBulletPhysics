@@ -1,8 +1,6 @@
 /*
  * GameCanvas.cpp
  *
- *  Created on: 12 Sep 2022
- *      Author: Faruk Aygun
  *
  *  Edited on : 16.02.2023
  *  	Author: Remzi ÝÞÇÝ
@@ -12,12 +10,11 @@
 #ifndef GAMECANVAS_H_
 #define GAMECANVAS_H_
 
+#include <gPhysic2dBox.h>
+#include <gPhysic2dCircle.h>
 #include "gBaseCanvas.h"
 #include "gApp.h"
-#include "gipBulletPhysics.h"
-#include "gImageGameObject.h"
-#include "gModelGameObject.h"
-
+#include "bases/gPhysic.h"
 
 class GameCanvas : public gBaseCanvas {
 public:
@@ -46,25 +43,22 @@ public:
 	void onCollided(int targetid);
 
 private:
-	int static const RIGIDWORLD = 0;
-	int static const SOFTRIGIDWORLD = 1;
 
 	gApp* root;
     gImage sky;
     gImage mountain;
-    gImage ground;
-    gImage ramp;
-    gImage ball;
-    gImage gameIcon;
-    //gModel ball3d;
+    gImage groundimage;
+    gImage rampimage;
+    gImage ballimage;
+    gImage gameIconimage;
 
-    gImageGameObject* groundobject;
-    gImageGameObject* rampobject;
-    gImageGameObject* ballobject;
-    gImageGameObject* softballobject;
-    gImageGameObject* gameiconobject;
+    gPhysicObject* groundobject;
+    gPhysicObject* groundobjectup;
+    gPhysicObject* rampobject;
+    gPhysicObject* ballobject;
+    gPhysicObject* gameiconobject;
 
-    //gModelGameObject* ball3dobject;
+
 
     float groundX, groundY;
     float rampX, rampY;
@@ -74,35 +68,6 @@ private:
     float gameIconX, gameIconY;
     float impulse = 1;
 
-    gipBulletPhysics gBulletObj;
-
-	btCollisionShape* groundCollisionShape;
-	btCollisionShape* rampCollisionShape;
-	btCollisionShape* ballCollisionShape;
-	btCollisionShape* softBallCollisionShape;
-	btCollisionObject* groundCollisionObj;
-	btCollisionObject* rampCollisionObj;
-	btCollisionObject* ballCollisionObj;
-	btCollisionObject* softBallCollisionObj;
-	btCollisionObject* gameIconCollisionObj;
-	btRigidBody* groundRigidBody;
-	btRigidBody* rampRigidBody;
-	btRigidBody* ballRigidBody;
-	btRigidBody* softBallRigidBody;
-	btRigidBody* gameIconRigidBody;
-	btTransform groundTransform;
-	btTransform rampTransform;
-	btTransform ballTransform;
-	btTransform softBallTransform;
-	btTransform gameIconTransform;
-	btDefaultMotionState* myMotionState;
-
-	int worldType;
-
-	//void createBoxObject();
-	//void createBallObject();
-	void startSimulation();
-	void startCleanup();
 };
 
 #endif /* GAMECANVAS_H_ */

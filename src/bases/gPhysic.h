@@ -37,7 +37,10 @@ public:
 	void operator = (const gPhysic &) = delete;
 
 	//Constructor for singleton
-	static gPhysic *world(float timestep = 60);
+	static gPhysic *Instance();
+
+	//Call this function to start physic
+	void startWorld(float timestep = 60);
 
 	//Call this function for each frame will run physic world
 	int runPhysicWorldStep();
