@@ -1,0 +1,196 @@
+/*
+ * gPhysicObject.h
+ *
+ *  Created on: 19 Þub 2023
+ *      Author: Remzi ÝÞÇÝ
+ *
+ *  This class is base cals for defined object
+ *	This class is abstructed class, don create referance directly from this class,
+ *	Inherit from this if you create new object type
+ */
+
+#ifndef SRC_BASES_GPHYSICOBJECT_H_
+#define SRC_BASES_GPHYSICOBJECT_H_
+
+#include "bullet/btBulletDynamicsCommon.h"
+#include "glm/glm.hpp"
+#include <Functional>
+#include "btBox2dShape.h"
+#include "gImage.h"
+#include "gModel.h"
+
+class gPhysicObject {
+	friend class gPhysic;
+public:
+
+	enum OBJECTRENDERTYPE {
+		OBJECTRENDERTYPE_IMAGE,
+		OBJECTRENDERTYPE_MODEL,
+		OBJECTRENDERTYPE_NONE
+	};
+
+	/*
+	 * Box = 0
+	 * Sphere = 8
+	 * Compound = 31
+	 */
+	enum transformtype {
+		TRANSFORMTYPE_BOX = 0,
+		TRANSFORMTYPE_SPHERE = 8,
+		TRANSFORMTYPE_COMPOUND = 31,
+	};
+
+	/*
+	 *	Call this function in Canvas draw method for showing content
+	 */
+	virtual void draw() = 0;
+
+
+
+	/*
+	 * Use this function for setting Oncollision fu
+	 * use std::bind for parameter
+	 */
+	void setOnCollided(std::function<void(int, glm::vec3, glm::vec3)> onColl);
+
+	//get with of conten(image, model etc)
+	int getWidth();
+
+	//get height of conten(image, model etc)
+	int getHeight();
+
+	/*
+	 * set size of object 1 is default
+	 * size need to be between 0.04 and 100000
+	 */
+	void setSize(glm::vec3 newvalue);
+	glm::vec3 getSize();
+
+	int getID();
+
+	glm::vec3 getPosition();
+	void setPosition(glm::vec3 newposition);
+
+
+	glm::vec3 getOrigin();
+	btQuaternion getRotation();
+	void setRotation(btQuaternion newrotation);
+
+	glm::vec3 getMassDirection();
+	void setMass(glm::vec3 newmassdirection, float newmass = 1.0f);
+
+
+	//Set base physic methods
+	void setFriction(float newvalue);
+	float getFriction();
+	void setRollingFriction(float newvalue);
+	float getRollingFriction();
+	void setSpinningFriction(float newvalue);
+	float getSpinnigFriction();
+	void setAnisotropicFriction(glm::vec3 newvalue, int anisotropicfrictionmode = 1);
+
+
+
+	// These apply methods should be used in update method.
+	void applyCentralForce(glm::vec3 forcevalue);
+	void applyCentralImpulse(glm::vec3 impulsevalue);
+	void applyForce(glm::vec3 forcevalue,glm::vec3 forcepos);
+	void applyImpulse(glm::vec3 impulsevalue,glm::vec3 impulsepos);
+	void applyTorque(glm::vec3 torquevalue);
+	void applyTorqueImpulse(glm::vec3 torquevalue);
+
+
+
+
+	/*
+	 * This function will be called when object collided with another object
+	 *
+	 * !!!
+	 *  Dont call this function manuel
+	 *  This function will be used by physic engine
+	 */
+	void onCollided(int targetobjectid, glm::vec3 selfcollpos, glm::vec3 targetcollpos);
+	btTransform* getTransform();
+	btCollisionShape* getCollisionShape();
+	btRigidBody* getRigidBody();
+
+
+
+protected:
+
+
+
+	//This class is abstracted
+	gPhysicObject();
+	virtual ~gPhysicObject();
+
+	/*
+	 *This function referans for onCollided func
+	 *This referance will connect Canvas function to physic object function
+	 *You need use std::bind with setOncollided to using this referance
+	 */
+	std::function<void(int, glm::vec3, glm::vec3)> _onColl;
+
+
+	//id is comes from physic engine object list id
+	int _id = -1;
+	int _width;
+	int _height;
+	int _depth = 1.0f;
+	glm::vec3 _size = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	glm::vec3 _position;
+	btQuaternion _rotation;
+	glm::vec3 _massdirection;
+	float _mass = 0.0f;
+	float _friction, _rollingfriction, _spinningFriction;
+	glm::vec3 _anisotropicfriction;
+	int _anistropicfrictionmode;
+
+	bool _isOnCollidedFuncSetted = false;
+	OBJECTRENDERTYPE _renderobjecttype = OBJECTRENDERTYPE_IMAGE;
+
+	bool _isrenderobjectloaded = false;
+
+	gImage* _image;
+	gModel* _model;
+
+	btTransform _transform;
+	btCollisionShape* _collisionshape;
+	btRigidBody* _rigidbody;
+
+	/*
+	 * This function is for physic engine dont use manualy
+	 */
+	void updatePositionVariable();
+
+	/*
+	 * This function is for physic engine dont use manualy
+	 */
+	void updateRotationVariable();
+
+	/*
+	 *This function is for chil object to set size
+	 */
+	virtual void setRendererObjectSize() = 0;
+
+	/*
+	 *This function is for chil object to set position
+	 */
+	virtual void setRendererObjectPosition() = 0;
+
+	/*
+	 *This function is for chil object to set rotation
+	 */
+	virtual void setRendererObjectRotation() = 0;
+
+	/*
+	 * This function is for chil object to set rotation
+	 */
+	bool _isstatic = true;
+
+private:
+
+
+};
+#endif /* SRC_BASES_GPHYSICOBJECT_H_ */

@@ -516,6 +516,7 @@ void gipBulletPhysics::collisionCallbackFunction() {
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
             if (pt.getDistance() < 0.f)
             {
+            	//Collision positions
               //  const btVector3& ptA = pt.getPositionWorldOnA();
               //  const btVector3& ptB = pt.getPositionWorldOnB();
               //  const btVector3& normalOnB = pt.m_normalWorldOnB;

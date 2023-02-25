@@ -53,13 +53,15 @@ void gDebugDraw::drawTriangle(const btVector3& a,const btVector3& b,const btVect
 	triangle->draw(a.x(), -a.y(), b.x(), -b.y(), c.x(), -c.y(), false);
 }
 
+
 void gDebugDraw::reportErrorWarning(const char* warningString) {
-	std::cout << warningString;
+	std::cout << "Physic world debug draw warning : " << warningString;
 }
 
 void gDebugDraw::drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color) {
 	//gCircle* circle = new gCircle();
 	//circle->draw(PointOnB.x(), -PointOnB.y(), 20.0f, true, 8);
+	//TODO: need to write codes for this
 }
 
 void gDebugDraw::draw3dText(const btVector3& location,const char* textString) {

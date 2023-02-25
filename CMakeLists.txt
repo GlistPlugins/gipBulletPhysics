@@ -15,6 +15,10 @@ list(APPEND PLUGIN_SRCS
 			${PLUGIN_DIR}/src/gImageGameObject.cpp
 			${PLUGIN_DIR}/src/gImageGameObject.cpp
 			${PLUGIN_DIR}/src/gDebugDraw.cpp
+			${PLUGIN_DIR}/src/bases/gPhysic.cpp
+			${PLUGIN_DIR}/src/bases/gPhysicObject.cpp
+			${PLUGIN_DIR}/src/gPhysic2dBox.cpp
+			${PLUGIN_DIR}/src/gPhysic2dCircle.cpp
 )
 
 

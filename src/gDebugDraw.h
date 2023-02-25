@@ -12,6 +12,7 @@
 #include "gLine.h"
 #include "gCircle.h"
 #include "gTriangle.h"
+#include "gRect.h"
 
 class gDebugDraw : public btIDebugDraw
 {
