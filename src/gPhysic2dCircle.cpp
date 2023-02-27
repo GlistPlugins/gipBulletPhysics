@@ -11,7 +11,7 @@
  * rotaion is degree format
  * size need to become between 0.04 and 100.000
  */
-gPhysic2dCircle::gPhysic2dCircle(gImage* image, bool isstatic, float mass, float radius, glm::vec3 rotation, glm::vec3 position) {
+gPhysic2dCircle::gPhysic2dCircle(gImage* image, bool isstatic, float mass, float radius, int objectlayers, int masklayers) {
 	this->_image = image;
 	this->_isrenderobjectloaded = true;
 	this->_renderobjecttype = OBJECTRENDERTYPE_IMAGE;
@@ -20,9 +20,8 @@ gPhysic2dCircle::gPhysic2dCircle(gImage* image, bool isstatic, float mass, float
 	this->_isstatic = isstatic;
 	this->_mass = mass;
 	this->_size = glm::vec3(radius, radius, radius);
-	this->_rotation.setRotation(btVector3(0.0f, 0.0f, 1.0f),(btScalar)(-glm::radians(rotation.z)));
-	this->_position = position;
-
+	if(objectlayers > 0) this->_objectlayers = objectlayers;
+	if(masklayers > 0) this->_masklayers = masklayers;
 	this->_collisionshape = new btSphereShape(((_width + _height) * 0.5f) * 0.5f * _size.x);
 
 	this->_transform.setIdentity();
@@ -34,13 +33,13 @@ gPhysic2dCircle::gPhysic2dCircle(gImage* image, bool isstatic, float mass, float
 	 */
 	this->_transform.setOrigin(
 				btVector3(
-						position.x + _width * 0.5f,
-						-(position.y + _height * 0.5f),
+						_position.x + _width * 0.5f,
+						-(_position.y + _height * 0.5f),
 						0.0f
 				)
 		);
 
-	if(rotation.z != 0.0f) {
+	if(_rotation.z() != 0.0f) {
 		this->_transform.setRotation(this->_rotation);
 
 	}
@@ -61,13 +60,13 @@ gPhysic2dCircle::gPhysic2dCircle(gImage* image, bool isstatic, float mass, float
 	//this->_rigidbody->setRestitution(0.81f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::Instance()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
 	this->_rigidbody->setUserIndex(this->_id);
 }
 
 
 //This constructor need test and work
-gPhysic2dCircle::gPhysic2dCircle(gModel* model, bool isstatic, float mass) {
+gPhysic2dCircle::gPhysic2dCircle(gMesh* model, bool isstatic, float mass, int objectlayers, int masklayers) {
 	this->_model = model;
 	_isrenderobjectloaded = true;
 	this->_renderobjecttype = OBJECTRENDERTYPE_MODEL;
@@ -76,6 +75,8 @@ gPhysic2dCircle::gPhysic2dCircle(gModel* model, bool isstatic, float mass) {
 	this->_depth = model->getScale().z;
 	this->_isstatic = false;
 	this->_mass = mass;
+	if(objectlayers > 0) this->_objectlayers = objectlayers;
+	if(masklayers > 0) this->_masklayers = masklayers;
 	this->_size = model->getScale();
 	glm::quat newQat = model->getOrientation();
 	this->_rotation = btQuaternion(-newQat.y, newQat.x, newQat.z);
@@ -121,13 +122,13 @@ gPhysic2dCircle::gPhysic2dCircle(gModel* model, bool isstatic, float mass) {
 	//this->_rigidbody->setRestitution(0.81f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::Instance()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }
 
 
-gPhysic2dCircle::gPhysic2dCircle(bool isstatic, float mass, float radius, glm::vec3 rotation, glm::vec3 position) {
+gPhysic2dCircle::gPhysic2dCircle(bool isstatic, float mass, float radius, int objectlayers, int masklayers) {
 	_isrenderobjectloaded = false;
 	this->_renderobjecttype = OBJECTRENDERTYPE_NONE;
 	this->_width = radius;
@@ -135,9 +136,12 @@ gPhysic2dCircle::gPhysic2dCircle(bool isstatic, float mass, float radius, glm::v
 	this->_depth = radius;
 	this->_isstatic = isstatic;
 	this->_mass = mass;
+
+	if(objectlayers > 0) this->_objectlayers = objectlayers;
+	if(masklayers > 0) this->_masklayers = masklayers;
 	this->_size = glm::vec3(1.0f, 1.0f, 1.0f);
-	this->_rotation.setRotation(btVector3(0.0f, 0.0f, 1.0f),(btScalar)(-glm::radians(rotation.z)));
-	this->_position = position;
+	//this->_rotation.setRotation(btVector3(0.0f, 0.0f, 1.0f),(btScalar)(-glm::radians(rotation.z)));
+
 
 	this->_collisionshape = new btSphereShape(_width * 0.5f * _size.x);
 
@@ -148,14 +152,15 @@ gPhysic2dCircle::gPhysic2dCircle(bool isstatic, float mass, float radius, glm::v
 	 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
 	 * You need set collision center to upright of half size of source
 	 */
+	std::cout << "Burasý çalýþtý" ;
 	this->_transform.setOrigin(
 			btVector3(
-					position.x + _width * 0.5f,
-					-(position.y + _height * 0.5f),
-					0.0f
+					0.0f,
+					0.0f,
+					-400.0f
 			)
 	);
-	if(rotation.z > 0.0f) {
+	if(_rotation.z() > 0.0f) {
 		this->_transform.setRotation(this->_rotation);
 
 	}
@@ -178,7 +183,7 @@ gPhysic2dCircle::gPhysic2dCircle(bool isstatic, float mass, float radius, glm::v
 	this->_rigidbody->setWorldTransform(_transform);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::Instance()->addPhysicObect(this);
+	this->_id = gPhysic::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }
@@ -188,7 +193,7 @@ void gPhysic2dCircle::draw() {
 	//Wont be draw if ther is no any renderer object
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
 		if(_isrenderobjectloaded) {
-			_image->draw(_position.x, _position.y, _width * _size.x, _height * _size.y, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));
+			_image->draw(_position.x, _position.y, _width, _height, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));
 		}
 	} else 	if(this->_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
 		if(_isrenderobjectloaded) {

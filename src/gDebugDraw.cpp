@@ -23,19 +23,17 @@ gDebugDraw::~gDebugDraw() {
 
 void gDebugDraw::setDebugMode(int debugMode) {
 	this->m_debugMode = debugMode;
+
 }
 
 void gDebugDraw::drawLine(const btVector3& from,const btVector3& to,const btVector3&  fromColor, const btVector3& toColor) {
 	gLine* line = new gLine();
-	line->draw(from.getX(), -from.getY(), to.getX(), -to.getY());
+	line->draw(from.getX(), -from.getY(),  from.getZ(),to.getX(), -to.getY(), to.getZ());
 }
 
 void gDebugDraw::drawLine(const btVector3& from,const btVector3& to,const btVector3&  fromColor) {
 	gLine* line = new gLine();
-
-	line->draw(from.getX(), -from.getY(), to.getX(), -to.getY());
-
-}
+	line->draw(from.getX(), -from.getY(),  from.getZ(),to.getX(), -to.getY(), to.getZ());}
 
 void gDebugDraw::drawSphere (btScalar radius, const btTransform &transform, const btVector3 &color) {
 	gCircle* circle = new gCircle();

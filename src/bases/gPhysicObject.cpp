@@ -34,11 +34,16 @@ int gPhysicObject::getHeight() {
 	return _height;
 }
 
+/*
+ * for size need become between 0.4 and 100000
+ */
 void gPhysicObject::setSize(glm::vec3 newvalue) {
 	this->_size = newvalue;
-	setRendererObjectSize();
+	//setRendererObjectSize();
+	setRendererObjectPosition();
 	_rigidbody->getCollisionShape()->setLocalScaling(btVector3(newvalue.x, newvalue.y, newvalue.z));
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
+
 }
 
 
@@ -58,15 +63,36 @@ glm::vec3 gPhysicObject::getPosition() {
 
 
 void gPhysicObject::setPosition(glm::vec3 newposition) {
-	this->_position = newposition;
+	if(_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
+		this->_position = newposition;
+		this->_transform.setOrigin(
+				btVector3(
+						newposition.x + _width * 0.5f,
+						-(newposition.y + _height * 0.5f),
+						newposition.z + _depth * 0.5f
+				)
+		);
+	} else if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
+		this->_position = newposition;
+		this->_transform.setOrigin(
+				btVector3(
+						_position.x + _width,
+						_position.y + _height,
+						_position.z + _depth
+				)
+		);
+	} else if(_renderobjecttype == OBJECTRENDERTYPE_NONE) {
+
+		this->_transform.setOrigin(
+				btVector3(
+						_position.x + _width,
+						_position.y + _height,
+						_position.z + _depth
+				)
+		);
+	}
+
 	setRendererObjectPosition();
-	this->_transform.setOrigin(
-			btVector3(
-					newposition.x + _width * 0.5f,
-					-(newposition.y + _height * 0.5f),
-					newposition.z + _depth * 0.5f
-			)
-	);
 	_rigidbody->setWorldTransform(_transform);
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 
@@ -85,8 +111,6 @@ void gPhysicObject::updatePositionVariable() {
 	 * Sphere = 8
 	 * Compound = 31
 	 */
-
-
 	if(type == transformtype::TRANSFORMTYPE_BOX) {
 		this->_position =  glm::vec3 (
 				_transform.getOrigin().getX() - _width * 0.5f,
@@ -106,11 +130,14 @@ void gPhysicObject::updatePositionVariable() {
 				_transform.getOrigin().getZ()
 		);
 	}
+	setRendererObjectPosition();
 }
 
 void gPhysicObject::updateRotationVariable() {
 	_rigidbody->getMotionState()->getWorldTransform(_transform);
+
 	this->_rotation = _transform.getRotation();
+	setRendererObjectRotation();
 }
 glm::vec3 gPhysicObject::getOrigin() {
 	btVector3 tempor = _transform.getOrigin();
@@ -129,7 +156,13 @@ void gPhysicObject::setRotation(btQuaternion newrotation) {
 	setRendererObjectRotation();
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
-
+void gPhysicObject::setRotation(glm::vec3 newrotation) {
+	this->_rotation.setEulerZYX(-gDegToRad(newrotation.z), gDegToRad(newrotation.y), gDegToRad(newrotation.x));
+	_transform.setRotation(this->_rotation);
+	this->_rigidbody->setWorldTransform(this->_transform);
+	setRendererObjectRotation();
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
+}
 
 void gPhysicObject::setMass(glm::vec3 newmassdirection, float newmass) {
 	this->_mass = newmass;
@@ -246,4 +279,11 @@ btRigidBody* gPhysicObject::getRigidBody() {
 
 btTransform*  gPhysicObject::getTransform() {
 	return &_transform;
+}
+
+void gPhysicObject::setTag(int newtag) {
+	this->_tag = newtag;
+}
+int gPhysicObject::getTag() {
+	return _tag;
 }

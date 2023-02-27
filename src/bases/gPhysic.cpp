@@ -24,10 +24,14 @@ void gPhysic::startWorld(float timestep)	{
 	m_physic->setTimeStep(timestep);
 	m_physic->initializeWorld();
 }
-
-int gPhysic::addPhysicObect(gPhysicObject* object) {
+/*
+ * Set owner target layer
+ * Set target layers whic you want collide with owner object
+ * 0 means dont collide
+ */
+int gPhysic::addPhysicObect(gPhysicObject* object, int objectlayer, int masklayer) {
 	physicobjects.push_back(object);
-	dynamicsworld->addRigidBody(object->getRigidBody());
+	dynamicsworld->addRigidBody(object->getRigidBody(), objectlayer, masklayer);
 	return physicobjects.size() - 1;
 }
 
@@ -57,7 +61,7 @@ void gPhysic::initializeWorld(int worldtype) {
 	gDebugDraw* debugDrawer = new gDebugDraw();
 	debugDrawer->clearLines();
 	debugDrawer->setDebugMode( debugDrawer->getDebugMode()
-          | btIDebugDraw::DBG_DrawWireframe );
+          | btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawAabb);
     dynamicsworld->setDebugDrawer(debugDrawer);
 
 }
@@ -185,6 +189,10 @@ void gPhysic::updateSingleAabb(btCollisionObject* targetcollisionobject) {
 	dynamicsworld->updateSingleAabb(targetcollisionobject);
 }
 
+void gPhysic::setTimeStep(float timestep) {
+	_timestep = (btScalar)timestep;
+}
+
 //cleanup in the reverse order of creation/initialization
 void gPhysic::clean() {
 	//remove the rigidbodies from the dynamics world and delete them
@@ -238,9 +246,7 @@ void gPhysic::clean() {
 	collisionconfiguration = 0;
 }
 
-void gPhysic::setTimeStep(float timestep) {
-	_timestep = (btScalar)timestep;
-}
+
 
 gPhysic::~gPhysic() {
 	clean();

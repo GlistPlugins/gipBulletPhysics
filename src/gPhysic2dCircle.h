@@ -15,12 +15,15 @@
 
 class gPhysic2dCircle:public gPhysicObject {
 public:
+	/*
+	 * layers are bitewise
+	 */
 	//Constructer for 2d image
-	gPhysic2dCircle(gImage* image, bool isstatic = true, float mass = 0.0f, float radius = 200, glm::vec3 rotation = glm::vec3(0.0f, 0.0f,0.0f), glm::vec3 position = glm::vec3(0.0f, 0.0f,0.0f));
+	gPhysic2dCircle(gImage* image, bool isstatic = true, float mass = 0.0f, float radius = 200, int objectlayers = -1, int masklayers = -1);
 	//Constructer for 3d model
-	gPhysic2dCircle(gModel* model, bool isstatic = true, float mass = 0.0f);
+	gPhysic2dCircle(gMesh* model, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
 	//Constructer for physic object without any content
-	gPhysic2dCircle(bool isstatic = true, float mass = 0.0f, float radius = 200, glm::vec3 rotation = glm::vec3(0.0f, 0.0f,0.0f), glm::vec3 position = glm::vec3(0.0f, 0.0f,0.0f));
+	gPhysic2dCircle(bool isstatic = true, float mass = 0.0f, float radius = 200, int objectlayers = -1, int masklayers = -1);
 
 
 	virtual ~gPhysic2dCircle();

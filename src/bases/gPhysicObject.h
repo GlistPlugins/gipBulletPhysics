@@ -19,6 +19,7 @@
 #include "gImage.h"
 #include "gModel.h"
 
+
 class gPhysicObject {
 	friend class gPhysic;
 public:
@@ -74,7 +75,9 @@ public:
 
 	glm::vec3 getOrigin();
 	btQuaternion getRotation();
-	void setRotation(btQuaternion newrotation);
+
+	//degree
+	void setRotation(glm::vec3 newrotation);
 
 	glm::vec3 getMassDirection();
 	void setMass(glm::vec3 newmassdirection, float newmass = 1.0f);
@@ -115,6 +118,8 @@ public:
 	btRigidBody* getRigidBody();
 
 
+	void setTag(int newtag);
+	int getTag();
 
 protected:
 
@@ -132,33 +137,20 @@ protected:
 	std::function<void(int, glm::vec3, glm::vec3)> _onColl;
 
 
-	//id is comes from physic engine object list id
-	int _id = -1;
-	int _width;
-	int _height;
-	int _depth = 1.0f;
-	glm::vec3 _size = glm::vec3(1.0f, 1.0f, 1.0f);
 
-	glm::vec3 _position;
-	btQuaternion _rotation;
-	glm::vec3 _massdirection;
-	float _mass = 0.0f;
-	float _friction, _rollingfriction, _spinningFriction;
-	glm::vec3 _anisotropicfriction;
-	int _anistropicfrictionmode;
-
-	bool _isOnCollidedFuncSetted = false;
-	OBJECTRENDERTYPE _renderobjecttype = OBJECTRENDERTYPE_IMAGE;
-
-	bool _isrenderobjectloaded = false;
 
 	gImage* _image;
-	gModel* _model;
+	gMesh* _model;
 
 	btTransform _transform;
 	btCollisionShape* _collisionshape;
 	btRigidBody* _rigidbody;
 
+	/*
+	 * This function is for physic engine dont use manualy
+	 * use radyan
+	 */
+	void setRotation(btQuaternion newrotation);
 	/*
 	 * This function is for physic engine dont use manualy
 	 */
@@ -184,11 +176,50 @@ protected:
 	 */
 	virtual void setRendererObjectRotation() = 0;
 
+	//id is comes from physic engine object list id
+	int _id = -1;
+	int _width = 200;
+	int _height = 200;
+	int _depth = 1.0f;
+	glm::vec3 _size = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	glm::vec3 _position = glm::vec3(0.0f, 0.0f, 0.0f);
+	btQuaternion _rotation;
+	glm::vec3 _massdirection;
+	float _mass = 0.0f;
+	float _friction, _rollingfriction, _spinningFriction;
+	glm::vec3 _anisotropicfriction;
+	int _anistropicfrictionmode;
+
+	bool _isOnCollidedFuncSetted = false;
+	OBJECTRENDERTYPE _renderobjecttype = OBJECTRENDERTYPE_IMAGE;
+
+	bool _isrenderobjectloaded = false;
+
 	/*
 	 * This function is for chil object to set rotation
 	 */
 	bool _isstatic = true;
 
+	/*
+	 * Tag is for grouping objects
+	 */
+	int _tag = 0;
+
+	/*
+	 * object layer has
+	 *
+	 */
+	int _objectlayers = 1<<1;
+
+	/*
+	 * mask layer, object will collide which object has this layers
+	 * Layer is bitwise
+	 * All layer  collide for default
+	 */
+	int _masklayers = 1 << 0 | 1 << 1 | 1 << 2 | 1 << 3 | 1 << 4 | 1 << 5 | 1 << 6 | 1 << 7 | 1 << 8 | 1 << 9
+			| 1 << 10 | 1 << 11 | 1 << 12 | 1 << 13 | 1 << 14 | 1 << 15 | 1 << 16 | 1 << 17 | 1 << 18 | 1 << 19
+			| 1 << 20 | 1 << 21 | 1 << 22;
 private:
 
 

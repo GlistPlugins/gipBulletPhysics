@@ -27,10 +27,40 @@ public:
 	 * Sphere = 8
 	 * Compound = 31
 	 */
-	enum transformtype {
+	enum TRANSFORMTYPE {
 		TRANSFORMTYPE_BOX = 0,
 		TRANSFORMTYPE_SPHERE = 8,
 		TRANSFORMTYPE_COMPOUND = 31,
+	};
+
+	/*
+	 * Layers are bitwise varialbles
+	 *
+	 */
+	 enum COLLISIONLAYERS {
+		LAYER0 = 1 << 0,	//Dont collide layer
+		LAYER1 = 1 << 1,	//Default collide layer
+		LAYER2 = 1 << 2,
+		LAYER3 = 1 << 3,
+		LAYER4 = 1 << 4,
+		LAYER5 = 1 << 5,
+		LAYER6 = 1 << 6,
+		LAYER7 = 1 << 7,
+		LAYER8 = 1 << 8,
+		LAYER9 = 1 << 9,
+		LAYER10 = 1 << 10,
+		LAYER11 = 1 << 11,
+		LAYER12 = 1 << 12,
+		LAYER13 = 1 << 13,
+		LAYER14 = 1 << 14,
+		LAYER15 = 1 << 15,
+		LAYER16 = 1 << 16,
+		LAYER17 = 1 << 17,
+		LAYER18 = 1 << 18,
+		LAYER19 = 1 << 19,
+		LAYER20 = 1 << 20,
+		LAYER21 = 1 << 21,
+		LAYER22 = 1 << 22
 	};
 
 	//Singletons should not be assignable.
@@ -58,8 +88,14 @@ public:
 
 	/*
 	 * This function calls by physicobjects childes
+	 * layer mas is must become bitwise
+	 * use COLLISIONLAYERS enums
+	 * object layer means object will own that flag
+	 * masklayer means object only will collide thouse layers
 	 */
-	int addPhysicObect(gPhysicObject* object);
+	int addPhysicObect(gPhysicObject* object, int objectlayer, int masklayer);
+
+
 
 	void updateSingleAabb(btCollisionObject* targetcollisionobject);
 

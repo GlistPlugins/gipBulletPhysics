@@ -11,15 +11,17 @@
 #include "bases/gPhysicObject.h"
 #include "bases/gPhysic.h"
 
-
 class gPhysic2dBox:public gPhysicObject {
 public:
+	/*
+	 * layers are bitewise
+	 */
 	//Constructer for 2d image
-	gPhysic2dBox(gImage* image, bool isstatic = true, float mass = 0.0f, glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 rotation = glm::vec3(0.0f, 0.0f,0.0f), glm::vec3 position = glm::vec3(0.0f, 0.0f,0.0f));
+	gPhysic2dBox(gImage* image, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
 	//Constructer for 3d model
-	gPhysic2dBox(gModel* model, bool isstatic = true, float mass = 0.0f);
+	gPhysic2dBox(gMesh* model, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
 	//Constructer for physic object without any content
-	gPhysic2dBox(bool isstatic = true, float mass = 0.0f, int width = 200, int height = 200, int depth = 200, glm::vec3 size = glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3 rotation = glm::vec3(0.0f, 0.0f,0.0f), glm::vec3 position = glm::vec3(0.0f, 0.0f,0.0f));
+	gPhysic2dBox( int width = 200, int height = 200, int depth = 200, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
 
 	virtual ~gPhysic2dBox();
 	inline void draw() override;
