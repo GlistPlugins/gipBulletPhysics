@@ -1,8 +1,8 @@
 /*
  * gPhysicObject.h
  *
- *  Created on: 19 Þub 2023
- *      Author: Remzi ÝÞÇÝ
+ *  Created on: 19 ï¿½ub 2023
+ *      Author: Remzi ï¿½ï¿½ï¿½ï¿½
  *
  *  This class is base cals for defined object
  *	This class is abstructed class, don create referance directly from this class,
@@ -64,20 +64,28 @@ public:
 	 * set size of object 1 is default
 	 * size need to be between 0.04 and 100000
 	 */
-	void setSize(glm::vec3 newvalue);
+	void setSize(float x, float y, float z = -1.0f);
 	glm::vec3 getSize();
+
+	void setTag(int newtag);
+	int getTag();
+
+	std::string getName();
+	void setName(std::string newname);
 
 	int getID();
 
 	glm::vec3 getPosition();
-	void setPosition(glm::vec3 newposition);
-
+	void setPosition(float x, float y, float z = 0.0f);
 
 	glm::vec3 getOrigin();
 	btQuaternion getRotation();
 
 	//degree
-	void setRotation(glm::vec3 newrotation);
+	void setRotation(float degrex, float degrey, float degrez);
+	//degree
+	//This for 2d object and world
+	void setRotation(float degrez);
 
 	glm::vec3 getMassDirection();
 	void setMass(glm::vec3 newmassdirection, float newmass = 1.0f);
@@ -91,7 +99,8 @@ public:
 	void setSpinningFriction(float newvalue);
 	float getSpinnigFriction();
 	void setAnisotropicFriction(glm::vec3 newvalue, int anisotropicfrictionmode = 1);
-
+	//value should become between 0 and 1
+	void setBounce(float newvalue = 0.0f);
 
 
 	// These apply methods should be used in update method.
@@ -118,8 +127,7 @@ public:
 	btRigidBody* getRigidBody();
 
 
-	void setTag(int newtag);
-	int getTag();
+
 
 protected:
 
@@ -192,9 +200,18 @@ protected:
 	int _anistropicfrictionmode;
 
 	bool _isOnCollidedFuncSetted = false;
+
 	OBJECTRENDERTYPE _renderobjecttype = OBJECTRENDERTYPE_IMAGE;
 
 	bool _isrenderobjectloaded = false;
+
+	/*
+	 * Is object 2d or 3d
+	 * true means 2d
+	 * false mean 3d
+	 */
+	bool is2d = true;
+
 
 	/*
 	 * This function is for chil object to set rotation
@@ -205,6 +222,11 @@ protected:
 	 * Tag is for grouping objects
 	 */
 	int _tag = 0;
+
+	/*
+	 * for naming object
+	 */
+	std::string objectname = "new object";
 
 	/*
 	 * object layer has

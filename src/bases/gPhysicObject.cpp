@@ -1,7 +1,7 @@
 /*
  * gPhysicObject.cpp
  *
- *  Created on: 19 Þub 2023
+ *  Created on: 19 ï¿½ub 2023
  *      Author: remzi
  */
 
@@ -37,11 +37,12 @@ int gPhysicObject::getHeight() {
 /*
  * for size need become between 0.4 and 100000
  */
-void gPhysicObject::setSize(glm::vec3 newvalue) {
-	this->_size = newvalue;
-	//setRendererObjectSize();
-	setRendererObjectPosition();
-	_rigidbody->getCollisionShape()->setLocalScaling(btVector3(newvalue.x, newvalue.y, newvalue.z));
+void gPhysicObject::setSize(float x, float y, float z) {
+	this->_size = glm::vec3(x, y, z > 0 ? z : _depth);
+	std::cout << _rigidbody->getWorldTransform().getOrigin().z();
+	//setRendererObjectSize(); // if you want chain size of physic object and rendrer object you can uncomment this line
+	//setRendererObjectPosition();
+	_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x, y, z));
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 
 }
@@ -51,6 +52,13 @@ glm::vec3 gPhysicObject::getSize() {
 	return this->_size;
 }
 
+std::string gPhysicObject::getName() {
+	return objectname;
+}
+
+void gPhysicObject::setName(std::string newname) {
+	this->objectname = newname;
+}
 
 int gPhysicObject::getID() {
 	return this->_id;
@@ -62,47 +70,58 @@ glm::vec3 gPhysicObject::getPosition() {
 }
 
 
-void gPhysicObject::setPosition(glm::vec3 newposition) {
+void gPhysicObject::setPosition(float x, float y, float z) {
+	this->_position = glm::vec3(x, y, z);
+
 	if(_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
-		this->_position = newposition;
 		this->_transform.setOrigin(
 				btVector3(
-						newposition.x + _width * 0.5f,
-						-(newposition.y + _height * 0.5f),
-						newposition.z + _depth * 0.5f
+						x + _width * 0.5f,
+						-(y + _height * 0.5f),
+						0.0f
 				)
 		);
 	} else if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
-		this->_position = newposition;
 		this->_transform.setOrigin(
 				btVector3(
-						_position.x + _width,
-						_position.y + _height,
-						_position.z + _depth
+						x + _width,
+						y + _height,
+						z + _depth
 				)
 		);
 	} else if(_renderobjecttype == OBJECTRENDERTYPE_NONE) {
+		if(z == 0.0f) {
+			this->_transform.setOrigin(
+					btVector3(
+							x + _width * 0.5f,
+							-(y + _height * 0.5f),
+							0.0f
+					)
+			);
+		} else {
+			this->_transform.setOrigin(
+					btVector3(
+							x + _width,
+							y + _height,
+							z + _depth
+					)
+			);
+		}
 
-		this->_transform.setOrigin(
-				btVector3(
-						_position.x + _width,
-						_position.y + _height,
-						_position.z + _depth
-				)
-		);
 	}
 
-	setRendererObjectPosition();
+
 	_rigidbody->setWorldTransform(_transform);
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
+	setRendererObjectPosition();
 
 
 }
+
 void gPhysicObject::updatePositionVariable() {
 	transformtype type = (transformtype)_collisionshape->getShapeType();
 	glm::vec3 temp_pos;
 
-	//temp_rigidbody->getMotionState()->getWorldTransform(temp_transform);
 	_rigidbody->getMotionState()->getWorldTransform(_transform);
 
 
@@ -111,25 +130,49 @@ void gPhysicObject::updatePositionVariable() {
 	 * Sphere = 8
 	 * Compound = 31
 	 */
-	if(type == transformtype::TRANSFORMTYPE_BOX) {
-		this->_position =  glm::vec3 (
-				_transform.getOrigin().getX() - _width * 0.5f,
-				-(_transform.getOrigin().getY() + _height * 0.5f),
-				_transform.getOrigin().getZ()
-		);
-	} else if(type == transformtype::TRANSFORMTYPE_SPHERE) {
-		this->_position =  glm::vec3 (
-				_transform.getOrigin().getX() - (_height * 0.5f),
-				-(_transform.getOrigin().getY() + (_height * 0.5f)),
-				_transform.getOrigin().getZ()
-		);
+
+	if(is2d) {
+		if(type == transformtype::TRANSFORMTYPE_BOX) {
+			this->_position =  glm::vec3 (
+					_transform.getOrigin().getX() - _width * 0.5f,
+					-(_transform.getOrigin().getY() + _height * 0.5f),
+					0.0f
+			);
+		} else if(type == transformtype::TRANSFORMTYPE_SPHERE) {
+			this->_position =  glm::vec3 (
+					_transform.getOrigin().getX() - (_height * 0.5f),
+					-(_transform.getOrigin().getY() + (_height * 0.5f)),
+					0.0f
+			);
+		} else {
+			this->_position = glm::vec3 (
+					_transform.getOrigin().getX() + _width,
+					-(_transform.getOrigin().getY() + _height),
+					0.0f
+			);
+		}
 	} else {
-		this->_position = glm::vec3 (
-				_transform.getOrigin().getX() + _width,
-				-(_transform.getOrigin().getY() + _height),
-				_transform.getOrigin().getZ()
-		);
+		if(type == transformtype::TRANSFORMTYPE_BOX) {
+			this->_position =  glm::vec3 (
+					_transform.getOrigin().getX() - _width * 0.5f,
+					-(_transform.getOrigin().getY() + _height * 0.5f),
+					_transform.getOrigin().getZ()
+			);
+		} else if(type == transformtype::TRANSFORMTYPE_SPHERE) {
+			this->_position =  glm::vec3 (
+					_transform.getOrigin().getX() - (_height * 0.5f),
+					-(_transform.getOrigin().getY() + (_height * 0.5f)),
+					_transform.getOrigin().getZ()
+			);
+		} else {
+			this->_position = glm::vec3 (
+					_transform.getOrigin().getX() + _width,
+					-(_transform.getOrigin().getY() + _height),
+					_transform.getOrigin().getZ()
+			);
+		}
 	}
+
 	setRendererObjectPosition();
 }
 
@@ -156,8 +199,17 @@ void gPhysicObject::setRotation(btQuaternion newrotation) {
 	setRendererObjectRotation();
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
 }
-void gPhysicObject::setRotation(glm::vec3 newrotation) {
-	this->_rotation.setEulerZYX(-gDegToRad(newrotation.z), gDegToRad(newrotation.y), gDegToRad(newrotation.x));
+void gPhysicObject::setRotation(float degrex, float degrey, float degrez) {
+	this->_rotation.setEulerZYX(-gDegToRad(degrez), gDegToRad(degrey), gDegToRad(degrex));
+	_transform.setRotation(this->_rotation);
+	this->_rigidbody->setWorldTransform(this->_transform);
+	setRendererObjectRotation();
+	gPhysic::Instance()->updateSingleAabb(_rigidbody);
+}
+
+
+void gPhysicObject::setRotation(float degrez) {
+	this->_rotation.setEulerZYX(-gDegToRad(degrez), gDegToRad(0.0f), gDegToRad(0.0f));
 	_transform.setRotation(this->_rotation);
 	this->_rigidbody->setWorldTransform(this->_transform);
 	setRendererObjectRotation();
@@ -235,6 +287,13 @@ void gPhysicObject::setAnisotropicFriction(glm::vec3 newvalue, int anisotropicfr
 	_rigidbody->setAnisotropicFriction(btVector3(newvalue.x, newvalue.y, newvalue.z), anisotropicfrictionmode);
 
 	gPhysic::Instance()->updateSingleAabb(_rigidbody);
+}
+
+void gPhysicObject::setBounce(float newvalue) {
+	if(newvalue > 0.0f) {
+
+		this->_rigidbody->setRestitution(newvalue);
+	}
 }
 
 

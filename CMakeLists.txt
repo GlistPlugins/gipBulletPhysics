@@ -19,6 +19,7 @@ list(APPEND PLUGIN_SRCS
 			${PLUGIN_DIR}/src/bases/gPhysicObject.cpp
 			${PLUGIN_DIR}/src/gPhysic2dBox.cpp
 			${PLUGIN_DIR}/src/gPhysic2dCircle.cpp
+			${PLUGIN_DIR}/src/gPhysic3dBox.cpp
 )
 
 

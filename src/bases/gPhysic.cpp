@@ -1,8 +1,8 @@
 /*
  * gPhysic.cpp
  *
- *  Created on: 19 Þub 2023
- *      Author: Remzi ÝÞÇÝ
+ *  Created on: 19 02 2023
+ *      Author: Remzi ISCI
  */
 
 
@@ -20,9 +20,9 @@ gPhysic* gPhysic::Instance() {
 	return gPhysic::m_physic;
 }
 
-void gPhysic::startWorld(float timestep)	{
+void gPhysic::startWorld(bool is2d, float timestep)	{
 	m_physic->setTimeStep(timestep);
-	m_physic->initializeWorld();
+	m_physic->initializeWorld(is2d);
 }
 /*
  * Set owner target layer
@@ -32,12 +32,13 @@ void gPhysic::startWorld(float timestep)	{
 int gPhysic::addPhysicObect(gPhysicObject* object, int objectlayer, int masklayer) {
 	physicobjects.push_back(object);
 	dynamicsworld->addRigidBody(object->getRigidBody(), objectlayer, masklayer);
+	dynamicsworld->addRigidBody(object->getRigidBody());
 	return physicobjects.size() - 1;
 }
 
 
 //Initiliaze world, calls from constructor doesn need manuel call
-void gPhysic::initializeWorld(int worldtype) {
+void gPhysic::initializeWorld(bool is2d,int worldtype) {
 
 	//Construct needed variables
 	collisionconfiguration = new btDefaultCollisionConfiguration();
@@ -50,18 +51,19 @@ void gPhysic::initializeWorld(int worldtype) {
 	constraintsolver = solver;
 	dynamicsworld = new btDiscreteDynamicsWorld(collisiondispatcher, softwolrdbroadphase, constraintsolver, collisionconfiguration);
 
+	dynamicsworld->getDispatchInfo().m_useContinuous=true;
 
-	dynamicsworld->getSolverInfo().m_erp2 = 0.0f;
+	/*dynamicsworld->getSolverInfo().m_erp2 = 0.2f;
 	dynamicsworld->getSolverInfo().m_globalCfm = 0.0f;
 	dynamicsworld->getSolverInfo().m_numIterations = 10;
-	dynamicsworld->getSolverInfo().m_solverMode = SOLVER_SIMD;  // | SOLVER_RANDMIZE_ORDER;
-	dynamicsworld->setGravity(btVector3(0.0f, -9.81f, 0.0f));
+	dynamicsworld->getSolverInfo().m_solverMode = SOLVER_SIMD ;  // | SOLVER_RANDMIZE_ORDER;*/
+	dynamicsworld->setGravity(btVector3(0.0f, is2d ? -9.81f : 9.81f, 0.0f));
 	//dynamicsworld->applyGravity();
 	//Setting up debugDrawer
-	gDebugDraw* debugDrawer = new gDebugDraw();
+	gDebugDraw* debugDrawer = new gDebugDraw(is2d);
 	debugDrawer->clearLines();
 	debugDrawer->setDebugMode( debugDrawer->getDebugMode()
-          | btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_DrawAabb);
+          | btIDebugDraw::DBG_DrawWireframe );
     dynamicsworld->setDebugDrawer(debugDrawer);
 
 }
@@ -81,9 +83,11 @@ int gPhysic::runPhysicWorldStep() {
 
 				physicobjects[i]->updatePositionVariable();
 				physicobjects[i]->updateRotationVariable();
-		}
 
+		}
 	}
+
+
 
 	//Call cehck collision for each frame
 	checkCollisions();
@@ -156,7 +160,7 @@ void gPhysic::printObjectTransform() {
 		rbarray.push_back(btRigidBody::upcast(colobjarray[id]));
 
 		btTransform transform;
-		btRigidBody* rb = rbarray[id];
+		btRigidBody* rb = object->_rigidbody;
 
 		if (rb && rb->getMotionState()) {
 			rb->getMotionState()->getWorldTransform(transform);

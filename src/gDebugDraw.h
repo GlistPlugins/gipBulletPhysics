@@ -9,18 +9,21 @@
 #define SRC_GDEBUGDRAW_H_
 
 #include "btIDebugDraw.h"
+#include "gRenderer.h"
 #include "gLine.h"
 #include "gCircle.h"
 #include "gTriangle.h"
 #include "gRect.h"
+#include "gSphere.h"
+#include "gFont.h"
 
 class gDebugDraw : public btIDebugDraw
 {
-int m_debugMode;
-
+int m_debugMode = DBG_DrawWireframe;
+bool is2dworld = true;
 public:
 
-gDebugDraw();
+gDebugDraw(bool is2d);
 virtual ~gDebugDraw();
 
 virtual void    drawLine(const btVector3& from,const btVector3& to,const btVector3&  fromColor, const btVector3& toColor);
@@ -43,6 +46,8 @@ virtual void    draw3dText(const btVector3& location,const char* textString);
 virtual void    setDebugMode(int debugMode);
 
 virtual int     getDebugMode() const { return m_debugMode;}
+
+void setIs2d(bool is2d);
 
 };
 

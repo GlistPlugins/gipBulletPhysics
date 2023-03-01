@@ -1,8 +1,8 @@
 /*
  * gPhysic2dBox.h
  *
- *  Created on: 20 Þub 2023
- *      Author: Remzi ÝÞÇÝ
+ *  Created on: 20 ï¿½ub 2023
+ *      Author: Remzi ï¿½ï¿½ï¿½ï¿½
  */
 
 #ifndef SRC_GPHYSIC2DBOX_H_
@@ -18,10 +18,8 @@ public:
 	 */
 	//Constructer for 2d image
 	gPhysic2dBox(gImage* image, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
-	//Constructer for 3d model
-	gPhysic2dBox(gMesh* model, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
 	//Constructer for physic object without any content
-	gPhysic2dBox( int width = 200, int height = 200, int depth = 200, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
+	gPhysic2dBox( int width = 200, int height = 200, bool isstatic = true, float mass = 0.0f, int objectlayers = -1, int masklayers = -1);
 
 	virtual ~gPhysic2dBox();
 	inline void draw() override;

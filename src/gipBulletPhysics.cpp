@@ -27,7 +27,7 @@ void gipBulletPhysics::initializeWorld(int type) {
 	dispatcher = new btCollisionDispatcher(collisionconfiguration);
 	overlappingpaircache = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver;
-	gDebugDraw* debugDrawer = new gDebugDraw();
+	gDebugDraw* debugDrawer = new gDebugDraw(true);
 
 	if (type == rigidWorld) {
 		dynamicsworld = new btDiscreteDynamicsWorld (dispatcher, overlappingpaircache, solver, collisionconfiguration);
@@ -40,7 +40,7 @@ void gipBulletPhysics::initializeWorld(int type) {
 
 
     /*Create custom debug drawer*/
-    gDebugDraw *draw   =   new gDebugDraw;
+    gDebugDraw *draw   =   new gDebugDraw(true);
     draw->clearLines();
     draw->setDebugMode( draw->getDebugMode()
           | btIDebugDraw::DBG_DrawWireframe );

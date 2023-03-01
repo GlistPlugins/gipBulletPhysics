@@ -1,8 +1,8 @@
 /*
  * gPhysic.h
  *
- *  Created on: 19 Þub 2023
- *      Author: Remzi ÝÞÇÝ
+ *  Created on: 19 ï¿½ub 2023
+ *      Author: Remzi ï¿½ï¿½ï¿½ï¿½
  *
  *      This clas is for physic implementation to Glist Engine
  *      This class is based on singleton pattern
@@ -70,7 +70,7 @@ public:
 	static gPhysic *Instance();
 
 	//Call this function to start physic
-	void startWorld(float timestep = 60);
+	void startWorld(bool is2d,float timestep = 60);
 
 	//Call this function for each frame will run physic world
 	int runPhysicWorldStep();
@@ -114,7 +114,7 @@ protected:
 	 * Will be called when class contstructed
 	 * For better performance choose WORLDTYPE_RIGIDWORLD
 	 */
-	void initializeWorld(int worldType = WORLDTYPE_RIGIDWORLD);
+	void initializeWorld(bool is2d,int worldType = WORLDTYPE_RIGIDWORLD);
 
 
 	// Delete initialized objects for cleaning mamory
@@ -168,7 +168,7 @@ private:
 
 	//Physic world will work 60 times per second, ideal for 60fps
 	inline static btScalar _timestep;
-	int maxsubsteps = 10;
+	int maxsubsteps = 1;
 	btScalar fixedtimestep = btScalar((1.0f)/btScalar(60.0f));
 };
 
