@@ -1,27 +1,27 @@
 /*
- * gPhysic.h
+ * gipBulletPhysics.h
  *
- *  Created on: 19 �ub 2023
- *      Author: Remzi ����
+ *  Created on: 19 02 2023
+ *      Author: Remzi ISCI
  *
  *      This clas is for physic implementation to Glist Engine
  *      This class is based on singleton pattern
  *      Class is works for basic physic initiliaze, store data and destruction
  */
 
-#ifndef SRC_BASES_GPHYSIC_H_
-#define SRC_BASES_GPHYSIC_H_
+#ifndef SRC_BASES_GIPBULLETPHYSICS_H_
+#define SRC_BASES_GIPBULLETPHYSICS_H_
 
 #include "gBasePlugin.h"
 #include "bullet/btBulletDynamicsCommon.h"
-#include "gPhysicObject.h"
+#include "gipPhysicObject.h"
 #include "glm/glm.hpp"
-#include "gDebugDraw.h"
+#include "bases/gipDebugDraw.h"
 
-class gPhysic : public gBasePlugin {
+class gipBulletPhysics : public gBasePlugin {
 public:
 	//Singletion class should not be cloneable
-	gPhysic(const gPhysic& obj) = delete;
+	gipBulletPhysics(const gipBulletPhysics& obj) = delete;
 	/*
 	 * Box = 0
 	 * Sphere = 8
@@ -64,10 +64,10 @@ public:
 	};
 
 	//Singletons should not be assignable.
-	void operator = (const gPhysic &) = delete;
+	void operator = (const gipBulletPhysics &) = delete;
 
 	//Constructor for singleton
-	static gPhysic *Instance();
+	static gipBulletPhysics *Instance();
 
 	//Call this function to start physic
 	void startWorld(bool is2d,float timestep = 60);
@@ -93,7 +93,7 @@ public:
 	 * object layer means object will own that flag
 	 * masklayer means object only will collide thouse layers
 	 */
-	int addPhysicObect(gPhysicObject* object, int objectlayer, int masklayer);
+	int addPhysicObect(gipPhysicObject* object, int objectlayer = -1, int masklayer = -1);
 
 
 
@@ -104,6 +104,9 @@ public:
 	btVector3 getGravity();
 
 	void setTimeStep(float timestep);
+
+	//Calling this function when destroyin an object
+	void removeObject(int id);
 
 protected:
 
@@ -123,11 +126,13 @@ protected:
 	//for detection collisions
 	void checkCollisions();
 
-private:
-	gPhysic();
-	virtual ~gPhysic();
 
-	inline static gPhysic* m_physic;
+
+private:
+	gipBulletPhysics();
+	virtual ~gipBulletPhysics();
+
+	inline static gipBulletPhysics* m_physic;
 
 
 	//World types
@@ -145,7 +150,7 @@ private:
 
 
 	//List of objects which has been added world
-	std::vector<gPhysicObject*> physicobjects;
+	std::vector<gipPhysicObject*> physicobjects;
 
 	/*
 	 * Nedded referances and variables for physic world
@@ -168,10 +173,10 @@ private:
 
 	//Physic world will work 60 times per second, ideal for 60fps
 	inline static btScalar _timestep;
-	int maxsubsteps = 1;
+	int maxsubsteps = 10;
 	btScalar fixedtimestep = btScalar((1.0f)/btScalar(60.0f));
 };
 
 
 
-#endif /* SRC_BASES_GPHYSIC_H_ */
+#endif /* SRC_BASES_GIPBULLETPHYSICS_H_ */

@@ -6,21 +6,21 @@
  */
 
 
-#include "gPhysic.h"
+#include "bases/gipBulletPhysics.h"
 
 
-gPhysic::gPhysic() {
+gipBulletPhysics::gipBulletPhysics() {
 
 }
 
-gPhysic* gPhysic::Instance() {
+gipBulletPhysics* gipBulletPhysics::Instance() {
 	if(!m_physic) {
-		m_physic = new gPhysic();
+		m_physic = new gipBulletPhysics();
 	}
-	return gPhysic::m_physic;
+	return gipBulletPhysics::m_physic;
 }
 
-void gPhysic::startWorld(bool is2d, float timestep)	{
+void gipBulletPhysics::startWorld(bool is2d, float timestep)	{
 	m_physic->setTimeStep(timestep);
 	m_physic->initializeWorld(is2d);
 }
@@ -29,7 +29,7 @@ void gPhysic::startWorld(bool is2d, float timestep)	{
  * Set target layers whic you want collide with owner object
  * 0 means dont collide
  */
-int gPhysic::addPhysicObect(gPhysicObject* object, int objectlayer, int masklayer) {
+int gipBulletPhysics::addPhysicObect(gipPhysicObject* object, int objectlayer, int masklayer) {
 	physicobjects.push_back(object);
 	dynamicsworld->addRigidBody(object->getRigidBody(), objectlayer, masklayer);
 	dynamicsworld->addRigidBody(object->getRigidBody());
@@ -38,7 +38,7 @@ int gPhysic::addPhysicObect(gPhysicObject* object, int objectlayer, int masklaye
 
 
 //Initiliaze world, calls from constructor doesn need manuel call
-void gPhysic::initializeWorld(bool is2d,int worldtype) {
+void gipBulletPhysics::initializeWorld(bool is2d,int worldtype) {
 
 	//Construct needed variables
 	collisionconfiguration = new btDefaultCollisionConfiguration();
@@ -60,7 +60,7 @@ void gPhysic::initializeWorld(bool is2d,int worldtype) {
 	dynamicsworld->setGravity(btVector3(0.0f, is2d ? -9.81f : 9.81f, 0.0f));
 	//dynamicsworld->applyGravity();
 	//Setting up debugDrawer
-	gDebugDraw* debugDrawer = new gDebugDraw(is2d);
+	gipDebugDraw* debugDrawer = new gipDebugDraw(is2d);
 	debugDrawer->clearLines();
 	debugDrawer->setDebugMode( debugDrawer->getDebugMode()
           | btIDebugDraw::DBG_DrawWireframe );
@@ -70,7 +70,7 @@ void gPhysic::initializeWorld(bool is2d,int worldtype) {
 
 //need to be called from game each update
 // Return step count fot world worked
-int gPhysic::runPhysicWorldStep() {
+int gipBulletPhysics::runPhysicWorldStep() {
 	// Physics calculations doing here.
 	int step = dynamicsworld->stepSimulation(_timestep, maxsubsteps, fixedtimestep);
 
@@ -99,7 +99,7 @@ int gPhysic::runPhysicWorldStep() {
 	return step;
 }
 
-void gPhysic::checkCollisions() {
+void gipBulletPhysics::checkCollisions() {
     //Count of collision
     int numManifolds = dynamicsworld->getDispatcher()->getNumManifolds();
 
@@ -132,23 +132,23 @@ void gPhysic::checkCollisions() {
 
 
 
-void gPhysic::setGravity(glm::vec3 newgravity) {
+void gipBulletPhysics::setGravity(glm::vec3 newgravity) {
 	dynamicsworld->setGravity(btVector3((btScalar)newgravity.x, (btScalar)newgravity.y, (btScalar)newgravity.z));
 	dynamicsworld->applyGravity();
 }
 
-btVector3 gPhysic::getGravity() {
+btVector3 gipBulletPhysics::getGravity() {
 	return dynamicsworld->getGravity();
 }
 
 /*
  * Call this function in the GamaCanvas draw method to draw physic bounds and debug views
  */
-void gPhysic::drawDebug() {
+void gipBulletPhysics::drawDebug() {
 	dynamicsworld->debugDrawWorld();
 }
 
-void gPhysic::printObjectTransform() {
+void gipBulletPhysics::printObjectTransform() {
 	std::vector<btCollisionObject*> colobjarray;
 	std::vector<btRigidBody*> rbarray;
 
@@ -189,16 +189,21 @@ void gPhysic::printObjectTransform() {
 	}
 }
 
-void gPhysic::updateSingleAabb(btCollisionObject* targetcollisionobject) {
+void gipBulletPhysics::updateSingleAabb(btCollisionObject* targetcollisionobject) {
 	dynamicsworld->updateSingleAabb(targetcollisionobject);
 }
 
-void gPhysic::setTimeStep(float timestep) {
+void gipBulletPhysics::setTimeStep(float timestep) {
 	_timestep = (btScalar)timestep;
 }
 
+void gipBulletPhysics::removeObject(int id) {
+	dynamicsworld->removeCollisionObject(physicobjects[id]->_rigidbody);
+	physicobjects.erase(physicobjects.begin() + id);
+}
+
 //cleanup in the reverse order of creation/initialization
-void gPhysic::clean() {
+void gipBulletPhysics::clean() {
 	//remove the rigidbodies from the dynamics world and delete them
 	if(dynamicsworld) {
 		int i;
@@ -252,6 +257,6 @@ void gPhysic::clean() {
 
 
 
-gPhysic::~gPhysic() {
+gipBulletPhysics::~gipBulletPhysics() {
 	clean();
 }

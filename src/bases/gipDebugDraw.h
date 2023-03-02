@@ -17,14 +17,14 @@
 #include "gSphere.h"
 #include "gFont.h"
 
-class gDebugDraw : public btIDebugDraw
+class gipDebugDraw : public btIDebugDraw
 {
 int m_debugMode = DBG_DrawWireframe;
 bool is2dworld = true;
 public:
 
-gDebugDraw(bool is2d);
-virtual ~gDebugDraw();
+gipDebugDraw(bool is2d);
+virtual ~gipDebugDraw();
 
 virtual void    drawLine(const btVector3& from,const btVector3& to,const btVector3&  fromColor, const btVector3& toColor);
 

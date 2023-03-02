@@ -2,11 +2,12 @@
  * GameCanvas.cpp
  *
  *  Edited on : 16.02.2023
- *  	Author: Remzi ÝÞÇÝ
+ *  	Author: Remzi ISCI
  */
 
 
 #include "GameCanvas.h"
+
 
 
 GameCanvas::GameCanvas(gApp* root) : gBaseCanvas(root) {
@@ -18,7 +19,7 @@ GameCanvas::~GameCanvas() {
 
 void GameCanvas::setup() {
 	// create and start physic world
-	gPhysic::Instance()->startWorld();
+	gipBulletPhysics::Instance()->startWorld(true);
 
 	sky.loadImage("layer-1-sky.png");
 	mountain.loadImage("layer-2-mountain.png");
@@ -30,27 +31,43 @@ void GameCanvas::setup() {
 	mountain.loadImage("layer-2-mountain.png");
 	ballimage.loadImage("ball.png");
 
-	//load physic objects
-	groundobject = new gPhysic2dBox(&groundimage, true, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(getWidth() * 0.0f, getHeight() * 0.9f, 0.0f));
-	groundobjectup = new gPhysic2dBox(true, 0.0f, getWidth(), getHeight() * 0.1f, 1, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f,0.0f), glm::vec3(0.0f, 0.0f,0.0f));
-	groundobject->setPosition(glm::vec3(getWidth() * 0.5f - groundobject->getWidth() * 0.5f, getHeight() - groundobject->getHeight(), 0.0f));
-	rampobject = new gPhysic2dBox(&rampimage, true, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f),glm::vec3(0.0f, 0.0f,135.0f));
-	rampobject->setPosition(glm::vec3(getWidth() * 0.7f, getHeight() * 0.6f, 0.0f));
-	gameiconobject = new gPhysic2dBox(&gameIconimage, false, 5.0f);
-	gameiconobject->setPosition(glm::vec3(0.0f, getHeight() * 0.4f, 0.0f));
-	btQuaternion newrot;
-	newrot.setRotation(btVector3(0.0f, 0.0f, 1.0f), gDegToRad(90.0f));
-	gameiconobject->setRotation(newrot);
-	gameiconobject->setOnCollided(std::bind(onCollided, this, std::placeholders::_1));
-	ballobject = new gPhysic2dCircle(&ballimage, false, 1.0f, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(getWidth() - ballimage.getWidth(), ballimage.getHeight(), 0.0f));
 
+	//load physic objects
+	groundobject = new gipPhysic2dBox(&groundimage, true, 0.0f,gipBulletPhysics::LAYER1, gipBulletPhysics::LAYER0|gipBulletPhysics::LAYER1|gipBulletPhysics::COLLISIONLAYERS::LAYER2|gipBulletPhysics::LAYER3);
+	groundobject->setPosition(0.0f, getHeight() - groundimage.getHeight());
+	//
+
+	wallleft = new gipPhysic2dBox(getWidth() * 0.05f, getHeight());
+	wallright = new gipPhysic2dBox(getWidth() * 0.05f, getHeight());
+	wallright->setPosition(getWidth() * 0.95f, 0.0f, 0.0f);
+	wallup = new gipPhysic2dBox(getWidth(), getHeight() * 0.05f);
+
+	rampobject = new gipPhysic2dBox(&rampimage, true, 0.0f);
+	rampobject->setRotation(135.0f);
+	rampobject->setPosition(getWidth() * 0.7f, getHeight() * 0.6f);
+
+
+	gameiconobject = new gipPhysic2dBox(&gameIconimage);
+	gameiconobject->setPosition(getWidth() * 0.1f, getHeight() * 0.4f);
+
+	gameiconobject->setOnCollided(std::bind(onCollided, this, std::placeholders::_1));
+	gameiconobject->setSize(0.8f, 0.4f);
+
+	//ballobject = new gPhysic2dCircle(&ballimage, false, 1.0f, 1.0f, gPhysic::LAYER3, gPhysic::LAYER0|gPhysic::LAYER1|gPhysic::LAYER2|gPhysic::LAYER3);
+	//ballobject->setPosition( glm::vec3(getWidth() - ballimage.getWidth(),  0.0f, 0.0f));
+	gipPhysicObject* newball = new gipPhysic2dCircle(&ballimage, false, 0.4f);
+	newball->setBounce(10.0f);
+	newball->setPosition(getWidth() - ballimage.getWidth() * 4, 0.0f);
+
+	balls.push_back(newball);
 }
 
 void GameCanvas::update() {
+
 	// Physics calculations doing here.
-	gPhysic::Instance()->runPhysicWorldStep();
+	gipBulletPhysics::Instance()->runPhysicWorldStep();
 	// force and impulse methods can call here.
-	ballobject->applyCentralForce(glm::vec3(-1.0f, 1.0f, 0.0f));
+	//ballobject->applyCentralForce(glm::vec3(-1.0f, 1.0f, 0.0f));
 
 }
 
@@ -61,18 +78,20 @@ void GameCanvas::draw() {
 
 	//Object with physic
     groundobject->draw();
-    groundobjectup->draw();
     rampobject->draw();
-    ballobject->draw();
     gameiconobject->draw();
+    int ballcount = balls.size();
+    for(int i = 0; i < ballcount; i++) {
+    	balls[i]->draw();
+    }
 
 	renderer->setColor(255, 0, 0);
 	//Physic debug renderer
-	gPhysic::Instance()->drawDebug();
+	gipBulletPhysics::Instance()->drawDebug();
 }
 
 void GameCanvas:: onCollided(int targetid) {
-	gLogi("Game Canvas") << "Game icon çarpýþma algýlandý" << targetid;
+	//gLogi("Game Canvas") << "Game icon ï¿½arpï¿½ï¿½ma algï¿½landï¿½" << targetid;
 }
 
 void GameCanvas::keyPressed(int key) {
@@ -101,6 +120,11 @@ void GameCanvas::mousePressed(int x, int y, int button) {
 
 void GameCanvas::mouseReleased(int x, int y, int button) {
 //	gLogi("GameCanvas") << "mouseReleased" << ", button:" << button;
+	gipPhysicObject* newball = new gipPhysic2dCircle(&ballimage, false, 4.0f);
+	//->setBounce((std::rand() % 100) / 100);
+	newball->setPosition(x,  y, 0.0f);
+	newball->setBounce(10.0f);
+	balls.push_back(newball);
 }
 
 void GameCanvas::mouseScrolled(int x, int y) {

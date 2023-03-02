@@ -9,8 +9,8 @@
  *	Inherit from this if you create new object type
  */
 
-#ifndef SRC_BASES_GPHYSICOBJECT_H_
-#define SRC_BASES_GPHYSICOBJECT_H_
+#ifndef SRC_BASES_GIPPHYSICOBJECT_H_
+#define SRC_BASES_GIPPHYSICOBJECT_H_
 
 #include "bullet/btBulletDynamicsCommon.h"
 #include "glm/glm.hpp"
@@ -20,8 +20,8 @@
 #include "gModel.h"
 
 
-class gPhysicObject {
-	friend class gPhysic;
+class gipPhysicObject {
+	friend class gipBulletPhysics;
 public:
 
 	enum OBJECTRENDERTYPE {
@@ -127,6 +127,7 @@ public:
 	btRigidBody* getRigidBody();
 
 
+	void destroy();
 
 
 protected:
@@ -134,8 +135,8 @@ protected:
 
 
 	//This class is abstracted
-	gPhysicObject();
-	virtual ~gPhysicObject();
+	gipPhysicObject();
+	virtual ~gipPhysicObject();
 
 	/*
 	 *This function referans for onCollided func
@@ -183,6 +184,8 @@ protected:
 	 *This function is for chil object to set rotation
 	 */
 	virtual void setRendererObjectRotation() = 0;
+
+
 
 	//id is comes from physic engine object list id
 	int _id = -1;
@@ -246,4 +249,4 @@ private:
 
 
 };
-#endif /* SRC_BASES_GPHYSICOBJECT_H_ */
+#endif /* SRC_BASES_GIPPHYSICOBJECT_H_ */

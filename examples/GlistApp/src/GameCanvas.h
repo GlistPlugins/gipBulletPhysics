@@ -3,18 +3,20 @@
  *
  *
  *  Edited on : 16.02.2023
- *  	Author: Remzi ÝÞÇÝ
+ *  	Author: Remzi ISCI
  */
 
 
 #ifndef GAMECANVAS_H_
 #define GAMECANVAS_H_
 
-#include <gPhysic2dBox.h>
-#include <gPhysic2dCircle.h>
+#include <gipPhysic2dBox.h>
+#include <gipPhysic2dCircle.h>
 #include "gBaseCanvas.h"
 #include "gApp.h"
-#include "bases/gPhysic.h"
+#include "bases/gipBulletPhysics.h"
+#include "gBox.h"
+#include <vector>
 
 class GameCanvas : public gBaseCanvas {
 public:
@@ -52,12 +54,13 @@ private:
     gImage ballimage;
     gImage gameIconimage;
 
-    gPhysicObject* groundobject;
-    gPhysicObject* groundobjectup;
-    gPhysicObject* rampobject;
-    gPhysicObject* ballobject;
-    gPhysicObject* gameiconobject;
-
+    gipPhysicObject* groundobject;
+    std::vector<gipPhysicObject*> balls;
+    gipPhysicObject* wallleft;
+    gipPhysicObject* wallright;
+    gipPhysicObject* wallup;
+    gipPhysicObject* rampobject;
+    gipPhysicObject* gameiconobject;
 
 
     float groundX, groundY;

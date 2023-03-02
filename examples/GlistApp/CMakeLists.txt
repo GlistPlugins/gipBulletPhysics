@@ -28,7 +28,9 @@ include(${ENGINE_DIR}/CMakeLists.txt)
 add_executable(${APP_NAME} 
 				${APP_DIR}/src/main.cpp
 				${APP_DIR}/src/gApp.cpp
-				${APP_DIR}/src/GameCanvas.cpp)
+				${APP_DIR}/src/GameCanvas.cpp
+				${APP_DIR}/src/GameCanvas3D.cpp
+)
 
 
 include_directories(${APP_NAME} PRIVATE

@@ -5,14 +5,14 @@
  *      Author: Remzi ����
  */
 
-#include <gPhysic3dBox.h>
+#include <gipPhysic3dBox.h>
 
 
 /*
  * rotaion is degree format
  * size need to become between 0.04 and 100.000
  */
-gPhysic3dBox::gPhysic3dBox(gMesh* model, bool isstatic, float mass, int objectlayers, int masklayers) {
+gipPhysic3dBox::gipPhysic3dBox(gMesh* model, bool isstatic, float mass, int objectlayers, int masklayers) {
 	this->_model = model;
 	_isrenderobjectloaded = true;
 	this->_renderobjecttype = OBJECTRENDERTYPE_MODEL;
@@ -71,12 +71,12 @@ gPhysic3dBox::gPhysic3dBox(gMesh* model, bool isstatic, float mass, int objectla
 	//this->_rigidbody->setRollingFriction(0.f);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
+	this->_id = gipBulletPhysics::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }
 
-gPhysic3dBox::gPhysic3dBox( int width, int height, int depth, bool isstatic, float mass, int objectlayers, int masklayers) {
+gipPhysic3dBox::gipPhysic3dBox( int width, int height, int depth, bool isstatic, float mass, int objectlayers, int masklayers) {
 
 	_isrenderobjectloaded = false;
 	this->_renderobjecttype = OBJECTRENDERTYPE_NONE;
@@ -125,11 +125,11 @@ gPhysic3dBox::gPhysic3dBox( int width, int height, int depth, bool isstatic, flo
 	this->_rigidbody->setWorldTransform(_transform);
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = gPhysic::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
+	this->_id = gipBulletPhysics::Instance()->addPhysicObect(this, this->_objectlayers, this->_masklayers);
 	this->_rigidbody->setUserIndex(this->_id);
 
 }
-void gPhysic3dBox::draw() {
+void gipPhysic3dBox::draw() {
 
 	//Wont be draw if ther is no any renderer object
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
@@ -144,14 +144,14 @@ void gPhysic3dBox::draw() {
 
 }
 
-void gPhysic3dBox::setRendererObjectSize() {
+void gipPhysic3dBox::setRendererObjectSize() {
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
 		if(_isrenderobjectloaded) {
 			_model->setScale(_size);
  		}
 	}
 }
-void gPhysic3dBox::setRendererObjectPosition() {
+void gipPhysic3dBox::setRendererObjectPosition() {
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
 		if(_isrenderobjectloaded) {
 			_model->setPosition(_position.x - + _width * 0.5f,
@@ -160,7 +160,7 @@ void gPhysic3dBox::setRendererObjectPosition() {
  		}
 	}
 }
-void gPhysic3dBox::setRendererObjectRotation() {
+void gipPhysic3dBox::setRendererObjectRotation() {
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
 		if(_isrenderobjectloaded) {
 			glm::vec3 newor;
@@ -173,5 +173,5 @@ void gPhysic3dBox::setRendererObjectRotation() {
 	}
 }
 
-gPhysic3dBox::~gPhysic3dBox() {
+gipPhysic3dBox::~gipPhysic3dBox() {
 }

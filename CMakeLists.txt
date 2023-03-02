@@ -11,15 +11,12 @@ set(PLUGIN_LIBS_DIR ${PLUGIN_DIR}/libs)
 
 ##### PLUGIN SOURCES #####
 list(APPEND PLUGIN_SRCS
-			${PLUGIN_DIR}/src/gipBulletPhysics.cpp
-			${PLUGIN_DIR}/src/gImageGameObject.cpp
-			${PLUGIN_DIR}/src/gImageGameObject.cpp
-			${PLUGIN_DIR}/src/gDebugDraw.cpp
-			${PLUGIN_DIR}/src/bases/gPhysic.cpp
-			${PLUGIN_DIR}/src/bases/gPhysicObject.cpp
-			${PLUGIN_DIR}/src/gPhysic2dBox.cpp
-			${PLUGIN_DIR}/src/gPhysic2dCircle.cpp
-			${PLUGIN_DIR}/src/gPhysic3dBox.cpp
+			${PLUGIN_DIR}/src/bases/gipBulletPhysics.cpp 
+			${PLUGIN_DIR}/src/bases/gipDebugDraw.cpp
+			${PLUGIN_DIR}/src/bases/gipPhysicObject.cpp
+			${PLUGIN_DIR}/src/gipPhysic2dBox.cpp
+			${PLUGIN_DIR}/src/gipPhysic2dCircle.cpp
+			${PLUGIN_DIR}/src/gipPhysic3dBox.cpp
 )
 
 
