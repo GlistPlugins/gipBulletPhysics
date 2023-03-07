@@ -1,11 +1,8 @@
 /*
  * GameCanvas.cpp
  *
- *  Created on: 12 Sep 2022
- *      Author: Faruk Aygun
- *
  *  Edited on : 16.02.2023
- *  	Author: Remzi ÝÞÇÝ
+ *  	Author: Remzi ISCÝ
  */
 
 

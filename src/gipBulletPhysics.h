@@ -1,44 +1,82 @@
 /*
  *  gipBulletPhysics.h
  *
- *  Created on: 5 Aug 2022
- *      Author: Faruk Aygun,
- *      		Emirhan Limon
  *
  *	Edited 		: 16.02.2023
- *  	Author 	: Remzi ÝÞÇÝ
+ *  	Author 	: Remzi ISCI
  */
 
 #ifndef SRC_GIPBULLETPHYSICS_H_
 #define SRC_GIPBULLETPHYSICS_H_
 
 #include <iostream>
-
+#include <vector>
 #include "gBasePlugin.h"
 #include "gImageGameObject.h"
-
 #include "bullet/btBulletDynamicsCommon.h"
 
 #include "glm/glm.hpp"
 
 
+class gipBaseGameObject;
 
-
-class gipBulletPhysics : public gBasePlugin{
+class gipBulletPhysics : public gBasePlugin {
 public:
-	gipBulletPhysics();
+	friend class gipBaseGameObject;
+
+	/*
+	* Layers are bitwise varialbles
+	 * You can use multiple layers together
+	 * Use | (Bite or operator) to use multiple layer together
+	 * etc : LAYER1 | LAYER2 | LAYER12 | LAYER22
+	 */
+	enum COLLISIONLAYERS {
+		LAYERNONMEMBER = -1, //Dont use this, this just for check
+		LAYER0 = 1 << 0,	//Dont collide layer
+		LAYER1 = 1 << 1,	//Default collide layer
+		LAYER2 = 1 << 2,
+		LAYER3 = 1 << 3,
+		LAYER4 = 1 << 4,
+		LAYER5 = 1 << 5,
+		LAYER6 = 1 << 6,
+		LAYER7 = 1 << 7,
+		LAYER8 = 1 << 8,
+		LAYER9 = 1 << 9,
+		LAYER10 = 1 << 10,
+		LAYER11 = 1 << 11,
+		LAYER12 = 1 << 12,
+		LAYER13 = 1 << 13,
+		LAYER14 = 1 << 14,
+		LAYER15 = 1 << 15,
+		LAYER16 = 1 << 16,
+		LAYER17 = 1 << 17,
+		LAYER18 = 1 << 18,
+		LAYER19 = 1 << 19,
+		LAYER20 = 1 << 20,
+		LAYER21 = 1 << 21,
+		LAYER22 = 1 << 22
+	};
+
+	//Physic World types, choose WORLDTYPE_RIGIDWORLD for better performance
+	enum WORLDTYPE {
+			WORLDTYPE_RIGIDWORLD = 0,
+			WORLDTYPE_SOFTWORLD = 1
+		};
+
+	enum WORLDCOORDINATETYPE {
+		WORLD2D = 0,
+		WORLD3D = 1
+	};
+
+	gipBulletPhysics(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
 	virtual ~gipBulletPhysics();
 
-	// keep track of the shapes, we release memory at exit.
-	// make sure to re-use collision shapes among rigid bodies whenever possible!
-	btAlignedObjectArray<btCollisionShape*> collisionshapes;
-	// keep track of the created game objects
-	std::vector<gImageGameObject*> gameobjects;
 
-	void update();
 
-	// initialize world first
-	void initializeWorld(int worldType);
+	/*
+	 * Physic world simulation time step 60 is deafult and ideal for most of time
+	 */
+	inline static void setTimeStep(float timestep);
 
 	// Delete initialized objects
 	void clean();
@@ -49,26 +87,17 @@ public:
 	void setSolverMode(int solverMode = SOLVER_SIMD);
 	void setSplitImpulse(int splitImpulse = false);
 	void setGravity(glm::vec3 gravityValue);
-	void setFriction(gImageGameObject* imgObject, float frictionValue);
-	void setRollingFriction(gImageGameObject* imgObject, float frictionValue);
-	void setSpinningFriction(gImageGameObject* imgObject, float frictionValue);
-	void setAnisotropicFriction(gImageGameObject* imgObject, glm::vec3 frictionValue, int frictionMode);
-
-	// These apply methods should be used in update method.
-	void applyCentralForce(gImageGameObject* imgObject, glm::vec3 forceValue);
-	void applyCentralImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue);
-	void applyForce(gImageGameObject* imgObject, glm::vec3 forceValue, glm::vec3 relPos);
-	void applyImpulse(gImageGameObject* imgObject, glm::vec3 impulseValue, glm::vec3 relPos);
-	void applyTorque(gImageGameObject* imgObject, glm::vec3 torqueValue);
-	void applyTorqueImpulse(gImageGameObject* imgObject, glm::vec3 torqueValue);
 
 	// These apply methods should be used in draw method.
 	void drawDebug();
 
-	//collision dedection codes
-	void collisionCallbackFunction();
 
+ 	int runPhysicWorldStep();
 
+	/*
+	 * Gets gravity ovf physicworld
+	 */
+	 glm::vec3 getGravity();
 
 	float getErp2();
 	float getglobalCfm();
@@ -76,51 +105,83 @@ public:
 	int getNumIterations();
 	int getSolverMode();
 	int getSplitImpulse();
-	/* Create methods return created object id
-	 * rotation is degree format
-	 * size need become beatween 0.04 nad 100000
-	 */
-	int createBox2dObject(gImageGameObject* imgObject, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f,1.0f));
-	int createCircle2dObject(gImageGameObject* imgObject, float rotation = 0.0f, float radius = 1.0f);
-	// increase stiffness, reduce dumping for harder floor. rotation is degree not radyan
-	int createSoftContactBox2dObject(gImageGameObject* imgObject, float stiffness = 300.0f, float damping = 10.0f, float rotation = 0.0f, glm::vec2 size = glm::vec2(1.0f,1.0f));
-	int createSoftCircle2dObject(gImageGameObject* imgObject, float rotation = 0.0f, float radius = 1.0f);
-	// The btScalar type abstracts floating point numbers, to easily switch between double and single floating point precision.
-	int stepSimulation(btScalar timeStep, int maxSubSteps = 1, btScalar fixedTimeStep = btScalar(1.) / btScalar(60.));
-
-	// Return the origin vector translation
-	glm::vec2 getOrigin2d(int imgObjectId);
-	/*
-	 * Unlike getOrigin, these two methods arranges and returns positions according to the Glist Engine.
-	 * These get methods works for soft objects too.
-	 */
-	// convert bullet3 positions to Glist Engine positions and return for circle objects.
-	glm::vec2 getCircle2dObjectPosition(gImageGameObject* imgObject);
-	// convert a bullet3 positions to Glist Engine positions and return for box objects.
-	glm::vec2 getBox2dObjectPosition(gImageGameObject* imgObject);
-	glm::vec3 get2dObjectRotation(gImageGameObject* imgObject);
-
-private:
-	enum worldType {
-		rigidWorld = 0,
-		softRigidWorld = 1
-	};
-
-	btDefaultCollisionConfiguration* collisionconfiguration;
-	btCollisionDispatcher* dispatcher;
-	btBroadphaseInterface* overlappingpaircache;
-	btSequentialImpulseConstraintSolver* solver;
-	btDiscreteDynamicsWorld* dynamicsworld;
-
-	//soft contact
-	btConstraintSolver* constraintsolver;
-	btBroadphaseInterface* broadphase;
-
-	btTransform getTransform(int imgObjectId);
-	btRigidBody* getRigidBody(gImageGameObject* imgObject);
 
 	// Call it in stepSimulation method to see the position and rotation of the objects.
 	void printObjectTransform();
+
+	/*
+	 * This function calls by physicobjects childes
+	 * layers are bitwise variables
+	 * use COLLISIONLAYERS enums to set layers
+	 * objectlayers means object will own that flags
+	 * targetlayers means object only will collide thouse layers
+	 */
+	int addPhysicObect(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
+
+protected:
+	void removeObject(int id);
+
+	void updateSingleAabb(btCollisionObject* rigidbody);
+
+
+
+	/*
+	 * Call this function for setting object layers
+	 * LAYER0 means dont collide
+	 */
+	void setObjectlayers(int objectid, COLLISIONLAYERS objectlayers);
+
+	/*
+	 *Call this function for setting target layers which want to collide with object
+	 *LAYER0 means dont collide
+	 */
+	void setTargetLayers(int objectid, COLLISIONLAYERS targetlayers);
+
+	/*
+	 * For setting mass
+	 * To change mass of object  need control physic world directly
+	 */
+	void setMass(gipBaseGameObject* targetobject, float newmass);
+private:
+	/*
+	 * initialize world first
+	 * worldcoordinate need for debuging
+	 */
+	void initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
+
+	//collision dedection codes
+	void checkCollisions();
+
+
+	/*
+	 * Nedded referances and variables for physic world
+	 */
+	btDefaultCollisionConfiguration* collisionconfiguration;
+	btCollisionDispatcher* collisiondispatcher;
+	//Needed for multithread collision dedection
+	btBroadphaseInterface* overlappingpaircache;
+	btSequentialImpulseConstraintSolver* solver;
+	btConstraintSolver* constraintsolver;
+	//Need another thread for soft objects
+	btBroadphaseInterface* softwolrdbroadphase;
+
+	btBroadphaseInterface* broadphase;
+
+	//Physic world
+	btDiscreteDynamicsWorld* _dynamicsworld;
+
+
+	//Physic world will work 60 times per second, ideal for 60fps
+	btScalar _timestep = 60.0f;
+	// step time for each update higher value will simulate game faster
+	int _maxsubsteps = 10;
+	btScalar _fixedtimestep = btScalar((1.0f)/_timestep);
+
+	//List of physic object which has been added world
+	std::vector<gipBaseGameObject*> _objectlist;
+
+	bool _isworldinitiliazed = false;
+
 };
 
 #endif /* SRC_GIPBULLETPHYSICS_H_ */
