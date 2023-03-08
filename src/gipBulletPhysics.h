@@ -131,19 +131,17 @@ protected:
 	 * Call this function for setting object layers
 	 * LAYER0 means dont collide
 	 */
-	void setObjectlayers(int objectid, COLLISIONLAYERS objectlayers);
+	void updateObjectlayers(int objectid);
 
-	/*
-	 *Call this function for setting target layers which want to collide with object
-	 *LAYER0 means dont collide
-	 */
-	void setTargetLayers(int objectid, COLLISIONLAYERS targetlayers);
 
 	/*
 	 * For setting mass
 	 * To change mass of object  need control physic world directly
 	 */
 	void setMass(gipBaseGameObject* targetobject, float newmass);
+
+
+
 private:
 	/*
 	 * initialize world first

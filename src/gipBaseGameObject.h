@@ -48,6 +48,40 @@ public:
 		OBJECTRENDERTYPE_MODEL,
 		OBJECTRENDERTYPE_NONE
 	};
+
+
+	/*
+	* Layers are bitwise varialbles
+	 * You can use multiple layers together
+	 * Use | (Bite or operator) to use multiple layer together
+	 * etc : LAYER1 | LAYER2 | LAYER12 | LAYER22
+	 */
+	enum COLLISIONLAYERS {
+		LAYERNONMEMBER = -1, //Dont use this, this just for check
+		LAYER0 = 1 << 0,	//Dont collide layer
+		LAYER1 = 1 << 1,	//Default collide layer
+		LAYER2 = 1 << 2,
+		LAYER3 = 1 << 3,
+		LAYER4 = 1 << 4,
+		LAYER5 = 1 << 5,
+		LAYER6 = 1 << 6,
+		LAYER7 = 1 << 7,
+		LAYER8 = 1 << 8,
+		LAYER9 = 1 << 9,
+		LAYER10 = 1 << 10,
+		LAYER11 = 1 << 11,
+		LAYER12 = 1 << 12,
+		LAYER13 = 1 << 13,
+		LAYER14 = 1 << 14,
+		LAYER15 = 1 << 15,
+		LAYER16 = 1 << 16,
+		LAYER17 = 1 << 17,
+		LAYER18 = 1 << 18,
+		LAYER19 = 1 << 19,
+		LAYER20 = 1 << 20,
+		LAYER21 = 1 << 21,
+		LAYER22 = 1 << 22
+	};
 	gipBaseGameObject();
 	virtual ~gipBaseGameObject();
 
@@ -107,6 +141,12 @@ public:
 	//Call this function for changing shape type
 	void setShapeType(SHAPETYPE shapetype);
 	int getShapeType();
+
+	//You can use COLLISIONLAYERS enum
+	//Object own layers, layer are bitwise
+	void setObjectLayers(int layers);
+	//Set target layers whic we want collide with this object, layers asre bitewise
+	void setMaskLayers(int masklayers);
 
 	glm::vec3 getOrigin();
 

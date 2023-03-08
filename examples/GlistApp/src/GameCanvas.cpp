@@ -51,6 +51,7 @@ void GameCanvas::setup() {
 	gameiconobject->setImage(&gameIcon);
 	gameiconobject->setName("Gameicon Object");
 	gameiconobject->setPosition(0.0f, getHeight() * 0.4f);
+	gameiconobject->setObjectLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER4);
 
 	// create object with loading image
 	softballobject = new gImageGameObject(gBulletObj);
@@ -77,6 +78,7 @@ void GameCanvas::setup() {
 	ghostballobject->setPosition(0 + ghostballobject->getWidth(), getHeight() * 0.1f);
 	ghostballobject->setMass(4.0f);
 	ghostballobject->setBounce(0.1f);
+	ghostballobject->setMaskLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER1 | gipBaseGameObject::COLLISIONLAYERS::LAYER2);
 	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
 }

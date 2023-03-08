@@ -148,6 +148,16 @@ void gipBulletPhysics::updateSingleAabb(btCollisionObject* rigidbody) {
 	_dynamicsworld->updateSingleAabb(rigidbody);
 }
 
+/*
+ * Call this function for setting object mask layers
+ * LAYER0 means dont collide
+ */
+void gipBulletPhysics::updateObjectlayers(int objectid) {
+	_dynamicsworld->removeRigidBody(this->_objectlist[objectid]->_rigidbody);
+	_dynamicsworld->addRigidBody(this->_objectlist[objectid]->_rigidbody, (int)this->_objectlist[objectid]->_objectlayers, (int)this->_objectlist[objectid]->_masklayers);
+}
+
+
 void gipBulletPhysics::setMass(gipBaseGameObject* targetobject, float newmass) {
 	_dynamicsworld->removeRigidBody(targetobject->_rigidbody);
 	btVector3 _interna = btVector3(0.0f, 0.0f, 0.0f);

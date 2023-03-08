@@ -247,7 +247,20 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 
+
 	//Set base physic methods ---------------------------------------------------------------
+	//Object own layers, layer are bitwise
+	void gipBaseGameObject::setObjectLayers(int layers) {
+		this->_objectlayers = layers;
+		this->_physicworld->updateObjectlayers(this->_id);
+	}
+	//Set target layers whic we want collide with this object, layers asre bitewise
+	void gipBaseGameObject::setMaskLayers(int masklayers) {
+		this->_masklayers = masklayers;
+		this->_physicworld->updateObjectlayers(this->_id);
+	}
+
+
 	void gipBaseGameObject::setMass(float newmass) {
 		if(this->_mass != newmass) {
 			this->_mass = newmass;
