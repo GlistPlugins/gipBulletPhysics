@@ -71,6 +71,8 @@ public:
 	gipBulletPhysics(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
 	virtual ~gipBulletPhysics();
 
+	gipBaseGameObject* getObject(int id);
+
 
 
 	/*

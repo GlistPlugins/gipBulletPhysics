@@ -71,6 +71,10 @@ int gipBulletPhysics::addPhysicObect(gipBaseGameObject* targetobject, int object
 	return this->_objectlist.size() - 1;
 }
 
+gipBaseGameObject* gipBulletPhysics::getObject(int id) {
+	return this->_objectlist[id];
+}
+
 //need to be called from game each update
 // Return step count fot world worked
 int gipBulletPhysics::runPhysicWorldStep() {

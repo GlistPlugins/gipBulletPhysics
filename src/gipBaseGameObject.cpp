@@ -152,8 +152,8 @@ gipBaseGameObject::~gipBaseGameObject() {
 				}
 			}
 		}
-		this->_sizecollider = glm::vec3(x, y, z > 0 ? z : _depth);
-		_rigidbody->getCollisionShape()->setLocalScaling(btVector3(_sizecollider.x,  _sizecollider.y, _sizecollider.z));
+		_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+		this->_sizecollider = glm::vec3(x, y, z > 0 ? z : _sizecollider.z);
 		this->_physicworld->updateSingleAabb(_rigidbody);
 	}
 
@@ -161,7 +161,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 		return this->_sizecollider;
 	}
 	void gipBaseGameObject::setObjectSize(float width, float height, float depth) {
-		if(this->_isrenderersizelocked) {
+		if(_isrenderobjectloaded && this->_isrenderersizelocked) {
 			_sizecollider.x *= width / _width;
 			_sizecollider.y *= height / _height;
 			if(_coordinatetype == COORDINATE2D) {
@@ -203,7 +203,12 @@ gipBaseGameObject::~gipBaseGameObject() {
 				this->_collisionshape =new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
 			} else if(shapetype == SHAPETYPE::SHAPETYPE_SPHERE){
 				this->_collisionshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z);
-				gLogi("sddsfsdfsd") << "dssadasdadasdas";
+			} else if(shapetype == SHAPETYPE::SHAPETYPE_CYLINDER){
+				this->_collisionshape = new btCylinderShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+			} else if(shapetype == SHAPETYPE::SHAPETYPE_CAPSULE){
+				this->_collisionshape = new btCapsuleShape(_sizecollider.x, _sizecollider.y);
+			} else if(shapetype == SHAPETYPE::SHAPETYPE_CONE){
+				this->_collisionshape = new btConeShape(_sizecollider.x, _sizecollider.y);
 			}
 			this->_transform.setIdentity();
 			/*

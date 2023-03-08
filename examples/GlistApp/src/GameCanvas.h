@@ -40,64 +40,31 @@ public:
 	void showNotify();
 	void hideNotify();
 
-	void onCollided(int targetid);
+	void onCollidedBall(int targetid);
 
 private:
-	int static const RIGIDWORLD = 0;
-	int static const SOFTRIGIDWORLD = 1;
+
 
 	gApp* root;
+
+	//images
     gImage sky;
     gImage mountain;
     gImage ground;
     gImage ramp;
-    gImage ball;
     gImage gameIcon;
-    //gModel ball3d;
+
 
     gImageGameObject* groundobject;
     gImageGameObject* rampobject;
-    gImageGameObject* ballobject;
     gImageGameObject* softballobject;
     gImageGameObject* gameiconobject;
+    gImageGameObject* ghostballobject;
 
-    //gModelGameObject* ball3dobject;
 
-    float groundX, groundY;
-    float rampX, rampY;
-    float rampAngle;
-    float gameiconangle;
-    float ballX, ballY;
-    float gameIconX, gameIconY;
-    float impulse = 1;
+    gipBulletPhysics* gBulletObj;
 
-    gipBulletPhysics gBulletObj;
 
-	btCollisionShape* groundCollisionShape;
-	btCollisionShape* rampCollisionShape;
-	btCollisionShape* ballCollisionShape;
-	btCollisionShape* softBallCollisionShape;
-	btCollisionObject* groundCollisionObj;
-	btCollisionObject* rampCollisionObj;
-	btCollisionObject* ballCollisionObj;
-	btCollisionObject* softBallCollisionObj;
-	btCollisionObject* gameIconCollisionObj;
-	btRigidBody* groundRigidBody;
-	btRigidBody* rampRigidBody;
-	btRigidBody* ballRigidBody;
-	btRigidBody* softBallRigidBody;
-	btRigidBody* gameIconRigidBody;
-	btTransform groundTransform;
-	btTransform rampTransform;
-	btTransform ballTransform;
-	btTransform softBallTransform;
-	btTransform gameIconTransform;
-	btDefaultMotionState* myMotionState;
-
-	int worldType;
-
-	//void createBoxObject();
-	//void createBallObject();
 	void startSimulation();
 	void startCleanup();
 };

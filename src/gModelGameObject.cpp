@@ -1,8 +1,8 @@
 /*
  * gModelGameObject.cpp
  *
- *  Created on: 15 Þub 2023
- *      Author: remzi
+ *  Edited on : 16.02.2023
+ *  	Author: Remzi ISCI
  */
 
 

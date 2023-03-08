@@ -37,7 +37,10 @@ public:
 
 	enum SHAPETYPE {
 		SHAPETYPE_BOX,
-		SHAPETYPE_SPHERE
+		SHAPETYPE_SPHERE,
+		SHAPETYPE_CYLINDER,
+		SHAPETYPE_CAPSULE,
+		SHAPETYPE_CONE
 	};
 
 	enum OBJECTRENDERTYPE {
@@ -84,6 +87,10 @@ public:
 	/*
 	 * set size of object 1 is default
 	 * size need to be between 0.04 and 100000
+	 * For BOX : each axis means one egde
+	 * For SPHERE : all axis means radius can be same
+	 * for Cylinder X means radius, y means height
+	 * for Cone x means raadius, y means height
 	 */
 	void setColliderSize(float x, float y, float z = -1.0f);
 	glm::vec3 getColliderSize();

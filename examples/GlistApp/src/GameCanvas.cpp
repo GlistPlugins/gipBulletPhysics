@@ -2,7 +2,7 @@
  * GameCanvas.cpp
  *
  *  Edited on : 16.02.2023
- *  	Author: Remzi ISCÝ
+ *  	Author: Remzi ISCI
  */
 
 
@@ -14,106 +14,101 @@ GameCanvas::GameCanvas(gApp* root) : gBaseCanvas(root) {
 }
 
 GameCanvas::~GameCanvas() {
-	gBulletObj.clean();
+	gBulletObj->clean();
 }
 
 void GameCanvas::setup() {
+	gBulletObj = new gipBulletPhysics(gipBulletPhysics::WORLDCOORDINATETYPE::WORLD2D);
 	sky.loadImage("layer-1-sky.png");
 	mountain.loadImage("layer-2-mountain.png");
 	ground.loadImage("layer-3-ground.png");
 	ramp.loadImage("ramp.png");
-	ball.loadImage("ball.png");
 	gameIcon.loadImage("gameicon/icon.png");
 
-	groundX = getWidth() / 2 - ground.getWidth() / 2;
-	groundY = getHeight() - ground.getHeight();
-	rampX = getWidth() * 0.7f;
-	rampY = getHeight() * 0.6f;
-	rampAngle = 135.0f;
-	gameIconX = 0.0f;
-	gameIconY = getHeight() * 0.6f;
-	gameiconangle = 35.0f;
-	ballX   = getWidth() - ball.getWidth();
-	ballY   = 0.0f; //getHeight() / 2 - ball.getHeight() / 2;
+	// create object with image referance
+	groundobject   = new gImageGameObject(gBulletObj);
+	groundobject->setTag(1); //1 for grouping grounds
+	groundobject->setName("Ground Object");
+	groundobject->setImage(&ground);
+	groundobject->setPosition(0.0f, getHeight() - ground.getHeight());
+	groundobject->setBounce(0.1f);
 
-	worldType = SOFTRIGIDWORLD; // 1
-	// create world
-	gBulletObj.initializeWorld(worldType);
-	if (worldType == SOFTRIGIDWORLD) {
-		// set default configurations
-		gBulletObj.setErp2();
-		gBulletObj.setglobalCfm();
-		gBulletObj.setNumIterations();
-		gBulletObj.setSolverMode();
-		gBulletObj.setSplitImpulse();
-	}
+	// create object without image referance
+	rampobject   = new gImageGameObject(gBulletObj);
+	rampobject->setTag(1); //1 for grouping grounds, you can set any integer as you wish
+	rampobject->setName("Ramp Object");
+	rampobject->setColliderSize(200.0f, 40.0f);
+	rampobject->setPosition(getWidth() * 0.8f, getHeight() * 0.7f);
+	rampobject->setRotation(135.0f);
+	rampobject->setBounce(0.1f);
+	//rampobject->setFriction(100.f);
+	//rampobject->setRollingFriction(100.f);
+	//rampobject->setSpinningFriction(100.f);
 
-	gBulletObj.setGravity(glm::vec3(0.0f, -600.8f, 0.0f));
+	// create object with image referance
+	gameiconobject   = new gImageGameObject(gBulletObj);
+	gameiconobject->setTag(2); //2 for grouping non ground statics, you can set any integer as you wish
+	gameiconobject->setImage(&gameIcon);
+	gameiconobject->setName("Gameicon Object");
+	gameiconobject->setPosition(0.0f, getHeight() * 0.4f);
 
-	// create object with image
-	groundobject   = new gImageGameObject(ground, 0.0f, glm::vec2(groundX, groundY), 0.0f);
-	//groundobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
+	// create object with loading image
+	softballobject = new gImageGameObject(gBulletObj);
+	gameiconobject->setTag(3); //3 for balls, you can set any integer as you wish
+	softballobject->setName("Softball Object");
+	softballobject->loadImage("ball.png");
+	softballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
+	softballobject->setPosition(getWidth() - softballobject->getWidth(), getHeight() * 0.1f);
+	softballobject->setMass(4.0f);
+	softballobject->setBounce(0.4f);
+	softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
-	rampobject   = new gImageGameObject(ramp, 0.0f, glm::vec2(rampX, rampY), rampAngle);
-	rampobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
-
-	gameiconobject   = new gImageGameObject(gameIcon, 0.0f, glm::vec2(gameIconX, gameIconY), 0.0f);
-	gameiconobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
-
-	softballobject = new gImageGameObject(ball, 5.0f, glm::vec2(ballX, ballY), 0.0f);
-	softballobject->setOnCollided(std::bind(&GameCanvas::onCollided,this, std::placeholders::_1));
-
-	// decrease stiffness and increase damping for softer ground. ex: 2000, 2
-	gBulletObj.createSoftContactBox2dObject(groundobject, 5000, 0.1f, 0.0f);
-	gBulletObj.createSoftContactBox2dObject(rampobject, 5000, 0.1f, rampAngle);
-	gBulletObj.createSoftContactBox2dObject(gameiconobject,5000, 0.1f, gameiconangle, glm::vec2(1.0f, 2.0f));
-	gBulletObj.createSoftCircle2dObject(softballobject);
-
-	// friction methods can call here.
-	/*
-	gBulletObj.setRollingFriction(softballobject, 100.0f);
-	gBulletObj.setRollingFriction(groundobject, 100.0f);
-	gBulletObj.setFriction(softballobject, 100.0f);
-	gBulletObj.setFriction(groundobject, 100.0f);
-	*/
+	//create object with loading image
+	ghostballobject = new gImageGameObject(gBulletObj);
+	//you can lock or unlock size of collider and image
+	//ghostballobject->setIsSizeLocked(false);
+	ghostballobject->loadImage("ball.png");
+	//you can set image render size
+	//ghostballobject->setObjectSize(400.0f, 400.0f);
+	ghostballobject->setTag(3); //3 for balls, you can set any integer as you wish
+	ghostballobject->setName("Softball Object");
+	ghostballobject->setColliderSize(80.0f, 80.0f);
+	ghostballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
+	ghostballobject->setPosition(0 + ghostballobject->getWidth(), getHeight() * 0.1f);
+	ghostballobject->setMass(4.0f);
+	ghostballobject->setBounce(0.1f);
+	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
 }
 
 void GameCanvas::update() {
-	// Physics calculations doing here.
-	gBulletObj.stepSimulation(60);
-	// force and impulse methods can call here.
-	//gBulletObj.applyCentralForce(softballobject, glm::vec3(-500.0f, 0.0f, 0.0f));
-	/*
-	 * Testing friction
-	 * Uncomment line 54 to 59 and 73. Comment line 64.
-	 * It is expected that the object will not move due to friction.
-	 * The ball does not move because the friction force is greater than the impulse force.
-	 */
-	// if (impulse) gBulletObj.applyCentralImpulse(softballobject, glm::vec3(-15.0f, 0.0f, 0.0f)); impulse = 0;
 
+	// Physics calculations doing here.
+	gBulletObj->runPhysicWorldStep();
+	// force and impulse methods can call here.
+	//ghostballobject->applyTorque(glm::vec3(0.0f, 0.0f, -40.0f));
+	//ghostballobject->applyCentralForce(glm::vec3(10.0f, 0.0f, 0.0f));
+	//ghostballobject->applyImpulse(glm::vec3(0.0f, 0.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //will add velocity instant
 }
 
 void GameCanvas::draw() {
+	//Draws nimages without colliders
 	sky.draw(getWidth() / 2 - sky.getWidth() / 2, getHeight() - sky.getHeight());
 	mountain.draw(getWidth() / 2 - mountain.getWidth() / 2, getHeight() - mountain.getHeight() / 2);
-	ground.draw(groundX, groundY);
-	gameIcon.draw(gameIconX, gameIconY, gameIcon.getWidth(), gameIcon.getHeight(), gameIcon.getWidth() * 0.5f, gameIcon.getHeight() * 0.5f, gameiconangle);
 
-	ramp.draw(rampX, rampY, ramp.getWidth(), ramp.getHeight(), ramp.getWidth() * 0.5f, ramp.getHeight() * 0.5f, rampAngle);
-	// getting position and rotation values from created image object.
-	ball.draw(softballobject->getPosition().x,
-			  softballobject->getPosition().y,
-			  softballobject->getWidth(),
-			  softballobject->getHeight(),
-			  softballobject->getRotationAngle());
+	//Draw physic objects
+	ghostballobject->draw();
+	gameiconobject->draw();
+	rampobject->draw();
+	softballobject->draw();
+	groundobject->draw();
 
-	renderer->setColor(255, 0, 0);
-	gBulletObj.drawDebug();
+	//This line for draw collider, delete or comment this line when get release
+	gBulletObj->drawDebug();
 }
 
-void GameCanvas:: onCollided(int targetid) {
-	gLogi("Game Canvas") << "Game canvasta çarpýþma algýlandý";
+void GameCanvas:: onCollidedBall(int targetid) {
+	gLogi("Ball Collison") << gBulletObj->getObject(targetid)->getName() << " Hitted me";
 }
 
 void GameCanvas::keyPressed(int key) {

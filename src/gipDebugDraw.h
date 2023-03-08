@@ -1,8 +1,8 @@
 /*
  * gDebugDraw.h
  *
- *  Created on: 16 Þub 2023
- *      Author: Remzi ÝÞÇÝ
+ *  Created on: 16 02 2023
+ *      Author: Remzi ISCI
  */
 
 #ifndef SRC_GDEBUGDRAW_H_
