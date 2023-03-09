@@ -1,8 +1,8 @@
 /*
  * gDebugDraw.h
  *
- *  Created on: 16 Þub 2023
- *      Author: Remzi ÝÞÇÝ
+ *  Created on: 16 02 2023
+ *      Author: Remzi ISCI
  */
 
 #ifndef SRC_GDEBUGDRAW_H_
@@ -12,15 +12,19 @@
 #include "gLine.h"
 #include "gCircle.h"
 #include "gTriangle.h"
+#include "gRect.h"
+#include "gSphere.h"
+#include "gFont.h"
 
-class gDebugDraw : public btIDebugDraw
+class gipDebugDraw : public btIDebugDraw
 {
 int m_debugMode;
-
 public:
-
-gDebugDraw();
-virtual ~gDebugDraw();
+/*
+ * wolrdcoordinate 0 = 2D , 1 = 3D
+ */
+gipDebugDraw(int worldcoordinate = 0);
+virtual ~gipDebugDraw();
 
 virtual void    drawLine(const btVector3& from,const btVector3& to,const btVector3&  fromColor, const btVector3& toColor);
 
@@ -43,6 +47,12 @@ virtual void    setDebugMode(int debugMode);
 
 virtual int     getDebugMode() const { return m_debugMode;}
 
+private:
+/*
+ * 0 = 2D
+ * 1 = 3D
+ */
+int _worldcoordinate = 0;
 };
 
 

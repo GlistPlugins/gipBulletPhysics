@@ -1,57 +1,52 @@
 /*
  * gImageGameObject.h
  *
- *  Created on: 24 Aug 2022
- *      Author: Faruk Aygun
+ *  Created on: 4 Mar 2023
+ *      Author: Remzi ISCI
+ */
+/*
+ *  This class inherit from gipPhysicObject
+ *  This clas uses 2d coordinate system
+ *  Layers are bit wise
+ *  Rotaions have been setted according degree format
  */
 
 #ifndef SRC_GIMAGEGAMEOBJECT_H_
 #define SRC_GIMAGEGAMEOBJECT_H_
 
-#include "gImage.h"
-#include "glm/glm.hpp"
-#include <functional>
+//#include "gImage.h"
+//#include "glm/glm.hpp"
+//#include <functional>
+#include "gipBaseGameObject.h"
+#include "gipBulletPhysics.h"
 
-
-class gImageGameObject {
+class gImageGameObject : public gipBaseGameObject {
 public:
-	gImageGameObject(gImage image, float mass, glm::vec2 position, float rotationAngle);
+	gImageGameObject(gipBulletPhysics* physicworld);
 	virtual ~gImageGameObject();
 
+	//Will load image from assest/images
+	void loadImage(std::string imagepath);
+
+	//Will load image with full file path
+	void load(std::string fullpath);
+
+	//Will get image from external source
+	void setImage(gImage* sourceimage);
+
+	//Will remove image source
+	void clearImage();
+
+	//Call this function to draw image
 	void draw();
-	void loadImage(std::string imagePath);
-	void setImage(gImage image);
-	void setId(int id);
-	void setMass(float mass);
-	void setPosition(glm::vec2 position);
-	void setRotationAngle(float angle);
-	void onCollided(int targetobjectid);
-	void setOnCollided(std::function<void(int)> onColl);
-	bool isCollisionFunSetted = false;
-	std::function<void(int)> onColl;
 
-	gImage* getImage();
 
-	int getId();
 
-	float getMass();
-	float getWidth();
-	float getHeight();
-	float getRotationAngle();
+protected:
 
-	glm::vec2 getPosition();
 
 private:
-	gImage image;
 
-	float mass;
-	float rotationAngle;
-
-	glm::vec2 position;
-
-	int id = -1;
-	int width;
-	int height;
 };
 
 #endif /* SRC_GIMAGEGAMEOBJECT_H_ */
