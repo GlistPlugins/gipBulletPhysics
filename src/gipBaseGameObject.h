@@ -118,6 +118,10 @@ public:
 	//This for 2d object and world
 	void setRotation(float degrez);
 
+	//Set offset collider fromorigin of object
+	void setColliderOffset(float offsetx, float offsety, float offsetz = 0);
+	glm::vec3 getColliderOffset();
+
 	/*
 	 * set size of object 1 is default
 	 * size need to be between 0.04 and 100000
@@ -236,6 +240,7 @@ protected:
 	bool _isrenderersizelocked = true;
 	glm::vec3 _position = glm::vec3(0.0f, 0.0f, 0.0f);
 	btQuaternion _rotation;
+	glm::vec3 _colliderofset = glm::vec3(0.0f, 0.0f, 0.0f);
 	//------------------------------------------------
 
 	//Physic properties-------------------------------

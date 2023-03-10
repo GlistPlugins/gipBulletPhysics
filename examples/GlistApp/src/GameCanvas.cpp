@@ -60,7 +60,7 @@ void GameCanvas::setup() {
 	softballobject->loadImage("ball.png");
 	softballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
 	softballobject->setPosition(getWidth() - softballobject->getWidth(), getHeight() * 0.1f);
-	softballobject->setMass(4.0f);
+	softballobject->setMass(40.0f);
 	softballobject->setBounce(0.4f);
 	softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
@@ -75,10 +75,11 @@ void GameCanvas::setup() {
 	ghostballobject->setName("Softball Object");
 	ghostballobject->setColliderSize(80.0f, 80.0f);
 	ghostballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
-	ghostballobject->setPosition(0 + ghostballobject->getWidth(), getHeight() * 0.1f);
-	ghostballobject->setMass(4.0f);
-	ghostballobject->setBounce(0.1f);
+	ghostballobject->setPosition(0 + ghostballobject->getWidth() * 1.2f, getHeight() * 0.1f);
+	ghostballobject->setMass(400.0f);
+	ghostballobject->setBounce(10.0f);
 	ghostballobject->setMaskLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER1 | gipBaseGameObject::COLLISIONLAYERS::LAYER2);
+	ghostballobject->setColliderOffset(100.f, 40.0f);
 	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
 }
