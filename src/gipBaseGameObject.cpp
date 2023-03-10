@@ -71,17 +71,17 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(_coordinatetype == COORDINATE2D) {
 			this->_transform.setOrigin(
 					btVector3(
-							x + _sizecollider.x * 0.5f,
-							-(y + _sizecollider.y * 0.5f),
+							x + (_sizecollider.x * 0.5f) + this->_colliderofset.x,
+							-(y + (_sizecollider.y * 0.5f) + this->_colliderofset.y),
 							0.0f
 					)
 			);
 		} else if(_coordinatetype == COORDINATE3D) {
 			this->_transform.setOrigin(
 					btVector3(
-							x,
-							y,
-							z
+							x + this->_colliderofset.x,
+							y + this->_colliderofset.y,
+							z + this->_colliderofset.z
 					)
 			);
 		}
@@ -128,6 +128,18 @@ gipBaseGameObject::~gipBaseGameObject() {
 			this->_physicworld->updateSingleAabb(_rigidbody);
 		}
 
+	}
+
+	//Set offset collider fromorigin of object
+	void gipBaseGameObject::setColliderOffset(float offsetx, float offsety, float offsetz) {
+		_colliderofset.x = offsetx;
+		_colliderofset.y = offsety;
+		_colliderofset.z = offsetz;
+		this->setPosition(this->_position.x, this->_position.y, this->_position.z);
+	}
+
+	glm::vec3 gipBaseGameObject::getColliderOffset() {
+		return _colliderofset;
 	}
 
 	void gipBaseGameObject::setIsSizeLocked(bool islocked) {
@@ -399,41 +411,41 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(_coordinatetype == COORDINATE::COORDINATE2D) {
 			if(type == TRANSFORMTYPE::TRANSFORMTYPE_BOX) {
 				this->_position =  glm::vec3 (
-						_transform.getOrigin().getX() - (_width * 0.5f),
-						-(_transform.getOrigin().getY() + (_height * 0.5f)),
+						_transform.getOrigin().getX() - (_width * 0.5f) - this->_colliderofset.x,
+						-(_transform.getOrigin().getY() + (_height * 0.5f) - this->_colliderofset.y),
 						0.0f
 				);
 			} else if(type == TRANSFORMTYPE::TRANSFORMTYPE_SPHERE) {
 				this->_position =  glm::vec3 (
-						_transform.getOrigin().getX() - (_height * 0.5f),
-						-(_transform.getOrigin().getY() + (_height * 0.5f)),
+						_transform.getOrigin().getX() - (_height * 0.5f) - this->_colliderofset.x,
+						-(_transform.getOrigin().getY() + (_height * 0.5f) - this->_colliderofset.y),
 						0.0f
 				);
 			} else {
 				this->_position = glm::vec3 (
-						_transform.getOrigin().getX() - _width * 0.5f,
-						-(_transform.getOrigin().getY() + _height * 0.5f),
+						_transform.getOrigin().getX() - _width * 0.5f - this->_colliderofset.x,
+						-(_transform.getOrigin().getY() + _height * 0.5f - this->_colliderofset.y),
 						0.0f
 				);
 			}
 		} else {
 			if(type == TRANSFORMTYPE::TRANSFORMTYPE_BOX) {
 				this->_position =  glm::vec3 (
-						_transform.getOrigin().getX(),
-						-(_transform.getOrigin().getY()),
-						_transform.getOrigin().getZ()
+						_transform.getOrigin().getX() - this->_colliderofset.x,
+						-(_transform.getOrigin().getY() - this->_colliderofset.y),
+						_transform.getOrigin().getZ() - this->_colliderofset.z
 				);
 			} else if(type == TRANSFORMTYPE::TRANSFORMTYPE_SPHERE) {
 				this->_position =  glm::vec3 (
-						_transform.getOrigin().getX(),
-						-_transform.getOrigin().getY(),
-						_transform.getOrigin().getZ()
+						_transform.getOrigin().getX() - this->_colliderofset.x,
+						-(_transform.getOrigin().getY() - this->_colliderofset.y),
+						_transform.getOrigin().getZ() - this->_colliderofset.z
 				);
 			} else {
 				this->_position = glm::vec3 (
-						_transform.getOrigin().getX(),
-						-(_transform.getOrigin().getY()),
-						_transform.getOrigin().getZ()
+						_transform.getOrigin().getX() - this->_colliderofset.x,
+						-(_transform.getOrigin().getY() - this->_colliderofset.y),
+						_transform.getOrigin().getZ() - this->_colliderofset.x
 				);
 			}
 		}

@@ -2,7 +2,7 @@
  * GameCanvas.cpp
  *
  *  Edited on : 16.02.2023
- *  	Author: Remzi ISCÝ
+ *  	Author: Remzi ISCI
  */
 
 
