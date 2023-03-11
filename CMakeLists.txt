@@ -15,6 +15,7 @@ list(APPEND PLUGIN_SRCS
 			${PLUGIN_DIR}/src/gipDebugDraw.cpp
 			${PLUGIN_DIR}/src/gipBaseGameObject.cpp
 			${PLUGIN_DIR}/src/gImageGameObject.cpp
+			${PLUGIN_DIR}/src/gModelGameObject.cpp
 )
 
 

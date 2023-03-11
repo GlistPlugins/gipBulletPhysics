@@ -174,7 +174,7 @@ private:
 	//Physic world will work 60 times per second, ideal for 60fps
 	btScalar _timestep = 60.0f;
 	// step time for each update higher value will simulate game faster
-	int _maxsubsteps = 10;
+	int _maxsubsteps = 1;
 	btScalar _fixedtimestep = btScalar((1.0f)/_timestep);
 
 	//List of physic object which has been added world

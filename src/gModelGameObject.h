@@ -8,41 +8,37 @@
 #ifndef SRC_GMODELGAMEOBJECT_H_
 #define SRC_GMODELGAMEOBJECT_H_
 
+#include "gipBaseGameObject.h"
+#include "gipBulletPhysics.h"
 
-
-#include "gModel.h"
-#include "glm/glm.hpp"
-
-class gModelGameObject {
+class gModelGameObject : public gipBaseGameObject {
 public:
-
-	gModelGameObject(gModel objectModel, float mass, glm::vec3 position, glm::vec3 rotationAngle, float scale);
+	gModelGameObject(gipBulletPhysics* physicworld);
 	virtual ~gModelGameObject();
 
+	//Will load model from assest/images
+	void loadModel(std::string modelpath);
+
+	//Will load model with full file path
+	void load(std::string fullpath);
+
+	//Will get model from external source
+	void setModel(gModel* sourcemodel);
+
+	//Will get mesh from external source
+	void setMesh(gMesh* sourcemesh);
+
+	//Will remove model source
+	void clearModel();
+
+	//Will remove mesh source
+	void clearMesh();
+
+	//Call this function to draw image
 	void draw();
-	void loadModel(std::string modelPath);
-	void setId(int id);
-	void setMass(float mass);
-	void setPosition(glm::vec3 position);
-	void rotateAround(float rad, glm::vec3, glm::vec3 rotationCenter);
-
-	gModel* getModel();
-
-	int getId();
-
-	float getMass();
-	float getScale();
-	glm::vec3 getPosition();
 
 private:
-	gModel model;
 
-	float mass;
-	glm::vec3 rotationAngle;
-	glm::vec3 position;
-
-	int id = -1;
-	float scale;
 };
 
 

@@ -165,6 +165,7 @@ void gipBulletPhysics::setMass(gipBaseGameObject* targetobject, float newmass) {
 	targetobject->_rigidbody->setMassProps(newmass, _interna);
 
 	if(newmass != 0.0f) {
+
 		targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() & !btCollisionObject::CF_STATIC_OBJECT);
 		targetobject->_isstatic = false;
 

@@ -13,6 +13,7 @@
 #include "bullet/btBulletDynamicsCommon.h"
 
 #include "gModel.h"
+#include "gMesh.h"
 #include "gImage.h"
 
 class gipBulletPhysics;
@@ -46,6 +47,7 @@ public:
 	enum OBJECTRENDERTYPE {
 		OBJECTRENDERTYPE_IMAGE,
 		OBJECTRENDERTYPE_MODEL,
+		OBJECTRENDERTYPE_MESH,
 		OBJECTRENDERTYPE_NONE
 	};
 
@@ -114,9 +116,10 @@ public:
 	//degree
 	glm::vec3 getRotation();
 	void setRotation(float degrex, float degrey, float degrez);
+
 	//degree
 	//This for 2d object and world
-	void setRotation(float degrez);
+	void setRotation2D(float degrez);
 
 	//Set offset collider fromorigin of object
 	void setColliderOffset(float offsetx, float offsety, float offsetz = 0);
@@ -223,6 +226,7 @@ protected:
 	//Referances--------------------------------
 	gImage* _image;
 	gModel* _model;
+	gMesh* _mesh;
 	gipBulletPhysics*_physicworld;
 	btTransform _transform;
 	btCollisionShape* _collisionshape;
@@ -299,6 +303,8 @@ protected:
 	int _masklayers = 1<<1 |1<<2 | 1<<3 | 1<<4 | 1<<5 | 1<<6 | 1<<7 | 1<<8 | 1<<9 | 1<<10
 			| 1<<11 | 1<<12 | 1<<13 | 1<<14 | 1<<15 | 1<<16 | 1<<17 | 1<<18 | 1<<19 | 1<<20
 			| 1<<21 | 1<<22;
+
+	const glm::quat _resetquat = glm::quatLookAt(glm::vec3(0,0,-1), glm::vec3(0,1,0));
 };
 
 
