@@ -183,7 +183,6 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(this->_isrenderersizelocked) {
 			_width *= x / _sizecollider.x;
 			_height *= y / _sizecollider.y;
-			gLogi("_width") << _width;
 			if(_coordinatetype == COORDINATE3D) {
 				_depth *= z / _sizecollider.z;
 				if(_isrenderobjectloaded) {
@@ -197,7 +196,8 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(_coordinatetype == COORDINATE2D)
 			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
 		else if(_coordinatetype == COORDINATE3D)
-			_rigidbody->getCollisionShape()->setLocalScaling(btVector3((x / _sizecollider.x), (y / _sizecollider.y), (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x, y, z > 0 ? z : _sizecollider.z));
+
 		this->_sizecollider = glm::vec3(x, y, z > 0 ? z : _sizecollider.z);
 		this->_physicworld->updateSingleAabb(_rigidbody);
 	}

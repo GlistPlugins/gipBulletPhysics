@@ -72,7 +72,7 @@ void GameCanvas::setup() {
 	ghostballobject->setTag(3); //3 for balls, you can set any integer as you wish
 	ghostballobject->setName("Softball Object");
 	//you can lock or unlock size of collider and image
-	ghostballobject->setIsSizeLocked(false);
+	//ghostballobject->setIsSizeLocked(false);
 	ghostballobject->setObjectSize(80.0f, 80.0f);
 	ghostballobject->setColliderSize(120.0f, 120.0f);
 	ghostballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);

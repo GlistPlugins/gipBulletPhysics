@@ -76,16 +76,18 @@ void GameCanvas3D::setup() {
 	box1gameobject->setRotation(20.0f, 20.0f, 20.0f);
 	box1gameobject->setRotation(20.0f, 20.0f, 20.0f);
 	box1gameobject->setRotation(20.0f, 20.0f, 20.0f);
-	box1gameobject->setColliderSize(4.0f, 4.0f, 4.0f);
-	box1gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
+	//box1gameobject->setColliderSize(4.0f, 4.0f, 4.0f);
+	//box1gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
 
 
 
 	box2gameobject = new gModelGameObject(physicworld);
 	box2 = new gBox();
 	box2gameobject->setMesh(box2);
-	box2gameobject->setPosition(-2.0f, 4.0f, 0.0f);
+	//box2gameobject->setPosition(-2.0f, 4.0f, 0.0f);
+	//box2gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
 	box2gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
+	box2gameobject->setColliderSize(2.0f, 2.0f, 2.0f);
 	box2->getMaterial()->setAmbientColor(0, 255, 0);
 	//---------------------------------------------------------
 }
