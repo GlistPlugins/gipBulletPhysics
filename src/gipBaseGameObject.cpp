@@ -122,17 +122,18 @@ gipBaseGameObject::~gipBaseGameObject() {
 
 				if(_renderobjecttype == OBJECTRENDERTYPE_MODEL){
 					_model->setOrientation(_resetquat);
-
+					//_model->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
 					if(newor.z != 0) _model->roll(-newor.z);
 					if(newor.y != 0) _model->pan(newor.y);
 					if(newor.x != 0) _model->tilt(-newor.x) ;
 				}
 				else if(_renderobjecttype == OBJECTRENDERTYPE_MESH){
 					_mesh->setOrientation(_resetquat);
-
+				//	_mesh->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
 					if(newor.z != 0) _mesh->roll(-newor.z);
 					if(newor.y != 0) _mesh->pan(newor.y);
 					if(newor.x != 0) _mesh->tilt(-newor.x) ;
+
 				}
 			}
 		}
@@ -182,19 +183,21 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(this->_isrenderersizelocked) {
 			_width *= x / _sizecollider.x;
 			_height *= y / _sizecollider.y;
+			gLogi("_width") << _width;
 			if(_coordinatetype == COORDINATE3D) {
 				_depth *= z / _sizecollider.z;
 				if(_isrenderobjectloaded) {
-					if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) this->_model->scale(_width, _height, _depth);
-					else if(_renderobjecttype == OBJECTRENDERTYPE_MESH) this->_mesh->scale(_width, _height, _depth);
+					if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) this->_model->setScale(_width, _height, _depth);
+					else if(_renderobjecttype == OBJECTRENDERTYPE_MESH) this->_mesh->setScale(_width, _height, _depth);
+
 				}
 			}
 		}
-		//Engine x and y 1 amount means 400 for bullet engine, need to convert
+
 		if(_coordinatetype == COORDINATE2D)
 			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
 		else if(_coordinatetype == COORDINATE3D)
-			_rigidbody->getCollisionShape()->setLocalScaling(btVector3((x / _sizecollider.x) * 0.0025f, (y / _sizecollider.y) * 0.0025f, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+			_rigidbody->getCollisionShape()->setLocalScaling(btVector3((x / _sizecollider.x), (y / _sizecollider.y), (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
 		this->_sizecollider = glm::vec3(x, y, z > 0 ? z : _sizecollider.z);
 		this->_physicworld->updateSingleAabb(_rigidbody);
 	}
