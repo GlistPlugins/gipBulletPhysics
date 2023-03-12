@@ -14,16 +14,28 @@
 #include "gBasePlugin.h"
 #include "gImageGameObject.h"
 #include "bullet/btBulletDynamicsCommon.h"
+#include "btRaycastCallback.h"
+#include "btCollisionWorld.h"
+#include "btGhostObject.h";
 
 #include "glm/glm.hpp"
 
 
 class gipBaseGameObject;
 
+class gipRaycastResult {
+public:
+	gipBaseGameObject* hittedobject;
+	glm::vec3 hitpoint;
+};
+
 class gipBulletPhysics : public gBasePlugin {
 public:
 	friend class gipBaseGameObject;
-
+	enum COLLISIONOBJECTTYPE {
+		COLLISIONOBJECTTYPE_RIGIDBODY,
+		COLLISIONOBJECTTYPE_GHOST
+	};
 	/*
 	* Layers are bitwise varialbles
 	 * You can use multiple layers together
@@ -111,6 +123,8 @@ public:
 	// Call it in stepSimulation method to see the position and rotation of the objects.
 	void printObjectTransform();
 
+
+
 	/*
 	 * This function calls by physicobjects childes
 	 * layers are bitwise variables
@@ -120,10 +134,16 @@ public:
 	 */
 	int addPhysicObect(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
 
+	//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
+	bool raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result);
+
+	//Physic world
+	btDiscreteDynamicsWorld* _dynamicsworld;
+
 protected:
 	void removeObject(int id);
 
-	void updateSingleAabb(btCollisionObject* rigidbody);
+	void updateSingleAabb(int id);
 
 
 
@@ -167,8 +187,7 @@ private:
 
 	btBroadphaseInterface* broadphase;
 
-	//Physic world
-	btDiscreteDynamicsWorld* _dynamicsworld;
+
 
 
 	//Physic world will work 60 times per second, ideal for 60fps

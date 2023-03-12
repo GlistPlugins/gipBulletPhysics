@@ -17,8 +17,6 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 	 _height = 1.0f;
 	 _depth = 1.0f;
 	btTransform temptensform;
-	//Bullet physic coordinate sytem need to be converted engine coordinate system
-	//this->_collisionshape = new btBoxShape(btVector3(_sizecollider.x * 400,_sizecollider.y * 400, _sizecollider.z));
 	this->_collisionshape = new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y, _sizecollider.z));
 	this->_transform.setIdentity();
 
@@ -35,7 +33,7 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 			btVector3(
 				_position.x,
 				-(_position.y),
-				0.0f
+				_position.z
 				)
 	);
 
@@ -43,7 +41,7 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 	btDefaultMotionState* mymotionstate = new btDefaultMotionState(this->_transform);
 	btRigidBody::btRigidBodyConstructionInfo rigidbodyinfo(_mass, mymotionstate, this->_collisionshape, localInertia);
 	this->_rigidbody = new btRigidBody(rigidbodyinfo);
-	this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+	this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK );
 	//if choosed static then add static flag to object will improve perfomance
 	if(this->_isstatic) {
 		this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_STATIC_OBJECT);
@@ -51,6 +49,7 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 		//Will prevent pass through walls but still will pass when get enough hight speed
 		this->_rigidbody->setCcdMotionThreshold(0.01f);
 	}
+
 
 	this->_rigidbody->setActivationState(4);
 	this->_id = physicworld->addPhysicObect(this, this->_objectlayers, this->_masklayers);

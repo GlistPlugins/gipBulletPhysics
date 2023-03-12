@@ -37,11 +37,13 @@ void gipDebugDraw::drawLine(const btVector3& from,const btVector3& to,const btVe
 
 void gipDebugDraw::drawLine(const btVector3& from,const btVector3& to,const btVector3&  fromColor) {
 	gLine* line = new gLine();
+
 	gColor oldcolor = line->getRenderer()->getColor();
 	line->getRenderer()->setColor(fromColor.x(), fromColor.y(), fromColor.z());
 	if(_worldcoordinate == 0) line->draw(from.getX(), -from.getY(), to.getX(), -to.getY());
 	else line->draw(from.getX(), -from.getY(),  from.getZ(),to.getX(), -to.getY(), to.getZ());
 	line->getRenderer()->setColor(oldcolor);
+
 }
 
 void gipDebugDraw::drawSphere (btScalar radius, const btTransform &transform, const btVector3 &color) {

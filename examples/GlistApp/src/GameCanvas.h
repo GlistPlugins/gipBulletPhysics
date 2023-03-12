@@ -14,7 +14,7 @@
 #include "gipBulletPhysics.h"
 #include "gImageGameObject.h"
 #include "gModelGameObject.h"
-
+#include "gGhostGameObject2D.h"
 
 class GameCanvas : public gBaseCanvas {
 public:
@@ -59,8 +59,9 @@ private:
     gImageGameObject* rampobject;
     gImageGameObject* softballobject;
     gImageGameObject* gameiconobject;
-    gImageGameObject* ghostballobject;
+    gImageGameObject* seconballobject;
 
+	gGhostGameObject2D* ghostbox;
 
     gipBulletPhysics* gBulletObj;
 

@@ -2,7 +2,7 @@
  * GameCanvas3D.h
  *
  *  Created on: 26 Þub 2023
- *      Author: remzi
+ *      Author: Remzi ISCI
  */
 
 #ifndef SRC_GAMECANVAS3D_H_
@@ -13,6 +13,7 @@
 #include "gipBulletPhysics.h"
 #include "gImageGameObject.h"
 #include "gModelGameObject.h"
+#include "gGhostGameObject3D.h"
 #include "gCamera.h"
 #include "gLight.h"
 #include "gSkybox.h"
@@ -48,12 +49,15 @@ public:
 
 private:
 
+
 	const int KEY_W = 2;
 	const int KEY_S = 4;
 	const int KEY_D = 8;
 	const int KEY_A = 16;
 	const int KEY_R = 32;
 	const int KEY_F = 64;
+
+	void onCollidedBall(int targetid);
 
 	gApp* root;
 	gImage logo;
@@ -72,8 +76,8 @@ private:
 	gModelGameObject* box1gameobject;
 	gModelGameObject* box2gameobject;
 	gModelGameObject* groundobject;
-	//---------------------------------------------------------
 
+	gGhostGameObject3D* ghostbox;
 
 	glm::vec3 spawnpoint;
 	glm::vec3 cameraposition;

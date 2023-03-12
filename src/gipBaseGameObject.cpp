@@ -67,7 +67,6 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 	void gipBaseGameObject::setPosition(float x, float y, float z) {
 		this->_position = glm::vec3(x, y, z);
-
 		if(_coordinatetype == COORDINATE2D) {
 			this->_transform.setOrigin(
 					btVector3(
@@ -85,8 +84,10 @@ gipBaseGameObject::~gipBaseGameObject() {
 					)
 			);
 		}
-		_rigidbody->setWorldTransform(_transform);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)	_rigidbody->setWorldTransform(_transform);
+		else this->_ghostobject->setWorldTransform(_transform);
+		this->_physicworld->updateSingleAabb(_id);
 
 		if(_isrenderobjectloaded) {
 			if(_renderobjecttype == OBJECTRENDERTYPE_MODEL){
@@ -140,8 +141,11 @@ gipBaseGameObject::~gipBaseGameObject() {
 
 		this->_rotation.setEulerZYX(newor.z, newor.y, newor.x);
 		_transform.setRotation(this->_rotation);
-		this->_rigidbody->setWorldTransform(this->_transform);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			this->_rigidbody->setWorldTransform(this->_transform);
+		else
+			this->_ghostobject->setWorldTransform(this->_transform);
+		this->_physicworld->updateSingleAabb(_id);
 
 	}
 
@@ -151,8 +155,12 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(_coordinatetype == COORDINATE2D) {
 			this->_rotation.setEulerZYX(gDegToRad(degrez), gDegToRad(0.0f), gDegToRad(0.0f));
 			_transform.setRotation(this->_rotation);
-			this->_rigidbody->setWorldTransform(this->_transform);
-			this->_physicworld->updateSingleAabb(this->getRigidBody());
+
+			if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+				this->_rigidbody->setWorldTransform(this->_transform);
+			else
+				this->_ghostobject->setWorldTransform(this->_transform);
+			this->_physicworld->updateSingleAabb(_id);
 		}
 	}
 
@@ -193,13 +201,20 @@ gipBaseGameObject::~gipBaseGameObject() {
 			}
 		}
 
-		if(_coordinatetype == COORDINATE2D)
-			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
-		else if(_coordinatetype == COORDINATE3D)
-			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x, y, z > 0 ? z : _sizecollider.z));
-
+		if(_coordinatetype == COORDINATE2D) {
+			if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+				_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+			else
+				_ghostobject->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+		}
+		else if(_coordinatetype == COORDINATE3D) {
+			if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+				_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x, y, z > 0 ? z : _sizecollider.z));
+			else
+				_ghostobject->getCollisionShape()->setLocalScaling(btVector3(x, y, z > 0 ? z : _sizecollider.z));
+		}
 		this->_sizecollider = glm::vec3(x, y, z > 0 ? z : _sizecollider.z);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+		this->_physicworld->updateSingleAabb(_id);
 	}
 
 	glm::vec3 gipBaseGameObject::getColliderSize() {
@@ -216,10 +231,13 @@ gipBaseGameObject::~gipBaseGameObject() {
 				else {
 					if(_depth > 0) _sizecollider.z *= depth / _depth;
 					else _sizecollider.z *= depth;
-					_rigidbody->getCollisionShape()->setLocalScaling(btVector3(_sizecollider.x, _sizecollider.y, _sizecollider.z));
+					if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+						_rigidbody->getCollisionShape()->setLocalScaling(btVector3(_sizecollider.x, _sizecollider.y, _sizecollider.z));
+					else
+						_ghostobject->getCollisionShape()->setLocalScaling(btVector3(_sizecollider.x, _sizecollider.y, _sizecollider.z));
 				}
 
-				this->_physicworld->updateSingleAabb(_rigidbody);
+				this->_physicworld->updateSingleAabb(_id);
 			}
 			_width = width;
 			_height = height;
@@ -260,7 +278,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btConeShape(_sizecollider.x, _sizecollider.y);
 				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btConeShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
 			}
-			this->_transform.setIdentity();
+
 			/*
 			 * The Glist Engine references the top left corner for object positions;
 			 * but the bullet3 library references the center of transform.
@@ -286,9 +304,15 @@ gipBaseGameObject::~gipBaseGameObject() {
 			}
 			btVector3 localInertia(0, 0, 0);
 			this->_collisionshape->calculateLocalInertia(_mass, localInertia);
-			this->_rigidbody->setCollisionShape(this->_collisionshape);
-			this->_rigidbody->setWorldTransform(_transform);
-			this->_physicworld->updateSingleAabb(_rigidbody);
+			if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+				this->_rigidbody->setCollisionShape(this->_collisionshape);
+				this->_rigidbody->setWorldTransform(_transform);
+			} else {
+				this->_ghostobject->setCollisionShape(this->_collisionshape);
+				this->_ghostobject->setWorldTransform(_transform);
+			}
+
+			this->_physicworld->updateSingleAabb(_id);
 		}
 
 	}
@@ -312,7 +336,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 
 
 	void gipBaseGameObject::setMass(float newmass) {
-		if(this->_mass != newmass) {
+		if(this->_mass != newmass && this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
 			this->_mass = newmass;
 			this->_physicworld->setMass(this, newmass);
  		}
@@ -324,9 +348,11 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	void gipBaseGameObject::setFriction(float newvalue) {
-		this->_friction = newvalue;
-		_rigidbody->setFriction(newvalue);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+			this->_friction = newvalue;
+			_rigidbody->setFriction(newvalue);
+			this->_physicworld->updateSingleAabb(_id);
+		}
 	}
 
 	float gipBaseGameObject::getFriction() {
@@ -334,9 +360,11 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	void gipBaseGameObject::setRollingFriction(float newvalue) {
-		this->_rollingfriction = newvalue;
-		_rigidbody->setRollingFriction(newvalue);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+			this->_rollingfriction = newvalue;
+			_rigidbody->setRollingFriction(newvalue);
+			this->_physicworld->updateSingleAabb(_id);
+		}
 	}
 
 	float gipBaseGameObject::getRollingFriction() {
@@ -344,9 +372,11 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	void gipBaseGameObject::setSpinningFriction(float newvalue) {
-		this->_spinningFriction = newvalue;
-		_rigidbody->setSpinningFriction(newvalue);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+			this->_spinningFriction = newvalue;
+			_rigidbody->setSpinningFriction(newvalue);
+			this->_physicworld->updateSingleAabb(_id);
+		}
 	}
 
 	float gipBaseGameObject::getSpinnigFriction() {
@@ -354,43 +384,51 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	void gipBaseGameObject::setAnisotropicFriction(glm::vec3 newvalue, int anisotropicfrictionmode) {
-		this->_anisotropicfriction = newvalue;
-		this->_anistropicfrictionmode = anisotropicfrictionmode;
-		_rigidbody->setAnisotropicFriction(btVector3(newvalue.x, newvalue.y, newvalue.z), anisotropicfrictionmode);
-		this->_physicworld->updateSingleAabb(_rigidbody);
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+			this->_anisotropicfriction = newvalue;
+			this->_anistropicfrictionmode = anisotropicfrictionmode;
+			_rigidbody->setAnisotropicFriction(btVector3(newvalue.x, newvalue.y, newvalue.z), anisotropicfrictionmode);
+			this->_physicworld->updateSingleAabb(_id);
+		}
 	}
 
 
 	//value should become between 0 and 1
 	void gipBaseGameObject::setBounce(float newvalue) {
-		if(newvalue > 0.0f) {
+		if(newvalue > 0.0f && this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
 			this->_rigidbody->setRestitution(newvalue);
-			this->_physicworld->updateSingleAabb(_rigidbody);
+			this->_physicworld->updateSingleAabb(_id);
 		}
 	}
 
 
 	// These apply methods should be used in update method.
 	void gipBaseGameObject::applyCentralForce(glm::vec3 forcevalue) {
-		_rigidbody->applyCentralForce(btVector3(forcevalue.x, forcevalue.y, forcevalue.z));
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			_rigidbody->applyCentralForce(btVector3(forcevalue.x, forcevalue.y, forcevalue.z));
 	}
 
 	void gipBaseGameObject::applyCentralImpulse(glm::vec3 impulsevalue) {
-		_rigidbody->applyCentralImpulse(btVector3(impulsevalue.x, impulsevalue.y, impulsevalue.z));
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			_rigidbody->applyCentralImpulse(btVector3(impulsevalue.x, impulsevalue.y, impulsevalue.z));
 	}
 
 	void gipBaseGameObject::applyForce(glm::vec3 forcevalue,glm::vec3 forcepos) {
-		_rigidbody->applyForce(btVector3(forcevalue.x, forcevalue.y, forcevalue.z), btVector3(forcepos.x, forcepos.y, forcepos.z));
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			_rigidbody->applyForce(btVector3(forcevalue.x, forcevalue.y, forcevalue.z), btVector3(forcepos.x, forcepos.y, forcepos.z));
 	}
 
 	void gipBaseGameObject::applyImpulse(glm::vec3 impulsevalue,glm::vec3 impulsepos) {
-		_rigidbody->applyImpulse(btVector3(impulsevalue.x, impulsevalue.y, impulsevalue.z), btVector3(impulsepos.x, impulsepos.y, impulsepos.z));
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			_rigidbody->applyImpulse(btVector3(impulsevalue.x, impulsevalue.y, impulsevalue.z), btVector3(impulsepos.x, impulsepos.y, impulsepos.z));
 	}
 	void gipBaseGameObject::applyTorque(glm::vec3 torquevalue) {
-		_rigidbody->applyTorque(btVector3(torquevalue.x, torquevalue.y, torquevalue.z));
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			_rigidbody->applyTorque(btVector3(torquevalue.x, torquevalue.y, torquevalue.z));
 	}
 	void gipBaseGameObject::applyTorqueImpulse(glm::vec3 torquevalue) {
-		_rigidbody->applyTorqueImpulse(btVector3(torquevalue.x, torquevalue.y, torquevalue.z));
+		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+			_rigidbody->applyTorqueImpulse(btVector3(torquevalue.x, torquevalue.y, torquevalue.z));
 	}
 
 	//----------------------------------------------------------------------------------------

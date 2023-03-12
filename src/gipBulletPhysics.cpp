@@ -26,7 +26,7 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
 		solver = new btSequentialImpulseConstraintSolver;
 
 		if (worldType == WORLDTYPE::WORLDTYPE_RIGIDWORLD) {
-			_dynamicsworld = new btDiscreteDynamicsWorld (collisiondispatcher, overlappingpaircache, solver, collisionconfiguration);
+		_dynamicsworld = new btDiscreteDynamicsWorld (collisiondispatcher, overlappingpaircache, solver, collisionconfiguration);
 		}
 		else if (worldType == WORLDTYPE::WORLDTYPE_SOFTWORLD) {
 			broadphase = new btDbvtBroadphase();
@@ -45,15 +45,21 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
 		 */
 		_dynamicsworld->setGravity(btVector3(0.0f, worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? -9.81f : 9.81f, 0.0f));
 		_dynamicsworld->applyGravity();
+
+		_dynamicsworld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+
 	    /*Create custom debug drawer*/
 	    gipDebugDraw *draw   = new gipDebugDraw((int)worldcoordinate);
 	    draw->clearLines();
 	    draw->setDebugMode( draw->getDebugMode()
-	          | btIDebugDraw::DBG_DrawWireframe );
+	          | btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
 
 	    _dynamicsworld->setDebugDrawer(draw);
 
 	    _isworldinitiliazed = true;
+
+	 //   this->_maxsubsteps = worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? 10 : 1;
+
 	}
 
 }
@@ -65,10 +71,65 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
  */
 int gipBulletPhysics::addPhysicObect(gipBaseGameObject* targetobject, int objectlayer, int masklayer) {
 	this->_objectlist.push_back(targetobject);
-	this->_dynamicsworld->addRigidBody(targetobject->getRigidBody(), objectlayer, masklayer);
-
+	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+		this->_dynamicsworld->addRigidBody(targetobject->getRigidBody(), objectlayer, masklayer);
+	else
+		this->_dynamicsworld->addCollisionObject(targetobject->_ghostobject, objectlayer, masklayer);
 
 	return this->_objectlist.size() - 1;
+}
+
+//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
+bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result) {
+	gLogi("raycast ") << "called";
+
+	btVector3 _start = btVector3(from.x, from.y, from.z);
+	btVector3 _end = btVector3(to.x, to.y, to.z);
+    btCollisionWorld::AllHitsRayResultCallback rayCallback(_start, _end);
+
+
+    //For debug ray
+ //   _dynamicsworld->getDebugDrawer()->drawLine(_start, _end, btVector4(1, 1, 0, 1));
+ //   _dynamicsworld->getDebugDrawer()->drawSphere(_start, 20.f, btVector4(1, 1, 0, 1));
+
+    rayCallback.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
+    rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
+    rayCallback.m_flags &= ~btTriangleRaycastCallback::kF_FilterBackfaces;
+	_dynamicsworld->performDiscreteCollisionDetection();
+	_dynamicsworld->updateAabbs();
+	overlappingpaircache->calculateOverlappingPairs(collisiondispatcher);
+
+	// Set the collision filter for the raycast callback
+	     rayCallback.m_collisionFilterGroup = 0;  // Raycast is in its own group
+	    rayCallback.m_collisionFilterMask = masklayers;  // Check collisions with specified layer mask
+
+	 // Perform the raycast on the dynamics world
+
+	_dynamicsworld->rayTest(_start, _end, rayCallback);
+	_dynamicsworld->performDiscreteCollisionDetection();
+	_dynamicsworld->updateAabbs();
+	overlappingpaircache->calculateOverlappingPairs(collisiondispatcher);
+
+	    // Check if the raycast hit anything
+	    if (rayCallback.hasHit()) {
+	        // Get the hit object and point
+	        const btRigidBody* hitBody = btRigidBody::upcast(rayCallback.m_collisionObjects[0]);
+	        btVector3 hitPoint;// = rayCallback.m_hitPointWorld;
+	       	gLogi("raycast") << "ray hitted";
+	        // Do something with the hit object and point (e.g., apply a force to the object)
+	        if (hitBody != nullptr) {
+
+	        	glm::vec3 hp = glm::vec3(hitPoint.x(), hitPoint.y(), hitPoint.z());
+	        	result->hitpoint = hp;
+	        	result->hittedobject = _objectlist[hitBody->getUserIndex()];
+	        	gLogi("raycast") << "ray hitted";
+	        	return true;
+	        }
+
+	    }
+
+	    return false;
+
 }
 
 gipBaseGameObject* gipBulletPhysics::getObject(int id) {
@@ -78,18 +139,20 @@ gipBaseGameObject* gipBulletPhysics::getObject(int id) {
 //need to be called from game each update
 // Return step count fot world worked
 int gipBulletPhysics::runPhysicWorldStep() {
+
 	// Physics calculations doing here.
 	int step = _dynamicsworld->stepSimulation(this->_timestep, this->_maxsubsteps, this->_fixedtimestep);
 	// update objects position
 	for (auto object : this->_objectlist) {
 
 		// don't update if object is static rb.
-		if (!object->_rigidbody->isStaticObject()) {
+		if (object->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY && !object->_rigidbody->isStaticObject()) {
 			object->updatePositionVariable();
 			object->updateRotationVariable();
 
 		}
 	}
+
 
 	//Call cehck collision for each frame
 	checkCollisions();
@@ -108,6 +171,7 @@ void gipBulletPhysics::checkCollisions() {
         btPersistentManifold* contactManifold =  _dynamicsworld->getDispatcher()->getManifoldByIndexInternal(i);
         //Count of point between collided two objects
         int numContacts = contactManifold->getNumContacts();
+
         for (int j=0;j<numContacts;j++)
         {
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
@@ -144,8 +208,11 @@ void gipBulletPhysics::drawDebug() {
 	_dynamicsworld->debugDrawWorld();
 }
 
-void gipBulletPhysics::updateSingleAabb(btCollisionObject* rigidbody) {
-	_dynamicsworld->updateSingleAabb(rigidbody);
+void gipBulletPhysics::updateSingleAabb(int id) {
+	if(this->_objectlist[id]->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+		_dynamicsworld->updateSingleAabb(this->_objectlist[id]->_rigidbody);
+	else
+		_dynamicsworld->updateSingleAabb(this->_objectlist[id]->_ghostobject);
 }
 
 /*
@@ -154,11 +221,15 @@ void gipBulletPhysics::updateSingleAabb(btCollisionObject* rigidbody) {
  */
 void gipBulletPhysics::updateObjectlayers(int objectid) {
 	_dynamicsworld->removeRigidBody(this->_objectlist[objectid]->_rigidbody);
-	_dynamicsworld->addRigidBody(this->_objectlist[objectid]->_rigidbody, (int)this->_objectlist[objectid]->_objectlayers, (int)this->_objectlist[objectid]->_masklayers);
+	if(this->_objectlist[objectid]->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+		_dynamicsworld->addRigidBody(this->_objectlist[objectid]->_rigidbody, (int)this->_objectlist[objectid]->_objectlayers, (int)this->_objectlist[objectid]->_masklayers);
+	else
+		this->_dynamicsworld->addCollisionObject(this->_objectlist[objectid]->_ghostobject, (int)this->_objectlist[objectid]->_objectlayers, (int)this->_objectlist[objectid]->_masklayers);
 }
 
 
 void gipBulletPhysics::setMass(gipBaseGameObject* targetobject, float newmass) {
+	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
 	_dynamicsworld->removeRigidBody(targetobject->_rigidbody);
 	btVector3 _interna = btVector3(0.0f, 0.0f, 0.0f);
 	targetobject->_rigidbody->getCollisionShape()->calculateLocalInertia(newmass, _interna);
@@ -176,6 +247,7 @@ void gipBulletPhysics::setMass(gipBaseGameObject* targetobject, float newmass) {
 
 
 	_dynamicsworld->addRigidBody(targetobject->_rigidbody, (int)targetobject->_objectlayers, (int)targetobject->_masklayers);
+	}
 }
 
 void gipBulletPhysics::printObjectTransform() {

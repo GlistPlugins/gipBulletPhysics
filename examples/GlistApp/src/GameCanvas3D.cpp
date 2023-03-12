@@ -2,7 +2,7 @@
  * GameCanvas3D.cpp
  *
  *  Created on: 26 Þub 2023
- *      Author: remzi
+ *      Author: Remzi ISCI
  */
 
 #include "GameCanvas3D.h"
@@ -57,16 +57,19 @@ void GameCanvas3D::setup() {
 
 
 	groundobject = new gModelGameObject(physicworld);
+	groundobject->setName("groundobject");
 	ground = new gBox();
 	ground->setTexture(&texturelight);
 	groundobject->setMesh(ground);
 	groundobject->setObjectSize(100.0f, 1.0f, 100.0f);
 	groundobject->setBounce(0.1f);
-	//groundobject->setPosition(0.0f, 0.0f, 0.0f);
+	groundobject->setObjectLayers(gipBulletPhysics::COLLISIONLAYERS::LAYER1);
+	groundobject->setPosition(0.0f, 0.0f, 0.0f);
 
 
 
 	box1gameobject = new gModelGameObject(physicworld);
+	box1gameobject->setName("box1gameobject");
 	box1gameobject->setPosition(0.0f, 10.0f, 0.0f);
 	box1 = new gBox();
 	box1->getMaterial()->setAmbientColor(0, 0, 255);
@@ -74,27 +77,40 @@ void GameCanvas3D::setup() {
 	box1gameobject->setMass(1.0f);
 	box1gameobject->setBounce(8.0f);
 	box1gameobject->setRotation(20.0f, 20.0f, 20.0f);
-	box1gameobject->setRotation(20.0f, 20.0f, 20.0f);
-	box1gameobject->setRotation(20.0f, 20.0f, 20.0f);
-	//box1gameobject->setColliderSize(4.0f, 4.0f, 4.0f);
-	//box1gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
+	//box1gameobject->setColliderSize(14.0f,14.0f, 14.0f);
+ 	box1gameobject->setObjectSize(10.0f, 2.0f, 10.0f);
 
 
 
 	box2gameobject = new gModelGameObject(physicworld);
+	box2gameobject->setName("box2gameobject");
 	box2 = new gBox();
 	box2gameobject->setMesh(box2);
-	//box2gameobject->setPosition(-2.0f, 4.0f, 0.0f);
+	box2gameobject->setPosition(-20.0f, 4.0f, 0.0f);
 	//box2gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
 	box2gameobject->setObjectSize(2.0f, 2.0f, 2.0f);
 	box2gameobject->setColliderSize(2.0f, 2.0f, 2.0f);
 	box2->getMaterial()->setAmbientColor(0, 255, 0);
+
+
+	ghostbox = new gGhostGameObject3D(physicworld);
+	ghostbox->setPosition(0.0f, 20.0f, 0.0f);
+	ghostbox->setColliderSize(0.0f, 100.0f, 0.0f);
+	ghostbox->setOnCollided(std::bind(&GameCanvas3D::onCollidedBall,this, std::placeholders::_1));
 	//---------------------------------------------------------
+}
+
+void GameCanvas3D::onCollidedBall(int targetid) {
+	gLogi("Ghostbox collided with ") << physicworld->getObject(targetid)->getName();
 }
 
 void GameCanvas3D::update() {
 	//gLogi("GameCanvas3D") << "update";
+
 	physicworld->runPhysicWorldStep();
+
+
+
 	if(keystate & KEY_W) {
 		camera.dolly(-1.0f);
 	} else if(keystate & KEY_S) {
@@ -110,6 +126,8 @@ void GameCanvas3D::update() {
 	sun2.pan((std::rand() % 100) * 0.001f);
 	sun2.tilt((std::rand() % 100) * 0.001f);
 	sun2.roll((std::rand() % 100) * 0.001f);
+
+
 }
 
 void GameCanvas3D::draw() {
@@ -123,12 +141,15 @@ void GameCanvas3D::drawScene() {
 	camera.begin();
 	enableDepthTest();
 	sun1.enable();
+	//Physic world
+
 	//sun2.enable();
-	sky.draw();
+	//sky.draw();
 	box2gameobject->draw();
 	groundobject->draw();
 	renderer->setColor(0, 0, 255);
 	box1gameobject->draw();
+
 	physicworld->drawDebug();
 	disableDepthTest();
 	sun1.disable();
@@ -157,6 +178,8 @@ void GameCanvas3D::keyPressed(int key) {
 	} else 	if(key == G_KEY_F){
 		keystate |= KEY_F;
 	}
+
+
 
 	if(key == G_KEY_ESC){
 		exit(0);
