@@ -39,7 +39,7 @@ void GameCanvas::setup() {
 	rampobject->setName("Ramp Object");
 	rampobject->setColliderSize(200.0f, 40.0f);
 	rampobject->setPosition(getWidth() * 0.8f, getHeight() * 0.7f);
-	rampobject->setRotation(135.0f);
+	rampobject->setRotation2D(25.0f);
 	rampobject->setBounce(0.1f);
 	//rampobject->setFriction(100.f);
 	//rampobject->setRollingFriction(100.f);
@@ -66,20 +66,21 @@ void GameCanvas::setup() {
 
 	//create object with loading image
 	ghostballobject = new gImageGameObject(gBulletObj);
-	//you can lock or unlock size of collider and image
-	//ghostballobject->setIsSizeLocked(false);
 	ghostballobject->loadImage("ball.png");
 	//you can set image render size
 	//ghostballobject->setObjectSize(400.0f, 400.0f);
 	ghostballobject->setTag(3); //3 for balls, you can set any integer as you wish
 	ghostballobject->setName("Softball Object");
-	ghostballobject->setColliderSize(80.0f, 80.0f);
+	//you can lock or unlock size of collider and image
+	//ghostballobject->setIsSizeLocked(false);
+	ghostballobject->setObjectSize(80.0f, 80.0f);
+	ghostballobject->setColliderSize(120.0f, 120.0f);
 	ghostballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
 	ghostballobject->setPosition(0 + ghostballobject->getWidth() * 1.2f, getHeight() * 0.1f);
 	ghostballobject->setMass(400.0f);
 	ghostballobject->setBounce(10.0f);
 	ghostballobject->setMaskLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER1 | gipBaseGameObject::COLLISIONLAYERS::LAYER2);
-	ghostballobject->setColliderOffset(100.f, 40.0f);
+	//ghostballobject->setColliderOffset(100.f, 40.0f);
 	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
 }

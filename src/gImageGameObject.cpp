@@ -98,6 +98,7 @@ void gImageGameObject::draw() {
 }
 
 
+
 gImageGameObject::~gImageGameObject() {
 	// TODO Auto-generated destructor stub
 }

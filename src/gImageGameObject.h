@@ -14,9 +14,6 @@
 #ifndef SRC_GIMAGEGAMEOBJECT_H_
 #define SRC_GIMAGEGAMEOBJECT_H_
 
-//#include "gImage.h"
-//#include "glm/glm.hpp"
-//#include <functional>
 #include "gipBaseGameObject.h"
 #include "gipBulletPhysics.h"
 
@@ -39,8 +36,6 @@ public:
 
 	//Call this function to draw image
 	void draw();
-
-
 
 protected:
 

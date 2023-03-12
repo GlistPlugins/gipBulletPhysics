@@ -80,7 +80,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 			this->_transform.setOrigin(
 					btVector3(
 							x + this->_colliderofset.x,
-							y + this->_colliderofset.y,
+							-(y + this->_colliderofset.y),
 							z + this->_colliderofset.z
 					)
 			);
@@ -88,10 +88,16 @@ gipBaseGameObject::~gipBaseGameObject() {
 		_rigidbody->setWorldTransform(_transform);
 		this->_physicworld->updateSingleAabb(_rigidbody);
 
-		if(_isrenderobjectloaded && _renderobjecttype == OBJECTRENDERTYPE_MODEL) {
-			_model->setPosition(_position.x,
-					-_position.y,
-					_position.z);
+		if(_isrenderobjectloaded) {
+			if(_renderobjecttype == OBJECTRENDERTYPE_MODEL){
+				_model->setPosition(_position.x,
+						_position.y,
+						_position.z);
+			} else if(_renderobjecttype == OBJECTRENDERTYPE_MESH){
+				_mesh->setPosition(_position.x,
+						_position.y,
+						_position.z);
+			}
 		}
 	}
 
@@ -104,30 +110,50 @@ gipBaseGameObject::~gipBaseGameObject() {
 		temprot.z = -gRadToDeg(temprot.z);
 		return temprot;
 	}
-	//Bu kýsým düzeltilecek
+
+
 	void gipBaseGameObject::setRotation(float degrex, float degrey, float degrez) {
-		this->_rotation.setEulerZYX(-gDegToRad(degrez), gDegToRad(degrey), gDegToRad(degrex));
+		glm::vec3 newor;
+		newor.x = gDegToRad(degrex);
+		newor.y = gDegToRad(degrey);
+		newor.z = gDegToRad(degrez);
+		if(_isrenderobjectloaded) {
+			if(_coordinatetype == COORDINATE3D) {
+
+				if(_renderobjecttype == OBJECTRENDERTYPE_MODEL){
+					_model->setOrientation(_resetquat);
+					//_model->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
+					if(newor.z != 0) _model->roll(-newor.z);
+					if(newor.y != 0) _model->pan(newor.y);
+					if(newor.x != 0) _model->tilt(-newor.x) ;
+				}
+				else if(_renderobjecttype == OBJECTRENDERTYPE_MESH){
+					_mesh->setOrientation(_resetquat);
+				//	_mesh->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
+					if(newor.z != 0) _mesh->roll(-newor.z);
+					if(newor.y != 0) _mesh->pan(newor.y);
+					if(newor.x != 0) _mesh->tilt(-newor.x) ;
+
+				}
+			}
+		}
+
+		this->_rotation.setEulerZYX(newor.z, newor.y, newor.x);
 		_transform.setRotation(this->_rotation);
 		this->_rigidbody->setWorldTransform(this->_transform);
 		this->_physicworld->updateSingleAabb(_rigidbody);
-		if(_isrenderobjectloaded && _renderobjecttype == OBJECTRENDERTYPE_MODEL) {
-			glm::vec3 newor;
-			newor.x = gRadToDeg(_rotation.getAxis().getX() * _rotation.getAngle());
-			newor.y = gRadToDeg(_rotation.getAxis().getY() * _rotation.getAngle());
-			newor.z = -gRadToDeg(_rotation.getAxis().getZ() * _rotation.getAngle());
-			_model->setOrientation(newor);
-		}
+
 	}
+
 	//degree
 	//This for 2d object and world
-	void gipBaseGameObject::setRotation(float degrez) {
+	void gipBaseGameObject::setRotation2D(float degrez) {
 		if(_coordinatetype == COORDINATE2D) {
-			this->_rotation.setEulerZYX(-gDegToRad(degrez), gDegToRad(0.0f), gDegToRad(0.0f));
+			this->_rotation.setEulerZYX(gDegToRad(degrez), gDegToRad(0.0f), gDegToRad(0.0f));
 			_transform.setRotation(this->_rotation);
 			this->_rigidbody->setWorldTransform(this->_transform);
-			this->_physicworld->updateSingleAabb(_rigidbody);
+			this->_physicworld->updateSingleAabb(this->getRigidBody());
 		}
-
 	}
 
 	//Set offset collider fromorigin of object
@@ -160,11 +186,18 @@ gipBaseGameObject::~gipBaseGameObject() {
 			if(_coordinatetype == COORDINATE3D) {
 				_depth *= z / _sizecollider.z;
 				if(_isrenderobjectloaded) {
-					this->_model->scale(_width, _height, _depth);
+					if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) this->_model->setScale(_width, _height, _depth);
+					else if(_renderobjecttype == OBJECTRENDERTYPE_MESH) this->_mesh->setScale(_width, _height, _depth);
+
 				}
 			}
 		}
-		_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+
+		if(_coordinatetype == COORDINATE2D)
+			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x / _sizecollider.x, y / _sizecollider.y, (z > 0 ? z : _sizecollider.z)  / _sizecollider.z));
+		else if(_coordinatetype == COORDINATE3D)
+			_rigidbody->getCollisionShape()->setLocalScaling(btVector3(x, y, z > 0 ? z : _sizecollider.z));
+
 		this->_sizecollider = glm::vec3(x, y, z > 0 ? z : _sizecollider.z);
 		this->_physicworld->updateSingleAabb(_rigidbody);
 	}
@@ -173,29 +206,29 @@ gipBaseGameObject::~gipBaseGameObject() {
 		return this->_sizecollider;
 	}
 	void gipBaseGameObject::setObjectSize(float width, float height, float depth) {
-		if(_isrenderobjectloaded && this->_isrenderersizelocked) {
-			_sizecollider.x *= width / _width;
-			_sizecollider.y *= height / _height;
-			if(_coordinatetype == COORDINATE2D) {
-				_rigidbody->getCollisionShape()->setLocalScaling(btVector3((width / _width) * 0.5f ,  (height / _height) * 0.5f, 1.0f));
+		if(_isrenderobjectloaded) {
+			 if(this->_isrenderersizelocked) {
+				_sizecollider.x *= width / _width;
+				_sizecollider.y *= height / _height;
+				if(_coordinatetype == COORDINATE2D) {
+					_rigidbody->getCollisionShape()->setLocalScaling(btVector3((width / _width) * 0.5f ,  (height / _height) * 0.5f, 1.0f));
+				}
+				else {
+					if(_depth > 0) _sizecollider.z *= depth / _depth;
+					else _sizecollider.z *= depth;
+					_rigidbody->getCollisionShape()->setLocalScaling(btVector3(_sizecollider.x, _sizecollider.y, _sizecollider.z));
+				}
+
+				this->_physicworld->updateSingleAabb(_rigidbody);
 			}
-			else {
-				if(_depth > 0) _sizecollider.z *= depth / _depth;
-				else _sizecollider.z *= depth;
-				_rigidbody->getCollisionShape()->setLocalScaling(btVector3((width / _width) * 0.5f ,  (height / _height) * 0.5f, _depth > 0 ? depth / _depth : depth));
-			}
-
-
-
-			this->_physicworld->updateSingleAabb(_rigidbody);
+			_width = width;
+			_height = height;
+			_depth = depth > 0 ? depth : _depth;
+			if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) _model->setScale(width, height, depth);
+			else if(_renderobjecttype == OBJECTRENDERTYPE_MESH) _mesh->setScale(width, height, depth);
+			setPosition(this->_position.x, this->_position.y, this->_position.z);
 		}
-		_width = width;
-		_height = height;
-		_depth = depth > 0 ? depth : _depth;
-		if(_isrenderobjectloaded && _renderobjecttype == OBJECTRENDERTYPE_MODEL) {
-			_model->scale(width, height, depth);
-		}
-		setPosition(this->_position.x, this->_position.y, this->_position.z);
+
 	}
 	glm::vec3 gipBaseGameObject::getObjectSize() {
 		return glm::vec3(_width, _height, _depth);
@@ -212,15 +245,20 @@ gipBaseGameObject::~gipBaseGameObject() {
 		if(this->_shapetype != shapetype) {
 			this->_shapetype = shapetype;
 			if(shapetype == SHAPETYPE::SHAPETYPE_BOX){
-				this->_collisionshape =new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+				if(_coordinatetype == COORDINATE2D)	this->_collisionshape = new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btBoxShape(btVector3(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f, _sizecollider.z));
 			} else if(shapetype == SHAPETYPE::SHAPETYPE_SPHERE){
-				this->_collisionshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z);
+				if(_coordinatetype == COORDINATE2D)	this->_collisionshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z);
+				else if(_coordinatetype == COORDINATE3D)	this->_collisionshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z * 0.0025f);
 			} else if(shapetype == SHAPETYPE::SHAPETYPE_CYLINDER){
-				this->_collisionshape = new btCylinderShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btCylinderShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btCylinderShape(btVector3(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f,_sizecollider.z * 0.0025f));
 			} else if(shapetype == SHAPETYPE::SHAPETYPE_CAPSULE){
-				this->_collisionshape = new btCapsuleShape(_sizecollider.x, _sizecollider.y);
+				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btCapsuleShape(_sizecollider.x, _sizecollider.y);
+				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btCapsuleShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
 			} else if(shapetype == SHAPETYPE::SHAPETYPE_CONE){
-				this->_collisionshape = new btConeShape(_sizecollider.x, _sizecollider.y);
+				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btConeShape(_sizecollider.x, _sizecollider.y);
+				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btConeShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
 			}
 			this->_transform.setIdentity();
 			/*
@@ -232,16 +270,16 @@ gipBaseGameObject::~gipBaseGameObject() {
 			if(_coordinatetype == COORDINATE3D) {
 				this->_transform.setOrigin(
 						btVector3(
-								_position.x,
-								-_position.y,
-								_position.z
+								_position.x + this->_colliderofset.x,
+								-(_position.y + this->_colliderofset.y),
+								_position.z + this->_colliderofset.z
 						)
 				);
 			} else {
 				this->_transform.setOrigin(
 							btVector3(
-									_position.x + _sizecollider.x * 0.5f,
-									-(_position.y + _sizecollider.y * 0.5f),
+									_position.x  + this->_colliderofset.x + _sizecollider.x * 0.5f,
+									-(_position.y + this->_colliderofset.y + _sizecollider.y * 0.5f),
 									0.0f
 							)
 					);
@@ -392,8 +430,26 @@ gipBaseGameObject::~gipBaseGameObject() {
 	 */
 	void gipBaseGameObject::updateRotationVariable() {
 		_transform = _rigidbody->getWorldTransform();
-
+		glm::vec3 newor;
 		this->_rotation = _transform.getRotation();
+
+		if(_isrenderobjectloaded) {
+			this->_rotation.getEulerZYX(newor.z, newor.y, newor.x);
+			if(_renderobjecttype == OBJECTRENDERTYPE_MODEL){
+				_model->setOrientation(_resetquat);
+
+				if(newor.z != 0) _model->roll(-newor.z);
+				if(newor.y != 0) _model->pan(newor.y);
+				if(newor.x != 0) _model->tilt(-newor.x) ;
+			}else if(_renderobjecttype == OBJECTRENDERTYPE_MESH){
+				_mesh->setOrientation(_resetquat);
+				if(newor.z != 0) _mesh->roll(-newor.z);
+				if(newor.y != 0) _mesh->pan(newor.y);
+				if(newor.x != 0) _mesh->tilt(-newor.x) ;
+
+			}
+		}
+
 	}
 
 	/*
@@ -432,27 +488,34 @@ gipBaseGameObject::~gipBaseGameObject() {
 			if(type == TRANSFORMTYPE::TRANSFORMTYPE_BOX) {
 				this->_position =  glm::vec3 (
 						_transform.getOrigin().getX() - this->_colliderofset.x,
-						-(_transform.getOrigin().getY() - this->_colliderofset.y),
+						_transform.getOrigin().getY() - this->_colliderofset.y,
 						_transform.getOrigin().getZ() - this->_colliderofset.z
 				);
 			} else if(type == TRANSFORMTYPE::TRANSFORMTYPE_SPHERE) {
 				this->_position =  glm::vec3 (
 						_transform.getOrigin().getX() - this->_colliderofset.x,
-						-(_transform.getOrigin().getY() - this->_colliderofset.y),
+						_transform.getOrigin().getY() - this->_colliderofset.y,
 						_transform.getOrigin().getZ() - this->_colliderofset.z
 				);
 			} else {
 				this->_position = glm::vec3 (
 						_transform.getOrigin().getX() - this->_colliderofset.x,
-						-(_transform.getOrigin().getY() - this->_colliderofset.y),
+						_transform.getOrigin().getY() - this->_colliderofset.y,
 						_transform.getOrigin().getZ() - this->_colliderofset.x
 				);
 			}
 		}
-		if(_isrenderobjectloaded && _renderobjecttype == OBJECTRENDERTYPE_MODEL) {
-			_model->setPosition(_position.x,
-					-_position.y,
-					_position.z);
+		if(_isrenderobjectloaded) {
+			if(_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
+				_model->setPosition(_position.x  + this->_colliderofset.x,
+						-(_position.y + this->_colliderofset.y),
+						_position.z + this->_colliderofset.z);
+			} else if(_renderobjecttype == OBJECTRENDERTYPE_MESH) {
+				_mesh->setPosition(_position.x + this->_colliderofset.x,
+						-(_position.y + this->_colliderofset.y),
+						_position.z + this->_colliderofset.z);
+			}
+
 		}
 
 	}
