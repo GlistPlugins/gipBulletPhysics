@@ -55,33 +55,38 @@ void GameCanvas::setup() {
 
 	// create object with loading image
 	softballobject = new gImageGameObject(gBulletObj);
-	gameiconobject->setTag(3); //3 for balls, you can set any integer as you wish
+	softballobject->setTag(3); //3 for balls, you can set any integer as you wish
 	softballobject->setName("Softball Object");
 	softballobject->loadImage("ball.png");
 	softballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
 	softballobject->setPosition(getWidth() - softballobject->getWidth(), getHeight() * 0.1f);
 	softballobject->setMass(40.0f);
 	softballobject->setBounce(0.4f);
-	softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
+	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
 	//create object with loading image
-	ghostballobject = new gImageGameObject(gBulletObj);
-	ghostballobject->loadImage("ball.png");
+	seconballobject = new gImageGameObject(gBulletObj);
+	seconballobject->loadImage("ball.png");
 	//you can set image render size
 	//ghostballobject->setObjectSize(400.0f, 400.0f);
-	ghostballobject->setTag(3); //3 for balls, you can set any integer as you wish
-	ghostballobject->setName("Softball Object");
+	seconballobject->setTag(3); //3 for balls, you can set any integer as you wish
+	seconballobject->setName("Softball Object");
 	//you can lock or unlock size of collider and image
 	//ghostballobject->setIsSizeLocked(false);
-	ghostballobject->setObjectSize(80.0f, 80.0f);
-	ghostballobject->setColliderSize(120.0f, 120.0f);
-	ghostballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
-	ghostballobject->setPosition(0 + ghostballobject->getWidth() * 1.2f, getHeight() * 0.1f);
-	ghostballobject->setMass(400.0f);
-	ghostballobject->setBounce(10.0f);
-	ghostballobject->setMaskLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER1 | gipBaseGameObject::COLLISIONLAYERS::LAYER2);
+	seconballobject->setObjectSize(80.0f, 80.0f);
+	seconballobject->setColliderSize(120.0f, 120.0f);
+	seconballobject->setShapeType(gipBaseGameObject::SHAPETYPE::SHAPETYPE_SPHERE);
+	seconballobject->setPosition(0 + seconballobject->getWidth() * 1.2f, getHeight() * 0.1f);
+	seconballobject->setMass(400.0f);
+	seconballobject->setBounce(10.0f);
+	seconballobject->setMaskLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER1 | gipBaseGameObject::COLLISIONLAYERS::LAYER2);
 	//ghostballobject->setColliderOffset(100.f, 40.0f);
 	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
+
+	ghostbox = new gGhostGameObject2D(gBulletObj);
+	ghostbox->setPosition(40.0f, getHeight() * 0.4f);
+	ghostbox->setColliderSize(120.0f, 0.0f);
+	ghostbox->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
 
 }
 
@@ -101,7 +106,7 @@ void GameCanvas::draw() {
 	mountain.draw(getWidth() / 2 - mountain.getWidth() / 2, getHeight() - mountain.getHeight() / 2);
 
 	//Draw physic objects
-	ghostballobject->draw();
+	seconballobject->draw();
 	gameiconobject->draw();
 	rampobject->draw();
 	softballobject->draw();
@@ -117,6 +122,7 @@ void GameCanvas:: onCollidedBall(int targetid) {
 
 void GameCanvas::keyPressed(int key) {
 //	gLogi("GameCanvas") << "keyPressed:" << key;
+
 }
 
 void GameCanvas::keyReleased(int key) {

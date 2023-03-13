@@ -11,10 +11,11 @@
 #include "glm/glm.hpp"
 #include <Functional>
 #include "bullet/btBulletDynamicsCommon.h"
-
+#include "btGhostObject.h"
 #include "gModel.h"
 #include "gMesh.h"
 #include "gImage.h"
+
 
 class gipBulletPhysics;
 
@@ -51,7 +52,10 @@ public:
 		OBJECTRENDERTYPE_NONE
 	};
 
-
+	enum COLLISIONOBJECTTYPE {
+		COLLISIONOBJECTTYPE_RIGIDBODY,
+		COLLISIONOBJECTTYPE_GHOST
+	};
 	/*
 	* Layers are bitwise varialbles
 	 * You can use multiple layers together
@@ -231,6 +235,7 @@ protected:
 	btTransform _transform;
 	btCollisionShape* _collisionshape;
 	btRigidBody* _rigidbody;
+	btCollisionObject* _ghostobject;
 	//----------------------------------------------
 
 
@@ -303,6 +308,7 @@ protected:
 	int _masklayers = 1<<1 |1<<2 | 1<<3 | 1<<4 | 1<<5 | 1<<6 | 1<<7 | 1<<8 | 1<<9 | 1<<10
 			| 1<<11 | 1<<12 | 1<<13 | 1<<14 | 1<<15 | 1<<16 | 1<<17 | 1<<18 | 1<<19 | 1<<20
 			| 1<<21 | 1<<22;
+	COLLISIONOBJECTTYPE _collsionobjecttype = COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY;
 
 	const glm::quat _resetquat = glm::quatLookAt(glm::vec3(0,0,-1), glm::vec3(0,1,0));
 };
