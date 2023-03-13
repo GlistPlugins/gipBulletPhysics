@@ -13,15 +13,6 @@ gipBaseGameObject::gipBaseGameObject() {
 
 gipBaseGameObject::~gipBaseGameObject() {
 	this->_physicworld->removeObject(this->_id);
-	delete _image;
-	delete _model;
-	delete _collisionshape;
-	delete _rigidbody;
-	_image = nullptr;
-	_model = nullptr;
-	_collisionshape = nullptr;
-	_rigidbody = nullptr;
-	_physicworld = nullptr;
 }
 
 
@@ -446,7 +437,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 
 	void gipBaseGameObject::destroy() {
 		this->_physicworld->removeObject(this->_id);
-		delete this;
+
 	}
 
 	/*

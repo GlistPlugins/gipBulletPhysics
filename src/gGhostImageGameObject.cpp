@@ -5,9 +5,9 @@
  *  	Author: Remzi ISCI
  */
 
-#include <gGhostGameObject2D.h>
+#include <gGhostImageGameObject.h>
 
-gGhostGameObject2D::gGhostGameObject2D(gipBulletPhysics* physicworld) {
+gGhostImageGameObject::gGhostImageGameObject(gipBulletPhysics* physicworld) {
 	this->_physicworld = physicworld;
 	this->_renderobjecttype = OBJECTRENDERTYPE_NONE;
 	this->_coordinatetype = COORDINATE::COORDINATE2D;
@@ -42,7 +42,46 @@ gGhostGameObject2D::gGhostGameObject2D(gipBulletPhysics* physicworld) {
 
 }
 
-gGhostGameObject2D::~gGhostGameObject2D() {
+
+void gGhostImageGameObject::loadImage(std::string imagepath) {
+	this->_image = new gImage();
+	this->_image->loadImage(imagepath);
+	this->_isrenderobjectloaded = true;
+	this->_renderobjecttype = OBJECTRENDERTYPE_IMAGE;
+	setObjectSize(this->_image->getWidth(), this->_image->getHeight());
+}
+
+void gGhostImageGameObject::load(std::string fullpath) {
+	this->_image = new gImage();
+	this->_image->load(fullpath);
+	this->_isrenderobjectloaded = true;
+	this->_renderobjecttype = OBJECTRENDERTYPE_IMAGE;
+	setObjectSize(this->_image->getWidth(), this->_image->getHeight());
+}
+
+void gGhostImageGameObject::setImage(gImage* sourceimage) {
+	this->_image = sourceimage;
+	this->_isrenderobjectloaded = true;
+	this->_renderobjecttype = OBJECTRENDERTYPE_IMAGE;
+	setObjectSize(this->_image->getWidth(), this->_image->getHeight());
+}
+
+void gGhostImageGameObject::clearImage() {
+	this->_isrenderobjectloaded = false;
+	this->_renderobjecttype = OBJECTRENDERTYPE_NONE;
+}
+
+
+void gGhostImageGameObject::draw() {
+	//Wont be draw if ther is no any renderer object
+	if(this->_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
+		if(_isrenderobjectloaded) {
+			_image->draw(_position.x, _position.y, _width, _height, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));
+		}
+	}
+}
+
+gGhostImageGameObject::~gGhostImageGameObject() {
 	// TODO Auto-generated destructor stub
 }
 

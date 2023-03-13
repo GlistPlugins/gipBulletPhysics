@@ -88,11 +88,7 @@ void gImageGameObject::draw() {
 	//Wont be draw if ther is no any renderer object
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
 		if(_isrenderobjectloaded) {
-	//		if(this->_shapetype == SHAPETYPE::SHAPETYPE_BOX)
-				_image->draw(_position.x, _position.y, _width, _height, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));
-	//		else if(this->_shapetype == SHAPETYPE::SHAPETYPE_SPHERE)
-	//			_image->draw(_position.x, _position.y, _width, _height, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));
-
+			_image->draw(_position.x, _position.y, _width, _height, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));
 		}
 	}
 }

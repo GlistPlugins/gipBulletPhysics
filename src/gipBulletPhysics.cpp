@@ -230,23 +230,23 @@ void gipBulletPhysics::updateObjectlayers(int objectid) {
 
 void gipBulletPhysics::setMass(gipBaseGameObject* targetobject, float newmass) {
 	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
-	_dynamicsworld->removeRigidBody(targetobject->_rigidbody);
-	btVector3 _interna = btVector3(0.0f, 0.0f, 0.0f);
-	targetobject->_rigidbody->getCollisionShape()->calculateLocalInertia(newmass, _interna);
-	targetobject->_rigidbody->setMassProps(newmass, _interna);
+		_dynamicsworld->removeRigidBody(targetobject->_rigidbody);
+		btVector3 _interna = btVector3(0.0f, 0.0f, 0.0f);
+		targetobject->_rigidbody->getCollisionShape()->calculateLocalInertia(newmass, _interna);
+		targetobject->_rigidbody->setMassProps(newmass, _interna);
 
-	if(newmass != 0.0f) {
+		if(newmass != 0.0f) {
 
-		targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() & !btCollisionObject::CF_STATIC_OBJECT);
-		targetobject->_isstatic = false;
+			targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() & !btCollisionObject::CF_STATIC_OBJECT);
+			targetobject->_isstatic = false;
 
-	} else {
-		targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() | btCollisionObject::CF_STATIC_OBJECT);
-		targetobject->_isstatic = true;
-	}
+		} else {
+			targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() | btCollisionObject::CF_STATIC_OBJECT);
+			targetobject->_isstatic = true;
+		}
 
 
-	_dynamicsworld->addRigidBody(targetobject->_rigidbody, (int)targetobject->_objectlayers, (int)targetobject->_masklayers);
+		_dynamicsworld->addRigidBody(targetobject->_rigidbody, (int)targetobject->_objectlayers, (int)targetobject->_masklayers);
 	}
 }
 
@@ -286,8 +286,14 @@ void gipBulletPhysics::printObjectTransform() {
 }
 
 void gipBulletPhysics::removeObject(int id) {
-	_dynamicsworld->removeCollisionObject(_objectlist[id]->getRigidBody());
+	if(_objectlist[id]->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
+		_dynamicsworld->removeCollisionObject(_objectlist[id]->getRigidBody());
+	else
+		_dynamicsworld->removeCollisionObject(_objectlist[id]->_ghostobject);
+	auto tempobject = _objectlist[id];
 	_objectlist.erase(_objectlist.begin() + id);
+	//delete &tempobject;
+	tempobject = nullptr;
 }
 
 void gipBulletPhysics::setErp2(float value) {
