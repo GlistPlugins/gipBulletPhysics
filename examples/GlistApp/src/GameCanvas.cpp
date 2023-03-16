@@ -112,8 +112,8 @@ void GameCanvas::draw() {
 	gBulletObj->drawDebug();
 }
 
-void GameCanvas:: onCollidedBall(int targetid) {
-	gLogi("Ball Collison") << gBulletObj->getObject(targetid)->getName() << " Hitted me";
+void GameCanvas:: onCollidedBall(int targetid, glm::vec3 pointa, glm::vec3 pointb) {
+	gLogi("Ball Collison") << gBulletObj->getObject(targetid)->getName() << pointb.x;
 }
 
 void GameCanvas::keyPressed(int key) {
@@ -123,7 +123,7 @@ void GameCanvas::keyPressed(int key) {
 		ghostbox = new gGhostImageGameObject(gBulletObj);
 		ghostbox->setPosition(40.0f, getHeight() * 0.4f);
 		ghostbox->setColliderSize(120.0f, 0.0f);
-		ghostbox->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
+		ghostbox->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 		gBulletObj->runPhysicWorldStep();
 		delete ghostbox;
 	}
