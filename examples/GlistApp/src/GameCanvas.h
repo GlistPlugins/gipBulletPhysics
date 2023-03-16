@@ -9,12 +9,12 @@
 #ifndef GAMECANVAS_H_
 #define GAMECANVAS_H_
 
+#include <gGhostImageGameObject.h>
 #include "gBaseCanvas.h"
 #include "gApp.h"
 #include "gipBulletPhysics.h"
 #include "gImageGameObject.h"
 #include "gModelGameObject.h"
-#include "gGhostGameObject2D.h"
 
 class GameCanvas : public gBaseCanvas {
 public:
@@ -40,7 +40,7 @@ public:
 	void showNotify();
 	void hideNotify();
 
-	void onCollidedBall(int targetid);
+	void onCollidedBall(int targetid, glm::vec3 pointa, glm::vec3 pointb);
 
 private:
 
@@ -61,7 +61,7 @@ private:
     gImageGameObject* gameiconobject;
     gImageGameObject* seconballobject;
 
-	gGhostGameObject2D* ghostbox;
+	gGhostImageGameObject* ghostbox;
 
     gipBulletPhysics* gBulletObj;
 

@@ -16,8 +16,8 @@ list(APPEND PLUGIN_SRCS
 			${PLUGIN_DIR}/src/gipBaseGameObject.cpp
 			${PLUGIN_DIR}/src/gImageGameObject.cpp
 			${PLUGIN_DIR}/src/gModelGameObject.cpp
-			${PLUGIN_DIR}/src/gGhostGameObject2D.cpp
-			${PLUGIN_DIR}/src/gGhostGameObject3D.cpp
+			${PLUGIN_DIR}/src/gGhostImageGameObject.cpp
+			${PLUGIN_DIR}/src/gGhostModelGameObject.cpp
 )
 
 

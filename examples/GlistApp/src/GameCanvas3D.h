@@ -8,12 +8,12 @@
 #ifndef SRC_GAMECANVAS3D_H_
 #define SRC_GAMECANVAS3D_H_
 
+#include <gGhostModelGameObject.h>
 #include "gBaseCanvas.h"
 #include "gApp.h"
 #include "gipBulletPhysics.h"
 #include "gImageGameObject.h"
 #include "gModelGameObject.h"
-#include "gGhostGameObject3D.h"
 #include "gCamera.h"
 #include "gLight.h"
 #include "gSkybox.h"
@@ -77,7 +77,7 @@ private:
 	gModelGameObject* box2gameobject;
 	gModelGameObject* groundobject;
 
-	gGhostGameObject3D* ghostbox;
+	gGhostModelGameObject* ghostbox;
 
 	glm::vec3 spawnpoint;
 	glm::vec3 cameraposition;

@@ -93,7 +93,7 @@ void GameCanvas3D::setup() {
 	box2->getMaterial()->setAmbientColor(0, 255, 0);
 
 
-	ghostbox = new gGhostGameObject3D(physicworld);
+	ghostbox = new gGhostModelGameObject(physicworld);
 	ghostbox->setPosition(0.0f, 20.0f, 0.0f);
 	ghostbox->setColliderSize(0.0f, 100.0f, 0.0f);
 	ghostbox->setOnCollided(std::bind(&GameCanvas3D::onCollidedBall,this, std::placeholders::_1));
