@@ -122,13 +122,11 @@ if(WIN32)
 				BussIK
 				clsocket
 				ConvexDecomposition
-				freeglut_static
 				freeglut
 				GIMPACTUtils
 				gwen
 				HACD
 				openvr_api
-				quadmath-0
 	)
 elseif(LINUX)
 	list(APPEND PLUGIN_LINKLIBS

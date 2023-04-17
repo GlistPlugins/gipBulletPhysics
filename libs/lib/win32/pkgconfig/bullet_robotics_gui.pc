@@ -1,0 +1,6 @@
+Name: bullet_robotics_gui
+Description: Bullet GUI extras for robotics
+Requires: bullet
+Version: 3.25
+Libs: -L/clang64/lib -lBulletRoboticsGUI
+Cflags:  -I/clang64/include/bullet -I/clang64/include/bullet_robotics_gui

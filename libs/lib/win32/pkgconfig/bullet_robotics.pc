@@ -1,0 +1,6 @@
+Name: bullet_robotics
+Description: Bullet extras that include several utilities for robotics including a urdf parser
+Requires: bullet
+Version: 3.25
+Libs: -L/clang64/lib -lBulletRobotics
+Cflags:  -I/clang64/include/bullet -I/clang64/include/bullet_robotics
