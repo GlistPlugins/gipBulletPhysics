@@ -1,5 +1,5 @@
 # gipBulletPhysics
-BulletPhysics plugin for GlistEngine. Work in progress.
+BulletPhysics plugin for GlistEngine.
 
 - Windows developers should not forget to add;
 ```
