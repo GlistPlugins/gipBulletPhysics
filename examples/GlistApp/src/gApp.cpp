@@ -6,17 +6,21 @@
  */
 
 #include "gApp.h"
-#include "GameCanvas.h"
+#include "gCanvas.h"
+#include "gCanvas3D.h"
 
 
 gApp::gApp() {
+}
+
+gApp::gApp(int argc, char **argv) : gBaseApp(argc, argv) {
 }
 
 gApp::~gApp() {
 }
 
 void gApp::setup() {
-	GameCanvas *cnv = new GameCanvas(this);
+	gCanvas* cnv = new gCanvas(this);
 	appmanager->setCurrentCanvas(cnv);
 }
 
