@@ -1,24 +1,24 @@
 /*
- * GameCanvas3D.cpp
+ * gCanvas3D.cpp
  *
- *  Created on: 26 Þub 2023
- *      Author: Remzi ISCI
+ *  Created on: 4 Eki 2023
+ *      Author: alper
  */
 
-#include "GameCanvas3D.h"
+#include <gCanvas3D.h>
 
-
-GameCanvas3D::GameCanvas3D(gApp* root) : gBaseCanvas(root) {
+gCanvas3D::gCanvas3D(gApp* root) : gBaseCanvas(root) {
 	this->root = root;
 }
 
-GameCanvas3D::~GameCanvas3D() {
+gCanvas3D::~gCanvas3D() {
 }
 
-void GameCanvas3D::setup() {
+
+void gCanvas3D::setup() {
 	//gipBulletPhysics::getInstance()->startWorld(false);
 
-	gLogi("GameCanvas3D") << "setup";
+	gLogi("gCanvas3D") << "setup";
 	logo.loadImage("glistengine_logo.png");
 
 	sun1.setPosition(0.0f, 40.0f, -100.0f);
@@ -96,16 +96,16 @@ void GameCanvas3D::setup() {
 	ghostbox = new gGhostModelGameObject(physicworld);
 	ghostbox->setPosition(0.0f, 20.0f, 0.0f);
 	ghostbox->setColliderSize(0.0f, 100.0f, 0.0f);
-	ghostbox->setOnCollided(std::bind(&GameCanvas3D::onCollidedBall,this, std::placeholders::_1));
+	ghostbox->setOnCollided(std::bind(&gCanvas3D::onCollidedBall,this, std::placeholders::_1));
 	//---------------------------------------------------------
 }
 
-void GameCanvas3D::onCollidedBall(int targetid) {
+void gCanvas3D::onCollidedBall(int targetid) {
 	gLogi("Ghostbox collided with ") << physicworld->getObject(targetid)->getName();
 }
 
-void GameCanvas3D::update() {
-	//gLogi("GameCanvas3D") << "update";
+void gCanvas3D::update() {
+	//gLogi("gCanvas3D") << "update";
 
 	physicworld->runPhysicWorldStep();
 
@@ -130,14 +130,14 @@ void GameCanvas3D::update() {
 
 }
 
-void GameCanvas3D::draw() {
-	//gLogi("GameCanvas3D") << "draw";
+void gCanvas3D::draw() {
+	//gLogi("gCanvas3D") << "draw";
 	//logo.draw((getWidth() - logo.getWidth()) / 2, (getHeight() - logo.getHeight()) / 2);
 
 	drawScene();
 }
 
-void GameCanvas3D::drawScene() {
+void gCanvas3D::drawScene() {
 	camera.begin();
 	enableDepthTest();
 	sun1.enable();
@@ -159,8 +159,8 @@ void GameCanvas3D::drawScene() {
 
 }
 
-void GameCanvas3D::keyPressed(int key) {
-//	gLogi("GameCanvas") << "keyPressed:" << key;
+void gCanvas3D::keyPressed(int key) {
+//	gLogi("gCanvas3D") << "keyPressed:" << key;
 	if(key == G_KEY_W){
 		keystate |= KEY_W;
 	} else 	if(key == G_KEY_S){
@@ -186,8 +186,8 @@ void GameCanvas3D::keyPressed(int key) {
 	}
 }
 
-void GameCanvas3D::keyReleased(int key) {
-//	gLogi("GameCanvas") << "keyReleased:" << key;
+void gCanvas3D::keyReleased(int key) {
+//	gLogi("gCanvas3D") << "keyReleased:" << key;
 	if(key == G_KEY_W){
 		keystate &= !KEY_W;
 	}
@@ -210,16 +210,16 @@ void GameCanvas3D::keyReleased(int key) {
 	}
 }
 
-void GameCanvas3D::charPressed(unsigned int codepoint) {
-//	gLogi("GameCanvas") << "charPressed:" << gCodepointToStr(codepoint);
+void gCanvas3D::charPressed(unsigned int codepoint) {
+//	gLogi("gCanvas3D") << "charPressed:" << gCodepointToStr(codepoint);
 }
 
-void GameCanvas3D::mouseMoved(int x, int y) {
-//	gLogi("GameCanvas") << "mouseMoved" << ", x:" << x << ", y:" << y;
+void gCanvas3D::mouseMoved(int x, int y) {
+//	gLogi("gCanvas3D") << "mouseMoved" << ", x:" << x << ", y:" << y;
 }
 
-void GameCanvas3D::mouseDragged(int x, int y, int button) {
-//	gLogi("GameCanvas") << "mouseDragged" << ", x:" << x << ", y:" << y << ", b:" << button;
+void gCanvas3D::mouseDragged(int x, int y, int button) {
+//	gLogi("gCanvas3D") << "mouseDragged" << ", x:" << x << ", y:" << y << ", b:" << button;
 	if(mouseoldx > x){
 		camera.pan(0.04f);
 	} else 	if(mouseoldx < x){
@@ -234,35 +234,31 @@ void GameCanvas3D::mouseDragged(int x, int y, int button) {
 	mouseoldy = y;
 }
 
-void GameCanvas3D::mousePressed(int x, int y, int button) {
+void gCanvas3D::mousePressed(int x, int y, int button) {
+//	gLogi("gCanvas3D") << "mousePressed" << ", button:" << button;
 	mouseoldx = x;
 	mouseoldy = y;
 }
 
-void GameCanvas3D::mouseReleased(int x, int y, int button) {
-//	gLogi("GameCanvas") << "mouseReleased" << ", button:" << button;
-
+void gCanvas3D::mouseReleased(int x, int y, int button) {
+//	gLogi("gCanvas3D") << "mouseReleased" << ", button:" << button;
 }
 
-void GameCanvas3D::mouseScrolled(int x, int y) {
-//	gLogi("GameCanvas") << "mouseScrolled" << ", x:" << x << ", y:" << y;
+void gCanvas3D::mouseScrolled(int x, int y) {
+//	gLogi("gCanvas3D") << "mouseScrolled" << ", x:" << x << ", y:" << y;
 }
 
-void GameCanvas3D::mouseEntered() {
+void gCanvas3D::mouseEntered() {
 }
 
-void GameCanvas3D::mouseExited() {
+void gCanvas3D::mouseExited() {
 }
 
-void GameCanvas3D::windowResized(int w, int h) {
+void gCanvas3D::windowResized(int w, int h) {
 }
 
-void GameCanvas3D::showNotify() {
-
+void gCanvas3D::showNotify() {
 }
 
-void GameCanvas3D::hideNotify() {
-
+void gCanvas3D::hideNotify() {
 }
-
-

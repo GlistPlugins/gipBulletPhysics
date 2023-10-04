@@ -1,12 +1,12 @@
 /*
- * GameCanvas3D.h
+ * gCanvas3D.h
  *
- *  Created on: 26 Þub 2023
- *      Author: Remzi ISCI
+ *  Created on: 4 Eki 2023
+ *      Author: alper
  */
 
-#ifndef SRC_GAMECANVAS3D_H_
-#define SRC_GAMECANVAS3D_H_
+#ifndef SRC_GCANVAS3D_H_
+#define SRC_GCANVAS3D_H_
 
 #include <gGhostModelGameObject.h>
 #include "gBaseCanvas.h"
@@ -19,12 +19,10 @@
 #include "gSkybox.h"
 #include "gBox.h"
 
-
-
-class GameCanvas3D : public gBaseCanvas {
+class gCanvas3D : public gBaseCanvas {
 public:
-	GameCanvas3D(gApp* root);
-	virtual ~GameCanvas3D();
+	gCanvas3D(gApp* root);
+	virtual ~gCanvas3D();
 
 	void setup();
 	void update();
@@ -87,5 +85,4 @@ private:
 	int mouseoldy = 0;
 };
 
-
-#endif /* SRC_GAMECANVAS3D_H_ */
+#endif /* SRC_GCANVAS3D_H_ */
