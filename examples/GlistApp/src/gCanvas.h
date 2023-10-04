@@ -1,13 +1,13 @@
 /*
- * GameCanvas.cpp
+ * gCanvas.cpp
  *
  *  Edited on : 16.02.2023
  *  	Author: Remzi ISCI
  */
 
 
-#ifndef GAMECANVAS_H_
-#define GAMECANVAS_H_
+#ifndef GCANVAS_H_
+#define GCANVAS_H_
 
 #include <gGhostImageGameObject.h>
 #include "gBaseCanvas.h"
@@ -16,10 +16,10 @@
 #include "gImageGameObject.h"
 #include "gModelGameObject.h"
 
-class GameCanvas : public gBaseCanvas {
+class gCanvas : public gBaseCanvas {
 public:
-	GameCanvas(gApp* root);
-	virtual ~GameCanvas();
+	gCanvas(gApp* root);
+	virtual ~gCanvas();
 
 	void setup();
 	void update();
@@ -70,4 +70,4 @@ private:
 	void startCleanup();
 };
 
-#endif /* GAMECANVAS_H_ */
+#endif /* GCANVAS_H_ */

@@ -1,23 +1,23 @@
 /*
- * GameCanvas.cpp
+ * gCanvas.cpp
  *
  *  Edited on : 16.02.2023
  *  	Author: Remzi ISCI
  */
 
 
-#include "GameCanvas.h"
+#include "gCanvas.h"
 
 
-GameCanvas::GameCanvas(gApp* root) : gBaseCanvas(root) {
+gCanvas::gCanvas(gApp* root) : gBaseCanvas(root) {
 	this->root = root;
 }
 
-GameCanvas::~GameCanvas() {
+gCanvas::~gCanvas() {
 	gBulletObj->clean();
 }
 
-void GameCanvas::setup() {
+void gCanvas::setup() {
 	gBulletObj = new gipBulletPhysics(gipBulletPhysics::WORLDCOORDINATETYPE::WORLD2D);
 	sky.loadImage("layer-1-sky.png");
 	mountain.loadImage("layer-2-mountain.png");
@@ -62,7 +62,7 @@ void GameCanvas::setup() {
 	softballobject->setPosition(getWidth() - softballobject->getWidth(), getHeight() * 0.1f);
 	softballobject->setMass(40.0f);
 	softballobject->setBounce(0.4f);
-	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
+	//softballobject->setOnCollided(std::bind(&gCanvas::onCollidedBall,this, std::placeholders::_1));
 
 	//create object with loading image
 	seconballobject = new gImageGameObject(gBulletObj);
@@ -81,12 +81,12 @@ void GameCanvas::setup() {
 	seconballobject->setBounce(10.0f);
 	seconballobject->setMaskLayers(gipBaseGameObject::COLLISIONLAYERS::LAYER1 | gipBaseGameObject::COLLISIONLAYERS::LAYER2);
 	//ghostballobject->setColliderOffset(100.f, 40.0f);
-	//softballobject->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1));
+	//softballobject->setOnCollided(std::bind(&gCanvas::onCollidedBall,this, std::placeholders::_1));
 
 
 }
 
-void GameCanvas::update() {
+void gCanvas::update() {
 
 	// Physics calculations doing here.
 	gBulletObj->runPhysicWorldStep();
@@ -96,7 +96,7 @@ void GameCanvas::update() {
 	//ghostballobject->applyImpulse(glm::vec3(0.0f, 0.0f, -100.0f), glm::vec3(0.0f, 0.0f, 0.0f)); //will add velocity instant
 }
 
-void GameCanvas::draw() {
+void gCanvas::draw() {
 	//Draws nimages without colliders
 	sky.draw(getWidth() / 2 - sky.getWidth() / 2, getHeight() - sky.getHeight());
 	mountain.draw(getWidth() / 2 - mountain.getWidth() / 2, getHeight() - mountain.getHeight() / 2);
@@ -112,67 +112,67 @@ void GameCanvas::draw() {
 	gBulletObj->drawDebug();
 }
 
-void GameCanvas:: onCollidedBall(int targetid, glm::vec3 pointa, glm::vec3 pointb) {
+void gCanvas:: onCollidedBall(int targetid, glm::vec3 pointa, glm::vec3 pointb) {
 	gLogi("Ball Collison") << gBulletObj->getObject(targetid)->getName() << pointb.x;
 }
 
-void GameCanvas::keyPressed(int key) {
-//	gLogi("GameCanvas") << "keyPressed:" << key;
+void gCanvas::keyPressed(int key) {
+//	gLogi("gCanvas") << "keyPressed:" << key;
 
 	if(key == G_KEY_R) {
 		ghostbox = new gGhostImageGameObject(gBulletObj);
 		ghostbox->setPosition(40.0f, getHeight() * 0.4f);
 		ghostbox->setColliderSize(120.0f, 0.0f);
-		ghostbox->setOnCollided(std::bind(&GameCanvas::onCollidedBall,this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+		ghostbox->setOnCollided(std::bind(&gCanvas::onCollidedBall,this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 		gBulletObj->runPhysicWorldStep();
 		delete ghostbox;
 	}
 
 }
 
-void GameCanvas::keyReleased(int key) {
-//	gLogi("GameCanvas") << "keyReleased:" << key;
+void gCanvas::keyReleased(int key) {
+//	gLogi("gCanvas") << "keyReleased:" << key;
 }
 
-void GameCanvas::charPressed(unsigned int codepoint) {
-//	gLogi("GameCanvas") << "charPressed:" << gCodepointToStr(codepoint);
+void gCanvas::charPressed(unsigned int codepoint) {
+//	gLogi("gCanvas") << "charPressed:" << gCodepointToStr(codepoint);
 }
 
-void GameCanvas::mouseMoved(int x, int y) {
-//	gLogi("GameCanvas") << "mouseMoved" << ", x:" << x << ", y:" << y;
+void gCanvas::mouseMoved(int x, int y) {
+//	gLogi("gCanvas") << "mouseMoved" << ", x:" << x << ", y:" << y;
 }
 
-void GameCanvas::mouseDragged(int x, int y, int button) {
-//	gLogi("GameCanvas") << "mouseDragged" << ", x:" << x << ", y:" << y << ", b:" << button;
+void gCanvas::mouseDragged(int x, int y, int button) {
+//	gLogi("gCanvas") << "mouseDragged" << ", x:" << x << ", y:" << y << ", b:" << button;
 }
 
-void GameCanvas::mousePressed(int x, int y, int button) {
-//	gLogi("GameCanvas") << "mousePressed" << ", button:" << button;
+void gCanvas::mousePressed(int x, int y, int button) {
+//	gLogi("gCanvas") << "mousePressed" << ", button:" << button;
 }
 
-void GameCanvas::mouseReleased(int x, int y, int button) {
-//	gLogi("GameCanvas") << "mouseReleased" << ", button:" << button;
+void gCanvas::mouseReleased(int x, int y, int button) {
+//	gLogi("gCanvas") << "mouseReleased" << ", button:" << button;
 }
 
-void GameCanvas::mouseScrolled(int x, int y) {
-//	gLogi("GameCanvas") << "mouseScrolled" << ", x:" << x << ", y:" << y;
+void gCanvas::mouseScrolled(int x, int y) {
+//	gLogi("gCanvas") << "mouseScrolled" << ", x:" << x << ", y:" << y;
 }
 
-void GameCanvas::mouseEntered() {
+void gCanvas::mouseEntered() {
 }
 
-void GameCanvas::mouseExited() {
+void gCanvas::mouseExited() {
 }
 
-void GameCanvas::windowResized(int w, int h) {
+void gCanvas::windowResized(int w, int h) {
 }
 
-void GameCanvas::showNotify() {
+void gCanvas::showNotify() {
 }
 
-void GameCanvas::hideNotify() {
+void gCanvas::hideNotify() {
 }
 
-void GameCanvas::startCleanup() {
+void gCanvas::startCleanup() {
 
 }
