@@ -292,6 +292,10 @@ void gipBulletPhysics::removeObject(int id) {
 		_dynamicsworld->removeCollisionObject(_objectlist[id]->_ghostobject);
 	auto tempobject = _objectlist[id];
 	_objectlist.erase(_objectlist.begin() + id);
+	for (int i = id; i < _objectlist.size(); i++) {
+		_objectlist[i]->_id--;
+		_objectlist[i]->_rigidbody->setUserIndex(_objectlist[i]->_id);
+	}
 	//delete &tempobject;
 	tempobject = nullptr;
 }
