@@ -16,7 +16,7 @@
 #include "bullet/btBulletDynamicsCommon.h"
 #include "btRaycastCallback.h"
 #include "btCollisionWorld.h"
-#include "btGhostObject.h";
+#include "btGhostObject.h"
 
 #include "glm/glm.hpp"
 
@@ -83,14 +83,7 @@ public:
 	gipBulletPhysics(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
 	virtual ~gipBulletPhysics();
 
-	gipBaseGameObject* getObject(int id);
-
-
-
-	/*
-	 * Physic world simulation time step 60 is deafult and ideal for most of time
-	 */
-	inline static void setTimeStep(float timestep);
+	gipBaseGameObject* getObject(ObjectId id);
 
 	// Delete initialized objects
 	void clean();
@@ -106,7 +99,11 @@ public:
 	void drawDebug();
 
 
- 	int runPhysicWorldStep();
+ 	void runPhysicWorldStep() {
+        runPhysicWorldStep(1000.0f / 60.0f);
+    }
+
+ 	void runPhysicWorldStep(float deltatime);
 
 	/*
 	 * Gets gravity ovf physicworld
@@ -132,7 +129,7 @@ public:
 	 * objectlayers means object will own that flags
 	 * targetlayers means object only will collide thouse layers
 	 */
-	int addPhysicObect(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
+	ObjectId addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
 
 	//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
 	bool raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result);
@@ -141,9 +138,9 @@ public:
 	btDiscreteDynamicsWorld* _dynamicsworld;
 
 protected:
-	void removeObject(int id);
+	void removeObject(ObjectId id);
 
-	void updateSingleAabb(int id);
+	void updateSingleAabb(ObjectId id);
 
 
 
@@ -151,7 +148,7 @@ protected:
 	 * Call this function for setting object layers
 	 * LAYER0 means dont collide
 	 */
-	void updateObjectlayers(int objectid);
+	void updateObjectlayers(ObjectId objectid);
 
 
 	/*
@@ -173,6 +170,7 @@ private:
 	void checkCollisions();
 
 
+    ObjectId objectidcounter;
 	/*
 	 * Nedded referances and variables for physic world
 	 */
@@ -190,14 +188,8 @@ private:
 
 
 
-	//Physic world will work 60 times per second, ideal for 60fps
-	btScalar _timestep = 60.0f;
-	// step time for each update higher value will simulate game faster
-	int _maxsubsteps = 10;
-	btScalar _fixedtimestep = btScalar((1.0f)/_timestep);
-
 	//List of physic object which has been added world
-	std::vector<gipBaseGameObject*> _objectlist;
+	std::unordered_map<ObjectId, gipBaseGameObject*> _objectlist;
 
 	bool _isworldinitiliazed = false;
 

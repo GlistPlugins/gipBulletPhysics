@@ -48,10 +48,9 @@ gipBaseGameObject::~gipBaseGameObject() {
 		this->_objectname = newname;
 	}
 
-	int gipBaseGameObject::getID() {
-		return this->_id;
+	ObjectId gipBaseGameObject::getId() {
+		return _id;
 	}
-
 
 	glm::vec3 gipBaseGameObject::getPosition() {
 		return this->_position;
@@ -448,10 +447,10 @@ gipBaseGameObject::~gipBaseGameObject() {
 	 *  This function will be used by physic engine
 	 */
 	void gipBaseGameObject::warnCollided(int targetobjectid, glm::vec3 selfcollpos, glm::vec3 targetcollpos) {
-
-		if(this->_isOnCollidedFuncSetted == true) {
-			this->_onColl(targetobjectid, selfcollpos, targetcollpos);
+		if(!this->_isOnCollidedFuncSetted) {
+            return;
 		}
+        this->_onColl(targetobjectid, selfcollpos, targetcollpos);
 	}
 
 	/*

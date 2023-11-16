@@ -9,13 +9,14 @@
 #define SRC_GIPBASEGAMEOBJECT_H_
 
 #include "glm/glm.hpp"
-#include <Functional>
+#include <functional>
 #include "bullet/btBulletDynamicsCommon.h"
 #include "btGhostObject.h"
 #include "gModel.h"
 #include "gMesh.h"
 #include "gImage.h"
 
+using ObjectId = uint64_t;
 
 class gipBulletPhysics;
 
@@ -112,7 +113,7 @@ public:
 	std::string getName();
 	void setName(std::string newname);
 
-	int getID();
+	ObjectId getId();
 
 	glm::vec3 getPosition();
 	void setPosition(float x, float y, float z = 0.0f);
@@ -226,12 +227,11 @@ protected:
 	 */
 	std::function<void(int, glm::vec3, glm::vec3)> _onColl;
 
-
 	//Referances--------------------------------
 	gImage* _image;
 	gModel* _model;
 	gMesh* _mesh;
-	gipBulletPhysics*_physicworld;
+	gipBulletPhysics* _physicworld;
 	btTransform _transform;
 	btCollisionShape* _collisionshape;
 	btRigidBody* _rigidbody;
@@ -241,7 +241,7 @@ protected:
 
 	//Game world properties-------------------------
 	//id is comes from physic engine object list id
-	int _id = -1;
+	ObjectId _id = -1;
 	int _width = 200;
 	int _height = 200;
 	int _depth = 1.0f;

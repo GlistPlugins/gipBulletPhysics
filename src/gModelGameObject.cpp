@@ -52,9 +52,8 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 
 
 	this->_rigidbody->setActivationState(4);
-	this->_id = physicworld->addPhysicObect(this, this->_objectlayers, this->_masklayers);
+	this->_id = physicworld->addPhysicObject(this, this->_objectlayers, this->_masklayers);
 	this->_rigidbody->setUserIndex(this->_id);
-
 }
 
 
