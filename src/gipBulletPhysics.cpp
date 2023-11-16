@@ -167,7 +167,7 @@ void gipBulletPhysics::checkCollisions() {
         //Count of point between collided two objects
         int numContacts = contactManifold->getNumContacts();
 
-        for (int j = 0; j < numContacts; j++) {
+        for (int j = numContacts - 1; j >= 0; j--) {
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
             if (pt.getDistance() <= 0.0f) {
               //Collision positions
@@ -178,9 +178,6 @@ void gipBulletPhysics::checkCollisions() {
               //  const btVector3& normalOnB = pt.m_normalWorldOnB;
                 _objectlist[contactManifold->getBody0()->getUserIndex()]->warnCollided(contactManifold->getBody1()->getUserIndex(), colonobjA, colonobjB);
                 _objectlist[contactManifold->getBody1()->getUserIndex()]->warnCollided(contactManifold->getBody0()->getUserIndex(), colonobjB, colonobjA);
-                if (contactManifold->getNumContacts() != numContacts) {
-                    break; // break if an object is removed from the list
-                }
             }
         }
     }
