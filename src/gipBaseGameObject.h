@@ -16,7 +16,7 @@
 #include "gMesh.h"
 #include "gImage.h"
 
-using ObjectId = uint64_t;
+using ObjectId = uint32_t;
 
 class gipBulletPhysics;
 
