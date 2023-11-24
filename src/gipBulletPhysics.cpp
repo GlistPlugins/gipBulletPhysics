@@ -9,7 +9,10 @@
 #include "gipDebugDraw.h"
 #include "gipBaseGameObject.h"
 
+gipBulletPhysics* gipBulletPhysics::plugin;
+
 gipBulletPhysics::gipBulletPhysics(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType) {
+	plugin = this;
 	initializeWorld(worldcoordinate, worldType);
 }
 
@@ -18,50 +21,49 @@ gipBulletPhysics::~gipBulletPhysics() {
 }
 
 void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType) {
-
-	if(_isworldinitiliazed == false){
-		collisionconfiguration = new btDefaultCollisionConfiguration();
-		collisiondispatcher = new btCollisionDispatcher(collisionconfiguration);
-		overlappingpaircache = new btDbvtBroadphase();
-		solver = new btSequentialImpulseConstraintSolver;
-
-		if (worldType == WORLDTYPE::WORLDTYPE_RIGIDWORLD) {
-		_dynamicsworld = new btDiscreteDynamicsWorld (collisiondispatcher, overlappingpaircache, solver, collisionconfiguration);
-		}
-		else if (worldType == WORLDTYPE::WORLDTYPE_SOFTWORLD) {
-			broadphase = new btDbvtBroadphase();
-			constraintsolver = solver;
-			_dynamicsworld = new btDiscreteDynamicsWorld(collisiondispatcher, broadphase, constraintsolver, collisionconfiguration);
-		}
-
-		/*
-		 * THis property is for fast object, When seeting this property false then fast object can pass through wall
-		 * When choosin true will gice better collision dtetection but will cost more performance
-		 */
-		_dynamicsworld->getDispatchInfo().m_useContinuous=true;
-
-		/*
-		 *2D coordinate and 3D coordinate have different y axis way
-		 */
-		_dynamicsworld->setGravity(btVector3(0.0f, worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? -9.81f : 9.81f, 0.0f));
-		_dynamicsworld->applyGravity();
-
-		_dynamicsworld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
-
-	    /*Create custom debug drawer*/
-	    gipDebugDraw *draw   = new gipDebugDraw((int)worldcoordinate);
-	    draw->clearLines();
-	    draw->setDebugMode( draw->getDebugMode()
-	          | btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
-
-	    _dynamicsworld->setDebugDrawer(draw);
-
-	    _isworldinitiliazed = true;
-
-	 //   this->_maxsubsteps = worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? 10 : 1;
-
+	if(_isworldinitiliazed) {
+        return;
 	}
+    collisionconfiguration = new btDefaultCollisionConfiguration();
+    collisiondispatcher = new btCollisionDispatcher(collisionconfiguration);
+    overlappingpaircache = new btDbvtBroadphase();
+    solver = new btSequentialImpulseConstraintSolver;
 
+    if (worldType == WORLDTYPE::WORLDTYPE_RIGIDWORLD) {
+        _dynamicsworld = new btDiscreteDynamicsWorld (collisiondispatcher, overlappingpaircache, solver, collisionconfiguration);
+    }
+    else if (worldType == WORLDTYPE::WORLDTYPE_SOFTWORLD) {
+        broadphase = new btDbvtBroadphase();
+        constraintsolver = solver;
+        _dynamicsworld = new btDiscreteDynamicsWorld(collisiondispatcher, broadphase, constraintsolver, collisionconfiguration);
+    }
+
+    /*
+     * THis property is for fast object, When seeting this property false then fast object can pass through wall
+     * When choosin true will gice better collision dtetection but will cost more performance
+     */
+    _dynamicsworld->getDispatchInfo().m_useContinuous = true;
+
+    /*
+     *2D coordinate and 3D coordinate have different y axis way
+     */
+    _dynamicsworld->setGravity(btVector3(0.0f, worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? -9.81f : 9.81f, 0.0f));
+    _dynamicsworld->applyGravity();
+
+    _dynamicsworld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+
+    /*Create custom debug drawer*/
+    gipDebugDraw *draw   = new gipDebugDraw((int)worldcoordinate);
+    draw->clearLines();
+    draw->setDebugMode( draw->getDebugMode()
+                        | btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
+
+    _dynamicsworld->setDebugDrawer(draw);
+
+    _isworldinitiliazed = true;
+
+	_dynamicsworld->setInternalTickCallback(internalTick);
+    //   this->_maxsubsteps = worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? 10 : 1;
 }
 
 /*
@@ -69,14 +71,16 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
  * Set target layers whic you want collide with owner object
  * 0 means dont collide
  */
-int gipBulletPhysics::addPhysicObect(gipBaseGameObject* targetobject, int objectlayer, int masklayer) {
-	this->_objectlist.push_back(targetobject);
-	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
-		this->_dynamicsworld->addRigidBody(targetobject->getRigidBody(), objectlayer, masklayer);
-	else
-		this->_dynamicsworld->addCollisionObject(targetobject->_ghostobject, objectlayer, masklayer);
-
-	return this->_objectlist.size() - 1;
+void gipBulletPhysics::addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer) {
+	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+        _dynamicsworld->addRigidBody(targetobject->getRigidBody(), objectlayer, masklayer);
+		targetobject->getRigidBody()->setUserPointer(targetobject);
+    } else {
+        _dynamicsworld->addCollisionObject(targetobject->_ghostobject, objectlayer, masklayer);
+		targetobject->_ghostobject->setUserPointer(targetobject);
+    }
+	targetobject->setSelfIndex(_objects.size());
+	_objects.push_back(targetobject);
 }
 
 //This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
@@ -121,7 +125,7 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
 
 	        	glm::vec3 hp = glm::vec3(hitPoint.x(), hitPoint.y(), hitPoint.z());
 	        	result->hitpoint = hp;
-	        	result->hittedobject = _objectlist[hitBody->getUserIndex()];
+	        	result->hittedobject = static_cast<gipBaseGameObject*>(hitBody->getUserPointer());
 	        	gLogi("raycast") << "ray hitted";
 	        	return true;
 	        }
@@ -132,63 +136,49 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
 
 }
 
-gipBaseGameObject* gipBulletPhysics::getObject(int id) {
-	return this->_objectlist[id];
-}
-
-//need to be called from game each update
-// Return step count fot world worked
-int gipBulletPhysics::runPhysicWorldStep() {
-
+// need to be called from game each update
+void gipBulletPhysics::runPhysicWorldStep(float deltatime) {
 	// Physics calculations doing here.
-	int step = _dynamicsworld->stepSimulation(this->_timestep, this->_maxsubsteps, this->_fixedtimestep);
+	_dynamicsworld->stepSimulation(deltatime, 10);
 	// update objects position
-	for (auto object : this->_objectlist) {
-
+	for (auto& object : this->_objects) {
 		// don't update if object is static rb.
-		if (object->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY && !object->_rigidbody->isStaticObject()) {
+		if (object->_collsionobjecttype == COLLISIONOBJECTTYPE_RIGIDBODY && !object->_rigidbody->isStaticObject()) {
 			object->updatePositionVariable();
 			object->updateRotationVariable();
-
 		}
 	}
-
-
-	//Call cehck collision for each frame
-	checkCollisions();
 	// For tests:
 	//printObjectTransform();
-
-	return step;
 }
 
 void gipBulletPhysics::checkCollisions() {
     //Count of collision
     int numManifolds = _dynamicsworld->getDispatcher()->getNumManifolds();
 
-    for (int i=0;i<numManifolds;i++)
-    {
+    for (int i = 0; i < numManifolds; i++) {
         btPersistentManifold* contactManifold =  _dynamicsworld->getDispatcher()->getManifoldByIndexInternal(i);
         //Count of point between collided two objects
         int numContacts = contactManifold->getNumContacts();
 
-        for (int j=0;j<numContacts;j++)
-        {
+        for (int j = numContacts - 1; j >= 0; j--) {
             btManifoldPoint& pt = contactManifold->getContactPoint(j);
-            if (pt.getDistance() <= 0.f) //Maybe can use <=
-            {
-              //Collision positions
-            	const btVector3& ptA = pt.getPositionWorldOnA();
-                const btVector3& ptB = pt.getPositionWorldOnB();
-                glm::vec3 colonobjA = glm::vec3((float)(ptA.x()), (float)(ptA.y()), (float)(ptA.z()));
-                glm::vec3 colonobjB = glm::vec3((float)(ptB.x()), (float)(ptB.y()), (float)(ptB.z()));
-              //  const btVector3& normalOnB = pt.m_normalWorldOnB;
-                this->_objectlist[contactManifold->getBody0()->getUserIndex()]->warnCollided(contactManifold->getBody1()->getUserIndex(), colonobjA, colonobjB);
-                this->_objectlist[contactManifold->getBody1()->getUserIndex()]->warnCollided(contactManifold->getBody0()->getUserIndex(), colonobjB, colonobjA);
-
-            }
+            //Collision positions
+			const btVector3& ptA = pt.getPositionWorldOnA();
+			const btVector3& ptB = pt.getPositionWorldOnB();
+			glm::vec3 colonobjA = glm::vec3((float)(ptA.x()), (float)(ptA.y()), (float)(ptA.z()));
+			glm::vec3 colonobjB = glm::vec3((float)(ptB.x()), (float)(ptB.y()), (float)(ptB.z()));
+			//  const btVector3& normalOnB = pt.m_normalWorldOnB;
+			gipBaseGameObject* obj1 = static_cast<gipBaseGameObject*>(contactManifold->getBody0()->getUserPointer());
+			gipBaseGameObject* obj2 = static_cast<gipBaseGameObject*>(contactManifold->getBody1()->getUserPointer());
+			obj1->warnCollided(obj2, colonobjA, colonobjB);
+			obj2->warnCollided(obj1, colonobjB, colonobjA);
         }
     }
+}
+
+void gipBulletPhysics::internalTick(btDynamicsWorld *world, btScalar timeStep) {
+	plugin->checkCollisions();
 }
 
 void gipBulletPhysics::setGravity(glm::vec3 gravityValue) {
@@ -197,7 +187,7 @@ void gipBulletPhysics::setGravity(glm::vec3 gravityValue) {
 }
 
 glm::vec3 gipBulletPhysics::getGravity() {
-	btVector3 tempvec =  _dynamicsworld->getGravity();
+	btVector3 tempvec = _dynamicsworld->getGravity();
 	return glm::vec3(tempvec.x(), tempvec.y(), tempvec.z());
 }
 
@@ -208,96 +198,17 @@ void gipBulletPhysics::drawDebug() {
 	_dynamicsworld->debugDrawWorld();
 }
 
-void gipBulletPhysics::updateSingleAabb(int id) {
-	if(this->_objectlist[id]->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
-		_dynamicsworld->updateSingleAabb(this->_objectlist[id]->_rigidbody);
-	else
-		_dynamicsworld->updateSingleAabb(this->_objectlist[id]->_ghostobject);
-}
-
-/*
- * Call this function for setting object mask layers
- * LAYER0 means dont collide
- */
-void gipBulletPhysics::updateObjectlayers(int objectid) {
-	_dynamicsworld->removeRigidBody(this->_objectlist[objectid]->_rigidbody);
-	if(this->_objectlist[objectid]->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
-		_dynamicsworld->addRigidBody(this->_objectlist[objectid]->_rigidbody, (int)this->_objectlist[objectid]->_objectlayers, (int)this->_objectlist[objectid]->_masklayers);
-	else
-		this->_dynamicsworld->addCollisionObject(this->_objectlist[objectid]->_ghostobject, (int)this->_objectlist[objectid]->_objectlayers, (int)this->_objectlist[objectid]->_masklayers);
-}
-
-
-void gipBulletPhysics::setMass(gipBaseGameObject* targetobject, float newmass) {
-	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
-		_dynamicsworld->removeRigidBody(targetobject->_rigidbody);
-		btVector3 _interna = btVector3(0.0f, 0.0f, 0.0f);
-		targetobject->_rigidbody->getCollisionShape()->calculateLocalInertia(newmass, _interna);
-		targetobject->_rigidbody->setMassProps(newmass, _interna);
-
-		if(newmass != 0.0f) {
-
-			targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() & !btCollisionObject::CF_STATIC_OBJECT);
-			targetobject->_isstatic = false;
-
-		} else {
-			targetobject->_rigidbody->setFlags(targetobject->_rigidbody->getFlags() | btCollisionObject::CF_STATIC_OBJECT);
-			targetobject->_isstatic = true;
-		}
-
-
-		_dynamicsworld->addRigidBody(targetobject->_rigidbody, (int)targetobject->_objectlayers, (int)targetobject->_masklayers);
+void gipBulletPhysics::removeObject(gipBaseGameObject* object) {
+	if (object->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+        _dynamicsworld->removeCollisionObject(object->getRigidBody());
+    } else {
+        _dynamicsworld->removeCollisionObject(object->_ghostobject);
+    }
+	size_t previousindex = object->_selfindex;
+	_objects.erase(_objects.begin() + previousindex);
+	for (size_t i = previousindex + 1; i < _objects.size(); ++i) {
+		_objects[i]->setSelfIndex(i);
 	}
-}
-
-void gipBulletPhysics::printObjectTransform() {
-	std::vector<btCollisionObject*> colobjarray;
-	std::vector<btRigidBody*> rbarray;
-
-	for (auto object : this->_objectlist) {
-		int id = object->getID();
-		btTransform transform;
-		btRigidBody* rb = object->getRigidBody();
-		if (rb && rb->getMotionState()) {
-			rb->getMotionState()->getWorldTransform(transform);
-		}
-		else {
-			transform = colobjarray[id]->getWorldTransform();
-		}
-
-		if (id == 1) {
-			gLogi("gipBulletPhysics") << "id: " << id
-					<< "\n\t\t\t pos(x,y,z): "
-					<< " (" << float(transform.getOrigin().getX())
-					<< ", " << float(transform.getOrigin().getY())
-					<< ", " << float(transform.getOrigin().getZ()) << ")"
-					<< "\n\t\t\t rot(x,y,z,w): "
-					<< " (" << float(transform.getRotation().getX())
-					<< ", " << float(transform.getRotation().getY())
-					<< ", " << float(transform.getRotation().getZ())
-					<< ", " << float(transform.getRotation().getW()) << ")"
-					<< "\n\t\t\t radian angle: "
-					<< transform.getRotation().getAngle()
-					<< "\n\t\t\t degree angle: "
-					<< gRadToDeg(transform.getRotation().getAngle())
-					<< "\n";
-		}
-	}
-}
-
-void gipBulletPhysics::removeObject(int id) {
-	if(_objectlist[id]->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
-		_dynamicsworld->removeCollisionObject(_objectlist[id]->getRigidBody());
-	else
-		_dynamicsworld->removeCollisionObject(_objectlist[id]->_ghostobject);
-	auto tempobject = _objectlist[id];
-	_objectlist.erase(_objectlist.begin() + id);
-	for (int i = id; i < _objectlist.size(); i++) {
-		_objectlist[i]->_id--;
-		_objectlist[i]->_rigidbody->setUserIndex(_objectlist[i]->_id);
-	}
-	//delete &tempobject;
-	tempobject = nullptr;
 }
 
 void gipBulletPhysics::setErp2(float value) {
@@ -311,7 +222,6 @@ void gipBulletPhysics::setglobalCfm(float value) {
 
 void gipBulletPhysics::setNumIterations(int value) {
 	_dynamicsworld->getSolverInfo().m_numIterations = value;
-
 }
 
 void gipBulletPhysics::setSolverMode(int solverMode) {
@@ -346,11 +256,10 @@ int gipBulletPhysics::getSplitImpulse() {
 void gipBulletPhysics::clean() {
 	//remove the rigidbodies from the dynamics world and delete them
 	if(_dynamicsworld) {
-		int i;
-		for (i = _dynamicsworld->getNumConstraints() - 1; i >= 0; i--) {
+		for (int i = _dynamicsworld->getNumConstraints() - 1; i >= 0; i--) {
 			_dynamicsworld->removeConstraint(_dynamicsworld->getConstraint(i));
 		}
-		for (i = _dynamicsworld->getNumCollisionObjects() - 1; i >= 0; i--) {
+		for (int i = _dynamicsworld->getNumCollisionObjects() - 1; i >= 0; i--) {
 			btCollisionObject* obj = _dynamicsworld->getCollisionObjectArray()[i];
 			btRigidBody* body = btRigidBody::upcast(obj);
 			if (body && body->getMotionState()) {
@@ -362,25 +271,24 @@ void gipBulletPhysics::clean() {
 	}
 
 	//delete gameobjects
-	for (int j = 0; j < _objectlist.size(); j++)
-	{
-		gipBaseGameObject* gameobject = _objectlist[j];
+	for (int j = 0; j < _objects.size(); j++) {
+		gipBaseGameObject* gameobject = _objects[j];
 		delete gameobject;
 	}
-	_objectlist.clear();
+	_objects.clear();
 
 	delete _dynamicsworld;
-	_dynamicsworld = 0;
+	_dynamicsworld = nullptr;
 	delete constraintsolver;
-	constraintsolver = 0;
+	constraintsolver = nullptr;
 	delete solver;
-	solver = 0;
+	solver = nullptr;
 	delete softwolrdbroadphase;
-	softwolrdbroadphase = 0;
+	softwolrdbroadphase = nullptr;
 	delete overlappingpaircache;
-	overlappingpaircache = 0;
+	overlappingpaircache = nullptr;
 	delete collisiondispatcher;
-	collisiondispatcher = 0;
+	collisiondispatcher = nullptr;
 	delete collisionconfiguration;
-	collisionconfiguration = 0;
+	collisionconfiguration = nullptr;
 }

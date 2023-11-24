@@ -16,7 +16,7 @@
 #include "bullet/btBulletDynamicsCommon.h"
 #include "btRaycastCallback.h"
 #include "btCollisionWorld.h"
-#include "btGhostObject.h";
+#include "btGhostObject.h"
 
 #include "glm/glm.hpp"
 
@@ -31,6 +31,8 @@ public:
 
 class gipBulletPhysics : public gBasePlugin {
 public:
+	static gipBulletPhysics* plugin;
+
 	friend class gipBaseGameObject;
 	enum COLLISIONOBJECTTYPE {
 		COLLISIONOBJECTTYPE_RIGIDBODY,
@@ -83,15 +85,6 @@ public:
 	gipBulletPhysics(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
 	virtual ~gipBulletPhysics();
 
-	gipBaseGameObject* getObject(int id);
-
-
-
-	/*
-	 * Physic world simulation time step 60 is deafult and ideal for most of time
-	 */
-	inline static void setTimeStep(float timestep);
-
 	// Delete initialized objects
 	void clean();
 	// for 2d set z axis 0
@@ -106,7 +99,11 @@ public:
 	void drawDebug();
 
 
- 	int runPhysicWorldStep();
+ 	void runPhysicWorldStep() {
+        runPhysicWorldStep(1000.0f / 60.0f);
+    }
+
+ 	void runPhysicWorldStep(float deltatime);
 
 	/*
 	 * Gets gravity ovf physicworld
@@ -120,11 +117,6 @@ public:
 	int getSolverMode();
 	int getSplitImpulse();
 
-	// Call it in stepSimulation method to see the position and rotation of the objects.
-	void printObjectTransform();
-
-
-
 	/*
 	 * This function calls by physicobjects childes
 	 * layers are bitwise variables
@@ -132,7 +124,7 @@ public:
 	 * objectlayers means object will own that flags
 	 * targetlayers means object only will collide thouse layers
 	 */
-	int addPhysicObect(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
+	void addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
 
 	//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
 	bool raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result);
@@ -141,26 +133,7 @@ public:
 	btDiscreteDynamicsWorld* _dynamicsworld;
 
 protected:
-	void removeObject(int id);
-
-	void updateSingleAabb(int id);
-
-
-
-	/*
-	 * Call this function for setting object layers
-	 * LAYER0 means dont collide
-	 */
-	void updateObjectlayers(int objectid);
-
-
-	/*
-	 * For setting mass
-	 * To change mass of object  need control physic world directly
-	 */
-	void setMass(gipBaseGameObject* targetobject, float newmass);
-
-
+	void removeObject(gipBaseGameObject* object);
 
 private:
 	/*
@@ -172,6 +145,7 @@ private:
 	//collision dedection codes
 	void checkCollisions();
 
+	static void internalTick(btDynamicsWorld* world, btScalar timeStep);
 
 	/*
 	 * Nedded referances and variables for physic world
@@ -187,17 +161,8 @@ private:
 
 	btBroadphaseInterface* broadphase;
 
-
-
-
-	//Physic world will work 60 times per second, ideal for 60fps
-	btScalar _timestep = 60.0f;
-	// step time for each update higher value will simulate game faster
-	int _maxsubsteps = 10;
-	btScalar _fixedtimestep = btScalar((1.0f)/_timestep);
-
 	//List of physic object which has been added world
-	std::vector<gipBaseGameObject*> _objectlist;
+	std::deque<gipBaseGameObject*> _objects;
 
 	bool _isworldinitiliazed = false;
 

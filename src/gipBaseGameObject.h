@@ -9,19 +9,21 @@
 #define SRC_GIPBASEGAMEOBJECT_H_
 
 #include "glm/glm.hpp"
-#include <Functional>
+#include <functional>
 #include "bullet/btBulletDynamicsCommon.h"
 #include "btGhostObject.h"
 #include "gModel.h"
 #include "gMesh.h"
 #include "gImage.h"
 
-
 class gipBulletPhysics;
 
-class gipBaseGameObject {
+class gipBaseGameObject;
+using OnCollidedFunction = std::function<void(gipBaseGameObject*, glm::vec3, glm::vec3)>;
 
+class gipBaseGameObject {
 public:
+	friend class gipBulletPhysics;
 
 	enum COORDINATE { COORDINATE2D = 0, COORDINATE3D = 1 };
 	/*
@@ -88,17 +90,15 @@ public:
 		LAYER21 = 1 << 21,
 		LAYER22 = 1 << 22
 	};
+
 	gipBaseGameObject();
 	virtual ~gipBaseGameObject();
-
-
-	friend class gipBulletPhysics;
 
 	/*
 	 * Use this function for setting Oncollision fu
 	 * use std::bind for parameter
 	 */
-	void setOnCollided(std::function<void(int, glm::vec3, glm::vec3)> onColl);
+	void setOnCollided(OnCollidedFunction func);
 
 	//get with of conten(image, model etc)
 	int getWidth();
@@ -111,8 +111,6 @@ public:
 
 	std::string getName();
 	void setName(std::string newname);
-
-	int getID();
 
 	glm::vec3 getPosition();
 	void setPosition(float x, float y, float z = 0.0f);
@@ -196,7 +194,9 @@ public:
 
 	bool getIsStatic();
 
+	void updateSingleAABB();
 
+	void updateObjectLayers();
 
 protected:
 
@@ -207,7 +207,7 @@ protected:
 	 *  Dont call this function manuel
 	 *  This function will be used by physic engine
 	 */
-	void warnCollided(int targetobjectid, glm::vec3 selfcollpos, glm::vec3 targetcollpos);
+	void warnCollided(gipBaseGameObject* target, glm::vec3 selfcollpos, glm::vec3 targetcollpos);
 
 	/*
 	 * This function is for physic engine dont use manualy
@@ -219,19 +219,21 @@ protected:
 	 */
 	void updateRotationVariable();
 
+	void setSelfIndex(size_t index);
+
 	/*
 	 *This function referans for onCollided func
 	 *This referance will connect Canvas function to physic object function
 	 *You need use std::bind with setOncollided to using this referance
 	 */
-	std::function<void(int, glm::vec3, glm::vec3)> _onColl;
-
+	OnCollidedFunction collidedcallback;
 
 	//Referances--------------------------------
+	size_t _selfindex = 0;
 	gImage* _image;
 	gModel* _model;
 	gMesh* _mesh;
-	gipBulletPhysics*_physicworld;
+	gipBulletPhysics* _physicworld;
 	btTransform _transform;
 	btCollisionShape* _collisionshape;
 	btRigidBody* _rigidbody;
@@ -240,8 +242,6 @@ protected:
 
 
 	//Game world properties-------------------------
-	//id is comes from physic engine object list id
-	int _id = -1;
 	int _width = 200;
 	int _height = 200;
 	int _depth = 1.0f;
@@ -262,9 +262,6 @@ protected:
 	int _anistropicfrictionmode;
 	//-------------------------------------------------
 
-
-	//True if setted OnCollided Function
-	bool _isOnCollidedFuncSetted = false;
 
 
 	OBJECTRENDERTYPE _renderobjecttype = OBJECTRENDERTYPE_IMAGE;

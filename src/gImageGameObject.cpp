@@ -36,11 +36,11 @@ gImageGameObject::gImageGameObject(gipBulletPhysics* physicworld) {
 	btDefaultMotionState* mymotionstate = new btDefaultMotionState(this->_transform);
 	btRigidBody::btRigidBodyConstructionInfo rigidbodyinfo(_mass, mymotionstate, this->_collisionshape, localInertia);
 	this->_rigidbody = new btRigidBody(rigidbodyinfo);
-	this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+	this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	//if choosed static then add static flag to object will improve perfomance
 	if(this->_isstatic) {
-		this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_STATIC_OBJECT);
-	}else {
+		this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+	} else {
 		//Will prevent pass through walls but still will pass when get enough hight speed
 		this->_rigidbody->setCcdMotionThreshold(0.01f);
 	}
@@ -49,9 +49,7 @@ gImageGameObject::gImageGameObject(gipBulletPhysics* physicworld) {
 		//Set factor according 2d world can move just 2 axis and rotat 1 axis
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = physicworld->addPhysicObect(this, this->_objectlayers, this->_masklayers);
-	this->_rigidbody->setUserIndex(this->_id);
-
+	physicworld->addPhysicObject(this, this->_objectlayers, this->_masklayers);
 }
 
 

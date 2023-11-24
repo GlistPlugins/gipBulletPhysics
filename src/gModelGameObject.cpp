@@ -45,16 +45,14 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 	//if choosed static then add static flag to object will improve perfomance
 	if(this->_isstatic) {
 		this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_STATIC_OBJECT);
-	}else {
+	} else {
 		//Will prevent pass through walls but still will pass when get enough hight speed
 		this->_rigidbody->setCcdMotionThreshold(0.01f);
 	}
 
 
 	this->_rigidbody->setActivationState(4);
-	this->_id = physicworld->addPhysicObect(this, this->_objectlayers, this->_masklayers);
-	this->_rigidbody->setUserIndex(this->_id);
-
+	physicworld->addPhysicObject(this, _objectlayers, _masklayers);
 }
 
 
