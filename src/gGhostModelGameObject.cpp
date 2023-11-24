@@ -47,9 +47,7 @@ gGhostModelGameObject::gGhostModelGameObject(gipBulletPhysics* physicworld) {
 	this->_ghostobject->setWorldTransform(this->_transform);
 	this->_ghostobject->setCollisionFlags(this->_ghostobject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
-	this->_id = physicworld->addPhysicObject(this, this->_objectlayers, this->_masklayers);
-	this->_ghostobject->setUserIndex(this->_id);
-
+	physicworld->addPhysicObject(this, this->_objectlayers, this->_masklayers);
 }
 
 void gGhostModelGameObject::loadModel(std::string modelpath) {

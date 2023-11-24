@@ -49,9 +49,7 @@ gImageGameObject::gImageGameObject(gipBulletPhysics* physicworld) {
 		//Set factor according 2d world can move just 2 axis and rotat 1 axis
 	this->_rigidbody->setLinearFactor(btVector3(1.0f, 1.0f, 0.0f));
 	this->_rigidbody->setAngularFactor(btVector3(0.0f, 0.0f, 1.0f));
-	this->_id = physicworld->addPhysicObject(this, this->_objectlayers, this->_masklayers);
-	this->_rigidbody->setUserIndex(this->_id);
-
+	physicworld->addPhysicObject(this, this->_objectlayers, this->_masklayers);
 }
 
 

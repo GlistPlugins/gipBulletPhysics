@@ -31,6 +31,8 @@ public:
 
 class gipBulletPhysics : public gBasePlugin {
 public:
+	static gipBulletPhysics* plugin;
+
 	friend class gipBaseGameObject;
 	enum COLLISIONOBJECTTYPE {
 		COLLISIONOBJECTTYPE_RIGIDBODY,
@@ -83,8 +85,6 @@ public:
 	gipBulletPhysics(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
 	virtual ~gipBulletPhysics();
 
-	gipBaseGameObject* getObject(ObjectId id);
-
 	// Delete initialized objects
 	void clean();
 	// for 2d set z axis 0
@@ -117,11 +117,6 @@ public:
 	int getSolverMode();
 	int getSplitImpulse();
 
-	// Call it in stepSimulation method to see the position and rotation of the objects.
-	void printObjectTransform();
-
-
-
 	/*
 	 * This function calls by physicobjects childes
 	 * layers are bitwise variables
@@ -129,7 +124,7 @@ public:
 	 * objectlayers means object will own that flags
 	 * targetlayers means object only will collide thouse layers
 	 */
-	ObjectId addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
+	void addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
 
 	//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
 	bool raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result);
@@ -138,26 +133,7 @@ public:
 	btDiscreteDynamicsWorld* _dynamicsworld;
 
 protected:
-	void removeObject(ObjectId id);
-
-	void updateSingleAabb(ObjectId id);
-
-
-
-	/*
-	 * Call this function for setting object layers
-	 * LAYER0 means dont collide
-	 */
-	void updateObjectlayers(ObjectId objectid);
-
-
-	/*
-	 * For setting mass
-	 * To change mass of object  need control physic world directly
-	 */
-	void setMass(gipBaseGameObject* targetobject, float newmass);
-
-
+	void removeObject(gipBaseGameObject* object);
 
 private:
 	/*
@@ -169,8 +145,8 @@ private:
 	//collision dedection codes
 	void checkCollisions();
 
+	static void internalTick(btDynamicsWorld* world, btScalar timeStep);
 
-    ObjectId objectidcounter;
 	/*
 	 * Nedded referances and variables for physic world
 	 */
@@ -185,11 +161,8 @@ private:
 
 	btBroadphaseInterface* broadphase;
 
-
-
-
 	//List of physic object which has been added world
-	std::unordered_map<ObjectId, gipBaseGameObject*> _objectlist;
+	std::deque<gipBaseGameObject*> _objects;
 
 	bool _isworldinitiliazed = false;
 
