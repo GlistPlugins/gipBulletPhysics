@@ -173,6 +173,7 @@ void gipBulletPhysics::checkCollisions() {
 			gipBaseGameObject* obj2 = static_cast<gipBaseGameObject*>(contactManifold->getBody1()->getUserPointer());
 			obj1->warnCollided(obj2, colonobjA, colonobjB);
 			obj2->warnCollided(obj1, colonobjB, colonobjA);
+			break;
         }
     }
 }
