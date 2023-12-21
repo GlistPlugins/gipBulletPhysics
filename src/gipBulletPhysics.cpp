@@ -206,7 +206,7 @@ void gipBulletPhysics::removeObject(gipBaseGameObject* object) {
     }
 	size_t previousindex = object->_selfindex;
 	_objects.erase(_objects.begin() + previousindex);
-	for (size_t i = previousindex + 1; i < _objects.size(); ++i) {
+	for (size_t i = previousindex; i < _objects.size(); ++i) {
 		_objects[i]->setSelfIndex(i);
 	}
 }
