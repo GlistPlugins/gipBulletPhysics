@@ -55,7 +55,7 @@ private:
 	const int KEY_R = 32;
 	const int KEY_F = 64;
 
-	void onCollidedBall(int targetid);
+	void onCollidedBall(gipBaseGameObject* target);
 
 	gApp* root;
 	gImage logo;

@@ -40,7 +40,7 @@ public:
 	void showNotify();
 	void hideNotify();
 
-	void onCollidedBall(int targetid, glm::vec3 pointa, glm::vec3 pointb);
+	void onCollidedBall(gipBaseGameObject* target, glm::vec3 pointa, glm::vec3 pointb);
 
 private:
 

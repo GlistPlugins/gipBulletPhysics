@@ -112,8 +112,8 @@ void gCanvas::draw() {
 	gBulletObj->drawDebug();
 }
 
-void gCanvas:: onCollidedBall(int targetid, glm::vec3 pointa, glm::vec3 pointb) {
-	gLogi("Ball Collison") << gBulletObj->getObject(targetid)->getName() << pointb.x;
+void gCanvas:: onCollidedBall(gipBaseGameObject* target, glm::vec3 pointa, glm::vec3 pointb) {
+	gLogi("Ball Collison") << target->getName() << pointb.x;
 }
 
 void gCanvas::keyPressed(int key) {
