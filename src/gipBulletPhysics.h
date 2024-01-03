@@ -13,10 +13,11 @@
 #include <vector>
 #include "gBasePlugin.h"
 #include "gImageGameObject.h"
+#include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
-#include "btRaycastCallback.h"
-#include "btCollisionWorld.h"
-#include "btGhostObject.h"
+#include "bullet/BulletCollision/btBulletCollisionCommon.h"
+#include "bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
+#include "bullet/BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 
 #include "glm/glm.hpp"
 

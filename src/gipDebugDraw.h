@@ -8,7 +8,8 @@
 #ifndef SRC_GDEBUGDRAW_H_
 #define SRC_GDEBUGDRAW_H_
 
-#include "btIDebugDraw.h"
+#include "bullet/btBulletCollisionCommon.h"
+#include "bullet/btBulletDynamicsCommon.h"
 #include "gLine.h"
 #include "gCircle.h"
 #include "gTriangle.h"

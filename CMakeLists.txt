@@ -24,6 +24,12 @@ list(APPEND PLUGIN_SRCS
 ##### PLUGIN HEADERS #####
 list(APPEND PLUGIN_INCLUDES
 			${PLUGIN_DIR}/src
+)
+
+if(WIN32)
+
+	list(APPEND PLUGIN_INCLUDES
+			${PLUGIN_DIR}/src
 			${PLUGIN_LIBS_DIR}/include
 			${PLUGIN_LIBS_DIR}/include/bullet
 			${PLUGIN_LIBS_DIR}/include/bullet/Bullet2FileLoader
@@ -76,7 +82,8 @@ list(APPEND PLUGIN_INCLUDES
 			${PLUGIN_LIBS_DIR}/include/bullet/LinearMath
 			${PLUGIN_LIBS_DIR}/include/GL
 			${PLUGIN_LIBS_DIR}/include/openvr
-)
+	)
+endif(WIN32)
 
 
 ##### PLUGIN DEPENDENCY LOCATIONS (IF ANY) #####
@@ -94,6 +101,12 @@ elseif(LINUX)
 	#Linux libs here
 elseif(APPLE)
 	#Macos libs here
+	find_package(Bullet REQUIRED)
+	message(STATUS "Bullet found: ${BULLET_FOUND}")
+	message(STATUS "Bullet include dirs: ${BULLET_INCLUDE_DIRS}")
+	message(STATUS "Bullet libraries: ${BULLET_LIBRARIES}")
+	list(APPEND PLUGIN_INCLUDES ${BULLET_INCLUDE_DIRS})
+	list(APPEND PLUGIN_LINKLIBS ${BULLET_LIBRARIES})
 endif(WIN32)
 
 

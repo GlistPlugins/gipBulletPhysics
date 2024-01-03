@@ -8,10 +8,10 @@
 #ifndef SRC_GIPBASEGAMEOBJECT_H_
 #define SRC_GIPBASEGAMEOBJECT_H_
 
+#include "bullet/btBulletCollisionCommon.h"
+#include "bullet/btBulletDynamicsCommon.h"
 #include "glm/glm.hpp"
 #include <functional>
-#include "bullet/btBulletDynamicsCommon.h"
-#include "btGhostObject.h"
 #include "gModel.h"
 #include "gMesh.h"
 #include "gImage.h"

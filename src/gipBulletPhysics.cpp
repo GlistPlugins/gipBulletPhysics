@@ -173,6 +173,7 @@ void gipBulletPhysics::checkCollisions() {
 			gipBaseGameObject* obj2 = static_cast<gipBaseGameObject*>(contactManifold->getBody1()->getUserPointer());
 			obj1->warnCollided(obj2, colonobjA, colonobjB);
 			obj2->warnCollided(obj1, colonobjB, colonobjA);
+			break;
         }
     }
 }
@@ -206,7 +207,7 @@ void gipBulletPhysics::removeObject(gipBaseGameObject* object) {
     }
 	size_t previousindex = object->_selfindex;
 	_objects.erase(_objects.begin() + previousindex);
-	for (size_t i = previousindex + 1; i < _objects.size(); ++i) {
+	for (size_t i = previousindex; i < _objects.size(); ++i) {
 		_objects[i]->setSelfIndex(i);
 	}
 }
