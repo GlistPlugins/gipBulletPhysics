@@ -100,8 +100,8 @@ void gCanvas3D::setup() {
 	//---------------------------------------------------------
 }
 
-void gCanvas3D::onCollidedBall(int targetid) {
-	gLogi("Ghostbox collided with ") << physicworld->getObject(targetid)->getName();
+void gCanvas3D::onCollidedBall(gipBaseGameObject* target) {
+	gLogi("Ghostbox collided with ") << target->getName();
 }
 
 void gCanvas3D::update() {
