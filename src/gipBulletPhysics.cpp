@@ -139,7 +139,7 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
 // need to be called from game each update
 void gipBulletPhysics::runPhysicWorldStep(float deltatime) {
 	// Physics calculations doing here.
-	_dynamicsworld->stepSimulation(deltatime, 10);
+	_dynamicsworld->stepSimulation(deltatime, 0);
 	// update objects position
 	for (auto& object : this->_objects) {
 		// don't update if object is static rb.

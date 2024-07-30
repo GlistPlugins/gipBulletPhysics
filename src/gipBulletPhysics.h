@@ -49,8 +49,8 @@ public:
 		LAYERNONMEMBER = -1, //Dont use this, this just for check
 		LAYER0 = 1 << 0,	//Dont collide layer
 		LAYER1 = 1 << 1,	//Default collide layer
-		LAYER2 = 1 << 2,
-		LAYER3 = 1 << 3,
+		LAYER2 = 1 << 2,	//Player bullet layer
+		LAYER3 = 1 << 3,	//player layer
 		LAYER4 = 1 << 4,
 		LAYER5 = 1 << 5,
 		LAYER6 = 1 << 6,
