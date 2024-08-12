@@ -22,7 +22,7 @@ gGhostImageGameObject::gGhostImageGameObject(gipBulletPhysics* physicworld) {
 		/*
 		 * The Glist Engine references the top left corner for object positions;
 		 * but the bullet3 library references the center of transform.
-		 * Glist engine Y axis is opposite to bullet physic y axis nned to convert y axis by multiply -1
+		 * Glist engine Y axis is opposite to bullet physics y axis we need to convert y axis by multiplying by -1
 		 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
 		 */
 	this->_transform.setOrigin(
@@ -71,7 +71,7 @@ void gGhostImageGameObject::clearImage() {
 
 
 void gGhostImageGameObject::draw() {
-	//Wont be draw if ther is no any renderer object
+	// Will not work if there isn't any renderer object
 	if(this->_renderobjecttype == OBJECTRENDERTYPE_IMAGE) {
 		if(_isrenderobjectloaded) {
 			_image->draw(_position.x, _position.y, _width, _height, _width * 0.5f, _height * 0.5f, gRadToDeg(-_rotation.getAxis().getZ() * _rotation.getAngle()));

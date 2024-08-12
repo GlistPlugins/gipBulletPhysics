@@ -16,19 +16,19 @@ gipBaseGameObject::~gipBaseGameObject() {
 }
 
 	/*
-	 * Use this function for setting Oncollision fu
+	 * Use this function to set Oncollision functions
 	 * use std::bind for parameter
 	 */
 	void gipBaseGameObject::setOnCollided(OnCollidedFunction func) {
 		collidedcallback = func;
 	}
 
-	//get with of content(image, model etc)
+	//get width of content(image, model etc)
 	int gipBaseGameObject::getWidth() {
 		return this->_width;
 	}
 
-	//get height of conten(image, model etc)
+	//get height of content(image, model etc)
 	int gipBaseGameObject::getHeight() {
 		return this->_height;
 	}
@@ -92,7 +92,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 		}
 	}
 
-	//degree
+	//This uses degrees
 	glm::vec3 gipBaseGameObject::getRotation() {
 		glm::vec3 temprot;
 		this->_rotation.getEulerZYX(temprot.z, temprot.y, temprot.x);
@@ -113,14 +113,14 @@ gipBaseGameObject::~gipBaseGameObject() {
 
 				if(_renderobjecttype == OBJECTRENDERTYPE_MODEL){
 					_model->setOrientation(_resetquat);
-					//_model->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
+//					_model->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
 					if(newor.z != 0) _model->roll(-newor.z);
 					if(newor.y != 0) _model->pan(newor.y);
 					if(newor.x != 0) _model->tilt(-newor.x) ;
 				}
 				else if(_renderobjecttype == OBJECTRENDERTYPE_MESH){
 					_mesh->setOrientation(_resetquat);
-				//	_mesh->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
+//					_mesh->setOrientation(glm::vec3(-newor.x, newor.y, -newor.z));
 					if(newor.z != 0) _mesh->roll(-newor.z);
 					if(newor.y != 0) _mesh->pan(newor.y);
 					if(newor.x != 0) _mesh->tilt(-newor.x) ;
@@ -139,8 +139,8 @@ gipBaseGameObject::~gipBaseGameObject() {
 		updateSingleAABB();
 	}
 
-	//degree
-	//This for 2d object and world
+	//This uses degrees
+	//This is for 2d objects and 2d world
 	void gipBaseGameObject::setRotation2D(float degrez) {
 		if(_coordinatetype == COORDINATE2D) {
 			this->_rotation.setEulerZYX(gDegToRad(degrez), gDegToRad(0.0f), gDegToRad(0.0f));
@@ -155,7 +155,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 		}
 	}
 
-	//Set offset collider fromorigin of object
+	//Set offset of collider from origin point of object
 	void gipBaseGameObject::setColliderOffset(float offsetx, float offsety, float offsetz) {
 		_colliderofset.x = offsetx;
 		_colliderofset.y = offsety;
@@ -175,8 +175,8 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	/*
-	 * set size of object 1 is default
-	 * size need to be between 0.04 and 100000
+	 * set the size of object, 1 is default
+	 * size needs to be between 0.04 and 100000
 	 */
 	void gipBaseGameObject::setColliderSize(float x, float y, float z) {
 		if(this->_isrenderersizelocked) {
@@ -249,7 +249,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 		return {tempor.x(), -tempor.y(), tempor.z()};
 	}
 
-	//Call this function for changing shape type
+	//Call this function to change shape type
 	void gipBaseGameObject::setShapeType(SHAPETYPE shapetype) {
 		if(this->_shapetype != shapetype) {
 			this->_shapetype = shapetype;
@@ -273,7 +273,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 			/*
 			 * The Glist Engine references the top left corner for object positions;
 			 * but the bullet3 library references the center of transform.
-			 * Glist engine Y axis is opposite to bullet physic y axis nned to convert y axis by multiply -1
+			 * Glist engine Y axis is opposite to bullet physics y axis we need to convert y axis by multiplying by -1
 			 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
 			 */
 			if(_coordinatetype == COORDINATE3D) {
@@ -320,7 +320,11 @@ gipBaseGameObject::~gipBaseGameObject() {
 		updateObjectLayers();
 	}
 
-	//Set target layers whic we want collide with this object, layers asre bitewise
+	/*
+	 * Set target layers which you want owner object to collide with
+	 * Layer 0 means do not collide
+	 * layers are bitwise
+	 */
 	void gipBaseGameObject::setMaskLayers(int masklayers) {
 		this->_masklayers = masklayers;
 		updateObjectLayers();
@@ -397,7 +401,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 
-	//value should become between 0 and 1
+	//value should be between 0 and 1
 	void gipBaseGameObject::setBounce(float newvalue) {
 		if(newvalue > 0.0f && this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
 			this->_rigidbody->setRestitution(newvalue);
@@ -405,7 +409,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 		}
 	}
 
-	// These apply methods should be used in update method.
+	// These "apply" methods should only be used in the update method
 	void gipBaseGameObject::applyCentralForce(glm::vec3 forcevalue) {
 		if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY)
 			_rigidbody->applyCentralForce(btVector3(forcevalue.x, forcevalue.y, forcevalue.z));
@@ -453,11 +457,11 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	/*
-	 * This function will be called when object collided with another object
+	 * This function will be called when object collides with another object
 	 *
 	 * !!!
-	 *  Dont call this function manuel
-	 *  This function will be used by physic engine
+	 * Don't call this function manually
+	 * This function will be used by physics engine
 	 */
 	void gipBaseGameObject::warnCollided(gipBaseGameObject* target, glm::vec3 selfcollpos, glm::vec3 targetcollpos) {
 		if (!collidedcallback) {
@@ -467,7 +471,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	/*
-	 * This function is for physic engine dont use manualy
+	 * This function is for physics engine don't use manually
 	 */
 	void gipBaseGameObject::updateRotationVariable() {
 		_transform = _rigidbody->getWorldTransform();
@@ -503,7 +507,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	/*
-	 * This function is for physic engine dont use manualy
+	 * This function is for physics engine don't use manually
 	 */
 	void gipBaseGameObject::updatePositionVariable() {
 		TRANSFORMTYPE type = (TRANSFORMTYPE)_collisionshape->getShapeType();

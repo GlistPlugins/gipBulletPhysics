@@ -1,8 +1,8 @@
 /*
  *  gipBulletPhysics.cpp
  *
- *  Edited 		: 16.02.2023
- *  	Author 	: Remzi ISCI
+ *  Edited: 16.02.2023
+ *  Author: Remzi ISCI
  */
 
 #include "gipBulletPhysics.h"
@@ -39,13 +39,13 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
     }
 
     /*
-     * THis property is for fast object, When seeting this property false then fast object can pass through wall
-     * When choosin true will gice better collision dtetection but will cost more performance
+     * This property is for fast objects, When this property is false fasts object can pass through walls
+     * When set true this will provide better collision detection but will make performance worse
      */
     _dynamicsworld->getDispatchInfo().m_useContinuous = true;
 
     /*
-     *2D coordinate and 3D coordinate have different y axis way
+     *2D coordinates and 3D coordinates y axis are different
      */
     _dynamicsworld->setGravity(btVector3(0.0f, worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? -9.81f : 9.81f, 0.0f));
     _dynamicsworld->applyGravity();
@@ -63,13 +63,13 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
     _isworldinitiliazed = true;
 
 	_dynamicsworld->setInternalTickCallback(internalTick);
-    //   this->_maxsubsteps = worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? 10 : 1;
+//       this->_maxsubsteps = worldcoordinate == WORLDCOORDINATETYPE::WORLD2D ? 10 : 1;
 }
 
 /*
  * Set owner target layer
- * Set target layers whic you want collide with owner object
- * 0 means dont collide
+ * Set target layers which you want owner object to collide with
+ * Layer 0 means do not collide
  */
 void gipBulletPhysics::addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer) {
 	if(targetobject->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
@@ -83,7 +83,7 @@ void gipBulletPhysics::addPhysicObject(gipBaseGameObject* targetobject, int obje
 	_objects.push_back(targetobject);
 }
 
-//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
+//This function does not work, rewrite needed, use gGhostGameObject3D or gGhostGameObject2D for ray
 bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result) {
 	gLogi("raycast ") << "called";
 
@@ -92,9 +92,9 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
     btCollisionWorld::AllHitsRayResultCallback rayCallback(_start, _end);
 
 
-    //For debug ray
- //   _dynamicsworld->getDebugDrawer()->drawLine(_start, _end, btVector4(1, 1, 0, 1));
- //   _dynamicsworld->getDebugDrawer()->drawSphere(_start, 20.f, btVector4(1, 1, 0, 1));
+    // For debug ray
+//	_dynamicsworld->getDebugDrawer()->drawLine(_start, _end, btVector4(1, 1, 0, 1));
+//  _dynamicsworld->getDebugDrawer()->drawSphere(_start, 20.f, btVector4(1, 1, 0, 1));
 
     rayCallback.m_flags |= btTriangleRaycastCallback::kF_KeepUnflippedNormal;
     rayCallback.m_flags |= btTriangleRaycastCallback::kF_UseSubSimplexConvexCastRaytest;
@@ -104,10 +104,10 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
 	overlappingpaircache->calculateOverlappingPairs(collisiondispatcher);
 
 	// Set the collision filter for the raycast callback
-	     rayCallback.m_collisionFilterGroup = 0;  // Raycast is in its own group
-	    rayCallback.m_collisionFilterMask = masklayers;  // Check collisions with specified layer mask
+	rayCallback.m_collisionFilterGroup = 0;  // Raycast is in its own group
+	rayCallback.m_collisionFilterMask = masklayers;  // Check collisions with specified layer mask
 
-	 // Perform the raycast on the dynamics world
+	// Perform raycast on the dynamics world
 
 	_dynamicsworld->rayTest(_start, _end, rayCallback);
 	_dynamicsworld->performDiscreteCollisionDetection();
@@ -116,7 +116,7 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
 
 	    // Check if the raycast hit anything
 	    if (rayCallback.hasHit()) {
-	        // Get the hit object and point
+	        // Get the hit object and contact point
 	        const btRigidBody* hitBody = btRigidBody::upcast(rayCallback.m_collisionObjects[0]);
 	        btVector3 hitPoint;// = rayCallback.m_hitPointWorld;
 	       	gLogi("raycast") << "ray hitted";
@@ -136,29 +136,29 @@ bool gipBulletPhysics::raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, 
 
 }
 
-// need to be called from game each update
+// needs to be called from game each update
 void gipBulletPhysics::runPhysicWorldStep(float deltatime) {
-	// Physics calculations doing here.
+	// Physics calculations are done here
 	_dynamicsworld->stepSimulation(deltatime, 0);
-	// update objects position
+	// Update objects position
 	for (auto& object : this->_objects) {
-		// don't update if object is static rb.
+		// Don't update if object is a static rigidbody
 		if (object->_collsionobjecttype == COLLISIONOBJECTTYPE_RIGIDBODY && !object->_rigidbody->isStaticObject()) {
 			object->updatePositionVariable();
 			object->updateRotationVariable();
 		}
 	}
 	// For tests:
-	//printObjectTransform();
+//	printObjectTransform();
 }
 
 void gipBulletPhysics::checkCollisions() {
-    //Count of collision
+    // Amount of collisions
     int numManifolds = _dynamicsworld->getDispatcher()->getNumManifolds();
 
     for (int i = 0; i < numManifolds; i++) {
         btPersistentManifold* contactManifold =  _dynamicsworld->getDispatcher()->getManifoldByIndexInternal(i);
-        //Count of point between collided two objects
+        // Amount of contact points between two colliding objects
         int numContacts = contactManifold->getNumContacts();
 
         for (int j = numContacts - 1; j >= 0; j--) {
@@ -168,7 +168,7 @@ void gipBulletPhysics::checkCollisions() {
 			const btVector3& ptB = pt.getPositionWorldOnB();
 			glm::vec3 colonobjA = glm::vec3((float)(ptA.x()), (float)(ptA.y()), (float)(ptA.z()));
 			glm::vec3 colonobjB = glm::vec3((float)(ptB.x()), (float)(ptB.y()), (float)(ptB.z()));
-			//  const btVector3& normalOnB = pt.m_normalWorldOnB;
+//			const btVector3& normalOnB = pt.m_normalWorldOnB;
 			gipBaseGameObject* obj1 = static_cast<gipBaseGameObject*>(contactManifold->getBody0()->getUserPointer());
 			gipBaseGameObject* obj2 = static_cast<gipBaseGameObject*>(contactManifold->getBody1()->getUserPointer());
 			obj1->warnCollided(obj2, colonobjA, colonobjB);
@@ -193,7 +193,7 @@ glm::vec3 gipBulletPhysics::getGravity() {
 }
 
 /*
- * Call this function in the GamaCanvas draw method to draw physic bounds and debug views
+ * Call this function in the GameCanvas draw method to draw physic boundaries and debug views
  */
 void gipBulletPhysics::drawDebug() {
 	_dynamicsworld->debugDrawWorld();
