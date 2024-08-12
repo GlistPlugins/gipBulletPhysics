@@ -22,7 +22,7 @@ class gipDebugDraw : public btIDebugDraw
 int m_debugMode;
 public:
 /*
- * wolrdcoordinate 0 = 2D , 1 = 3D
+ * worldcoordinate enum: 0 = 2D , 1 = 3D
  */
 gipDebugDraw(int worldcoordinate = 0);
 virtual ~gipDebugDraw();

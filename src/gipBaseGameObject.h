@@ -27,7 +27,7 @@ public:
 
 	enum COORDINATE { COORDINATE2D = 0, COORDINATE3D = 1 };
 	/*
-	 * Tranform type for collision shapes
+	 * Tranform types for collision shapes
 	 *
 	 * Box = 0
 	 * Sphere = 8
@@ -59,14 +59,14 @@ public:
 		COLLISIONOBJECTTYPE_GHOST
 	};
 	/*
-	* Layers are bitwise varialbles
-	 * You can use multiple layers together
-	 * Use | (Bite or operator) to use multiple layer together
-	 * etc : LAYER1 | LAYER2 | LAYER12 | LAYER22
-	 */
+	* Layers are bitwise variables
+	* You can use multiple layers together
+	* Use | (Bitwise or operator) to use multiple layers together
+	* etc : LAYER1 | LAYER2 | LAYER12 | LAYER22
+	*/
 	enum COLLISIONLAYERS {
-		LAYERNONMEMBER = -1, //Dont use this, this just for check
-		LAYER0 = 1 << 0,	//Dont collide layer
+		LAYERNONMEMBER = -1, //Don't use this, this is just for check
+		LAYER0 = 1 << 0,	//Don't collide layer
 		LAYER1 = 1 << 1,	//Default collide layer
 		LAYER2 = 1 << 2,
 		LAYER3 = 1 << 3,
@@ -95,15 +95,15 @@ public:
 	virtual ~gipBaseGameObject();
 
 	/*
-	 * Use this function for setting Oncollision fu
+	 * Use this function to set Oncollision functions
 	 * use std::bind for parameter
 	 */
 	void setOnCollided(OnCollidedFunction func);
 
-	//get with of conten(image, model etc)
+	//get width of content(image, model etc)
 	int getWidth();
 
-	//get height of conten(image, model etc)
+	//get height of content(image, model etc)
 	int getHeight();
 
 	void setTag(int newtag);
@@ -115,25 +115,26 @@ public:
 	glm::vec3 getPosition();
 	void setPosition(float x, float y, float z = 0.0f);
 
-	//degree
+	//This uses degrees unlike std library
 	glm::vec3 getRotation();
 	void setRotation(float degrex, float degrey, float degrez);
 
-	//degree
-	//This for 2d object and world
+	//This uses degrees unlike std library
+	//This is for 2d objects and world
 	void setRotation2D(float degrez);
 
-	//Set offset collider fromorigin of object
+	//Set collider offset from the origin of object
 	void setColliderOffset(float offsetx, float offsety, float offsetz = 0);
 	glm::vec3 getColliderOffset();
 
 	/*
-	 * set size of object 1 is default
-	 * size need to be between 0.04 and 100000
+	 * set size of the object
+	 * 1 is default
+	 * size needs to be between 0.04 and 100000
 	 * For BOX : each axis means one egde
 	 * For SPHERE : all axis means radius can be same
-	 * for Cylinder X means radius, y means height
-	 * for Cone x means raadius, y means height
+	 * for CYLINDER : x means radius, y means height
+	 * for CONE : x means radius, y means height
 	 */
 	void setColliderSize(float x, float y, float z = -1.0f);
 	glm::vec3 getColliderSize();
@@ -141,20 +142,20 @@ public:
 	glm::vec3 getObjectSize();
 
 	/*
-	 * Set lock size of object and collider
+	 * Lock the size of object and collider
 	 */
 	void setIsSizeLocked(bool islocked);
 	bool getIsSizeLocked();
 
 
-	//Call this function for changing shape type
+	//Call this function to change shape type
 	void setShapeType(SHAPETYPE shapetype);
 	int getShapeType();
 
 	//You can use COLLISIONLAYERS enum
-	//Object own layers, layer are bitwise
+	//Set layers which this object is in, Layers are bitwise
 	void setObjectLayers(int layers);
-	//Set target layers whic we want collide with this object, layers asre bitewise
+	//Set target layers which we want this object to collide with, layers are bitewise
 	void setMaskLayers(int masklayers);
 
 	glm::vec3 getOrigin();
@@ -171,7 +172,7 @@ public:
 	void setAnisotropicFriction(glm::vec3 newvalue, int anisotropicfrictionmode = 1);
 
 
-	//value should become between 0 and 1
+	//value should be between 0 and 1
 	void setBounce(float newvalue = 0.0f);
 
 
@@ -194,6 +195,7 @@ public:
 
 	bool getIsStatic();
 
+	//AABB means "Axis-Aligned Bounding Box"
 	void updateSingleAABB();
 
 	void updateObjectLayers();
@@ -201,34 +203,34 @@ public:
 protected:
 
 	/*
-	 * This function will be called when object collided with another object
+	 * This function will be called when object collides with another object
 	 *
 	 * !!!
-	 *  Dont call this function manuel
-	 *  This function will be used by physic engine
+	 * Don't call this function manually
+	 * This function will be used by physics engine
 	 */
 	void warnCollided(gipBaseGameObject* target, glm::vec3 selfcollpos, glm::vec3 targetcollpos);
 
 	/*
-	 * This function is for physic engine dont use manualy
+	 * This function is for physics engine don't use manually
 	 */
 	void updatePositionVariable();
 
 	/*
-	 * This function is for physic engine dont use manualy
+	 * This function is for physics engine don't use manually
 	 */
 	void updateRotationVariable();
 
 	void setSelfIndex(size_t index);
 
 	/*
-	 *This function referans for onCollided func
-	 *This referance will connect Canvas function to physic object function
-	 *You need use std::bind with setOncollided to using this referance
+	 *This function is reference for onCollided func
+	 *This reference will connect Canvas function to physics object function
+	 *You need use std::bind with setOncollided to use this reference
 	 */
 	OnCollidedFunction collidedcallback;
 
-	//Referances--------------------------------
+	//References--------------------------------
 	size_t _selfindex = 0;
 	gImage* _image;
 	gModel* _model;
@@ -252,7 +254,7 @@ protected:
 	glm::vec3 _colliderofset = glm::vec3(0.0f, 0.0f, 0.0f);
 	//------------------------------------------------
 
-	//Physic properties-------------------------------
+	//Physics properties-------------------------------
 
 	float _mass = 0.0f;
 	float _friction = 0.0f;
@@ -277,7 +279,7 @@ protected:
 	COORDINATE _coordinatetype = COORDINATE2D;
 
 	/*
-	 * This function is for chil object to set rotation
+	 * This function is for child objects to set rotation
 	 */
 	bool _isstatic = true;
 
@@ -287,20 +289,20 @@ protected:
 	int _tag = 0;
 
 	/*
-	 * for naming object
+	 * for naming objects
 	 */
 	std::string _objectname = "new object";
 
 	/*
-	 * object layer has
+	 * layers the objects has
 	 *
 	 */
 	int _objectlayers = 1<<1;
 
 	/*
-	 * mask layer, object will collide which object has this layers
-	 * Layer is bitwise
-	 * All layer  collide for default
+	 * These are mask layers, object will collide with other objects that have these layers
+	 * Layers are bitwise
+	 * All layers set to collide for default
 	 */
 	int _masklayers = 1<<1 |1<<2 | 1<<3 | 1<<4 | 1<<5 | 1<<6 | 1<<7 | 1<<8 | 1<<9 | 1<<10
 			| 1<<11 | 1<<12 | 1<<13 | 1<<14 | 1<<15 | 1<<16 | 1<<17 | 1<<18 | 1<<19 | 1<<20

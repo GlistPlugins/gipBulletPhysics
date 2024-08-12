@@ -4,11 +4,12 @@
  *  Created on: 16 02 2023
  *      Author: Remzi ISCI
  */
+
 /*
- * Engine Y axis direciton is opposite to coming data that comes from bullet physic Y axis direction
- *
- *
- *
+ * The Glist Engine references the top left corner for object positions;
+ * but the bullet3 library references the center of transform.
+ * Glist engine Y axis is opposite to bullet physics y axis we need to convert y axis by multiplying by -1
+ * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
  */
 #include "gipDebugDraw.h"
 #include "gRenderer.h"

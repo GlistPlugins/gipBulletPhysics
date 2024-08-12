@@ -42,11 +42,11 @@ gModelGameObject::gModelGameObject(gipBulletPhysics* physicworld) {
 	btRigidBody::btRigidBodyConstructionInfo rigidbodyinfo(_mass, mymotionstate, this->_collisionshape, localInertia);
 	this->_rigidbody = new btRigidBody(rigidbodyinfo);
 	this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK );
-	//if choosed static then add static flag to object will improve perfomance
+	//If static is choosen then add static flag to object to improve perfomance
 	if(this->_isstatic) {
 		this->_rigidbody->setCollisionFlags(this->_rigidbody->getCollisionFlags()|btCollisionObject::CF_STATIC_OBJECT);
 	} else {
-		//Will prevent pass through walls but still will pass when get enough hight speed
+		//Will prevent passing through walls but will still pass when it gets fast enough
 		this->_rigidbody->setCcdMotionThreshold(0.01f);
 	}
 
@@ -109,7 +109,7 @@ void gModelGameObject::clearMesh() {
 }
 
 void gModelGameObject::draw() {
-	//Wont be draw if ther is no any renderer object
+	// Will not work if there isn't any renderer object
 	if(_isrenderobjectloaded) {
 		if(this->_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
 			this->_model->draw();

@@ -2,8 +2,8 @@
  *  gipBulletPhysics.h
  *
  *
- *	Edited 		: 16.02.2023
- *  	Author 	: Remzi ISCI
+ *	Edited 	: 16.02.2023
+ *  Author 	: Remzi ISCI
  */
 
 #ifndef SRC_GIPBULLETPHYSICS_H_
@@ -26,7 +26,9 @@ class gipBaseGameObject;
 
 class gipRaycastResult {
 public:
+	//this should be spelled "hitobject" or "objecthit"
 	gipBaseGameObject* hittedobject;
+	//this should be "contactpoint"
 	glm::vec3 hitpoint;
 };
 
@@ -40,10 +42,10 @@ public:
 		COLLISIONOBJECTTYPE_GHOST
 	};
 	/*
-	* Layers are bitwise varialbles
+	 * Layers are bitwise varialbles
 	 * You can use multiple layers together
-	 * Use | (Bite or operator) to use multiple layer together
-	 * etc : LAYER1 | LAYER2 | LAYER12 | LAYER22
+	 * Use | (Bitwise or operator) to use multiple layer together
+	 * e.g.: LAYER1 | LAYER2 | LAYER12 | LAYER22
 	 */
 	enum COLLISIONLAYERS {
 		LAYERNONMEMBER = -1, //Dont use this, this just for check
@@ -119,15 +121,15 @@ public:
 	int getSplitImpulse();
 
 	/*
-	 * This function calls by physicobjects childes
+	 * This function is called by physicobjects childs
 	 * layers are bitwise variables
 	 * use COLLISIONLAYERS enums to set layers
-	 * objectlayers means object will own that flags
-	 * targetlayers means object only will collide thouse layers
+	 * objectlayers means object will own those flags
+	 * targetlayers means object will only collide with those layers
 	 */
 	void addPhysicObject(gipBaseGameObject* targetobject, int objectlayer, int masklayer);
 
-	//This function doesnt work, need to rewrite, use gGhostGameObject3D or gGhostGameObject2D for ray
+	//This function doesn't work, rewrite needed, use gGhostGameObject3D or gGhostGameObject2D for ray
 	bool raycastHit(glm::vec3 from, glm::vec3 to, int masklayers, gipRaycastResult* result);
 
 	//Physic world
@@ -139,17 +141,17 @@ protected:
 private:
 	/*
 	 * initialize world first
-	 * worldcoordinate need for debuging
+	 * worldcoordinate is needed for debugging
 	 */
 	void initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORLDTYPE worldType = WORLDTYPE::WORLDTYPE_RIGIDWORLD);
 
-	//collision dedection codes
+	//collision detection codes
 	void checkCollisions();
 
 	static void internalTick(btDynamicsWorld* world, btScalar timeStep);
 
 	/*
-	 * Nedded referances and variables for physic world
+	 * Needed references and variables for world physics
 	 */
 	btDefaultCollisionConfiguration* collisionconfiguration;
 	btCollisionDispatcher* collisiondispatcher;
@@ -157,12 +159,12 @@ private:
 	btBroadphaseInterface* overlappingpaircache;
 	btSequentialImpulseConstraintSolver* solver;
 	btConstraintSolver* constraintsolver;
-	//Need another thread for soft objects
+	//Another thread is needed for soft objects
 	btBroadphaseInterface* softwolrdbroadphase;
 
 	btBroadphaseInterface* broadphase;
 
-	//List of physic object which has been added world
+	//List of physic objects which have been added to the world
 	std::deque<gipBaseGameObject*> _objects;
 
 	bool _isworldinitiliazed = false;

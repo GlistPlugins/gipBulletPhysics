@@ -3,13 +3,15 @@
  *
  *  Created on: 12 Mar 2023
  *      Author: Remzi ISCI
- *
- *  This class inherit from gipPhysicObject
+ */
+
+/*
+ *  This class is inherited from gipBaseGameObject
  *  This clas uses 2d coordinate system
- *  Layers are bit wise
- *  Rotaions have been setted according degree format
+ *  Layers are bitwise
+ *  Rotations have been set according to degree format
  *
- *   Ghost object doesnt get any effect by physic world velocity and forces
+ *  Ghost object doesn't get effected by physics world velocity and forces
  */
 
 #ifndef SRC_GGHOSTMODELGAMEOBJECT_H_
@@ -25,25 +27,25 @@ public:
 	gGhostModelGameObject(gipBulletPhysics* physicworld);
 	virtual ~gGhostModelGameObject();
 
-	//Will load model from assest/images
+	// Loads model from assets/images
 	void loadModel(std::string modelpath);
 
-	//Will load model with full file path
+	// Loads model from full file path
 	void load(std::string fullpath);
 
-	//Will get model from external source
+	// Loads model from already existing source
 	void setModel(gModel* sourcemodel);
 
-	//Will get mesh from external source
+	// Loads mesh from already existing source
 	void setMesh(gMesh* sourcemesh);
 
-	//Will remove model source
+	// Turns own model off
 	void clearModel();
 
-	//Will remove mesh source
+	// Turns own mesh off
 	void clearMesh();
 
-	//Call this function to draw image
+	// Call this function to draw image
 	void draw();
 
 protected:

@@ -4,14 +4,16 @@
  *  Created on: 12 Mar 2023
  *      Author: Remzi ISCI
  */
+
 /*
- *  This class inherit from gipPhysicObject
+ *  This class is inherited from gipBaseGameObject
  *  This clas uses 2d coordinate system
- *  Layers are bit wise
- *  Rotaions have been setted according degree format
+ *  Layers are bitwise
+ *  Rotations have been set according to degree format
  *
- *  Ghost object doesnt get any effect by physic world velocity and forces
+ *  Ghost object doesn't get effected by physics world velocity and forces
  */
+
 #ifndef SRC_GGHOSTIMAGEGAMEOBJECT_H_
 #define SRC_GGHOSTIMAGEGAMEOBJECT_H_
 
@@ -25,19 +27,19 @@ public:
 	virtual ~gGhostImageGameObject();
 
 
-	//Will load image from assest/images
+	// Loads image from assets/images
 	void loadImage(std::string imagepath);
 
-	//Will load image with full file path
+	// Loads image from full file path
 	void load(std::string fullpath);
 
-	//Will get image from external source
+	// Loads image from already existing source
 	void setImage(gImage* sourceimage);
 
-	//Will remove image source
+	// Turns own image off
 	void clearImage();
 
-	//Call this function to draw image
+	// Call this function to draw image
 	void draw();
 protected:
 

@@ -5,10 +5,10 @@
  *  Created on: 12 Mar 2023
  *      Author: Remzi ISCI
  *
- *  This class inherit from gipPhysicObject
+ *  This class is inherited from gipPhysicObject
  *  This clas uses 2d coordinate system
- *  Layers are bit wise
- *  Rotaions have been setted according degree format
+ *  Layers are bitwise
+ *  Rotations have been set according to degree format
  */
 
 #include <gGhostModelGameObject.h>
@@ -32,7 +32,7 @@ gGhostModelGameObject::gGhostModelGameObject(gipBulletPhysics* physicworld) {
 		/*
 		 * The Glist Engine references the top left corner for object positions;
 		 * but the bullet3 library references the center of transform.
-		 * Glist engine Y axis is opposite to bullet physic y axis nned to convert y axis by multiply -1
+		 * Glist engine Y axis is opposite to bullet physics y axis we need to convert y axis by multiplying by -1
 		 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
 		 */
 	this->_transform.setOrigin(
@@ -103,7 +103,7 @@ void gGhostModelGameObject::clearMesh() {
 }
 
 void gGhostModelGameObject::draw() {
-	//Wont be draw if ther is no any renderer object
+	// Will not work if there isn't any renderer object
 	if(_isrenderobjectloaded) {
 		if(this->_renderobjecttype == OBJECTRENDERTYPE_MODEL) {
 			this->_model->draw();
