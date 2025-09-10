@@ -13,6 +13,22 @@ gipBaseGameObject::gipBaseGameObject() {
 
 gipBaseGameObject::~gipBaseGameObject() {
 	this->_physicworld->removeObject(this);
+	if (_trimesh.triinfo) {
+		delete _trimesh.triinfo;
+		_trimesh.triinfo = nullptr;
+	}
+	if (_trimesh.ivarray) {
+		delete _trimesh.ivarray;
+		_trimesh.ivarray = nullptr;
+	}
+	if (_collisionshape) {
+		delete _collisionshape;
+		_collisionshape  = nullptr;
+	}
+	if (_rigidbody){
+		delete _rigidbody;
+		_rigidbody       = nullptr;
+	}
 }
 
 	/*
@@ -251,62 +267,83 @@ gipBaseGameObject::~gipBaseGameObject() {
 
 	//Call this function to change shape type
 	void gipBaseGameObject::setShapeType(SHAPETYPE shapetype) {
-		if(this->_shapetype != shapetype) {
-			this->_shapetype = shapetype;
-			if(shapetype == SHAPETYPE::SHAPETYPE_BOX){
-				if(_coordinatetype == COORDINATE2D)	this->_collisionshape = new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
-				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btBoxShape(btVector3(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f, _sizecollider.z));
-			} else if(shapetype == SHAPETYPE::SHAPETYPE_SPHERE){
-				if(_coordinatetype == COORDINATE2D)	this->_collisionshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z);
-				else if(_coordinatetype == COORDINATE3D)	this->_collisionshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z * 0.0025f);
-			} else if(shapetype == SHAPETYPE::SHAPETYPE_CYLINDER){
-				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btCylinderShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
-				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btCylinderShape(btVector3(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f,_sizecollider.z * 0.0025f));
-			} else if(shapetype == SHAPETYPE::SHAPETYPE_CAPSULE){
-				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btCapsuleShape(_sizecollider.x, _sizecollider.y);
-				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btCapsuleShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
-			} else if(shapetype == SHAPETYPE::SHAPETYPE_CONE){
-				if(_coordinatetype == COORDINATE2D) this->_collisionshape = new btConeShape(_sizecollider.x, _sizecollider.y);
-				else if(_coordinatetype == COORDINATE3D) this->_collisionshape = new btConeShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
-			}
+			if(this->_shapetype == shapetype) return;
+			if(this->_shapetype != shapetype) {
+				this->_shapetype = shapetype;
+				btCollisionShape* oldshape = this->_collisionshape;
+				btCollisionShape* newshape = nullptr;
+				if(shapetype == SHAPETYPE::SHAPETYPE_BOX){
+					if(_coordinatetype == COORDINATE2D)	newshape = new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+					else if(_coordinatetype == COORDINATE3D) newshape = new btBoxShape(btVector3(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f, _sizecollider.z));
+				} else if(shapetype == SHAPETYPE::SHAPETYPE_SPHERE){
+					if(_coordinatetype == COORDINATE2D)	newshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z);
+					else if(_coordinatetype == COORDINATE3D) newshape = new btSphereShape(((_sizecollider.x + _sizecollider.y) * 0.5f) * 0.5f * _sizecollider.z * 0.0025f);
+				} else if(shapetype == SHAPETYPE::SHAPETYPE_CYLINDER){
+					if(_coordinatetype == COORDINATE2D) newshape = new btCylinderShape(btVector3(_sizecollider.x, _sizecollider.y,_sizecollider.z));
+					else if(_coordinatetype == COORDINATE3D) newshape = new btCylinderShape(btVector3(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f,_sizecollider.z * 0.0025f));
+				} else if(shapetype == SHAPETYPE::SHAPETYPE_CAPSULE){
+					if(_coordinatetype == COORDINATE2D) newshape = new btCapsuleShape(_sizecollider.x, _sizecollider.y);
+					else if(_coordinatetype == COORDINATE3D) newshape = new btCapsuleShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
+				} else if(shapetype == SHAPETYPE::SHAPETYPE_CONE){
+					if(_coordinatetype == COORDINATE2D) newshape = new btConeShape(_sizecollider.x, _sizecollider.y);
+					else if(_coordinatetype == COORDINATE3D) newshape = new btConeShape(_sizecollider.x * 0.0025f, _sizecollider.y * 0.0025f);
+				} else if(shapetype == SHAPETYPE::SHAPETYPE_TRIANGLEMESH){
+					if (!_trimesh.ivarray) {
+						newshape = new btBoxShape(btVector3(_sizecollider.x, _sizecollider.y, _sizecollider.z));
+					} else {
+						const bool usequantizedaabb = true;
+						auto* bvh = new btBvhTriangleMeshShape(_trimesh.iface, usequantizedaabb, /*buildbvh=*/true);
+						// kenar takilmalari icin bilgi haritasi
+						_trimesh.triinfo = new btTriangleInfoMap();
+						btGenerateInternalEdgeInfo(bvh, _trimesh.triinfo);
+						newshape = bvh;
+						// Trimesh statik icindir; mass=0 bekler. Inertia sifir kalabilir.
+						_mass = 0.0f;
+						_isstatic = true;
+					}
+				}
 
-			/*
-			 * The Glist Engine references the top left corner for object positions;
-			 * but the bullet3 library references the center of transform.
-			 * Glist engine Y axis is opposite to bullet physics y axis we need to convert y axis by multiplying by -1
-			 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
-			 */
-			if(_coordinatetype == COORDINATE3D) {
-				this->_transform.setOrigin(
-						btVector3(
-								_position.x + this->_colliderofset.x,
-								-(_position.y + this->_colliderofset.y),
-								_position.z + this->_colliderofset.z
-						)
-				);
-			} else {
-				this->_transform.setOrigin(
+				/*
+				 * The Glist Engine references the top left corner for object positions;
+				 * but the bullet3 library references the center of transform.
+				 * Glist engine Y axis is opposite to bullet physics y axis we need to convert y axis by multiplying by -1
+				 * so we should convert Glist positions to bullet3 positions with (+img.getHeight()).
+				 */
+				if(_coordinatetype == COORDINATE3D) {
+					this->_transform.setOrigin(
 							btVector3(
-									_position.x  + this->_colliderofset.x + _sizecollider.x * 0.5f,
-									-(_position.y + this->_colliderofset.y + _sizecollider.y * 0.5f),
-									0.0f
+									_position.x + this->_colliderofset.x,
+									-(_position.y + this->_colliderofset.y),
+									_position.z + this->_colliderofset.z
 							)
 					);
-			}
-			btVector3 localInertia(0, 0, 0);
-			this->_collisionshape->calculateLocalInertia(_mass, localInertia);
-			if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
-				this->_rigidbody->setCollisionShape(this->_collisionshape);
-				this->_rigidbody->setWorldTransform(_transform);
-			} else {
-				this->_ghostobject->setCollisionShape(this->_collisionshape);
-				this->_ghostobject->setWorldTransform(_transform);
+				} else {
+					this->_transform.setOrigin(
+								btVector3(
+										_position.x  + this->_colliderofset.x + _sizecollider.x * 0.5f,
+										-(_position.y + this->_colliderofset.y + _sizecollider.y * 0.5f),
+										0.0f
+								)
+						);
+				}
+				btVector3 localinertia(0, 0, 0);
+				if (_mass > 0.0f) newshape->calculateLocalInertia(_mass, localinertia);
+				_collisionshape = newshape;
+				if(this->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
+					this->_rigidbody->setCollisionShape(this->_collisionshape);
+					this->_rigidbody->setWorldTransform(_transform);
+					if (_mass == 0.0f)
+						_rigidbody->setCollisionFlags(_rigidbody->getCollisionFlags() | btCollisionObject::CF_STATIC_OBJECT);
+				} else {
+					this->_ghostobject->setCollisionShape(this->_collisionshape);
+					this->_ghostobject->setWorldTransform(_transform);
+				}
+
+				if (oldshape && oldshape != _collisionshape) delete oldshape;
+				updateSingleAABB();
 			}
 
-			updateSingleAABB();
 		}
-
-	}
 	int gipBaseGameObject::getShapeType() {
 		return (int)this->_shapetype;
 	}
@@ -595,4 +632,36 @@ gipBaseGameObject::~gipBaseGameObject() {
 		}
 	}
 
+	/* Sets the triangle mesh data for this object.
+	 * If takeownership is true, copies the input arrays and keeps internal ownership.
+	 * Builds a btTriangleIndexVertexArray and stores pointers for later collision shape use.
+	 */
+	void gipBaseGameObject::setTriangleMeshSource(const btScalar* verts, int vcount, const int* indices, int tricount,
+												bool takeownership) {
+	    if (takeownership) {
+	        _trimesh.vertexowner = std::make_unique<btScalar[]>(vcount * 3);
+	        std::memcpy(_trimesh.vertexowner.get(), verts, sizeof(btScalar) * vcount * 3);
+	        _trimesh.indexowner = std::make_unique<int[]>(tricount * 3);
+	        std::memcpy(_trimesh.indexowner.get(), indices, sizeof(int) * tricount * 3);
+	        verts   = _trimesh.vertexowner.get();
+	        indices = _trimesh.indexowner.get();
+	    }
+	    _trimesh.numverts = vcount;
+	    _trimesh.numtris  = tricount;
+	    // Bullet index/vertex array
+	    auto* iv = new btTriangleIndexVertexArray(
+	        tricount, const_cast<int*>(indices), 3 * sizeof(int),
+	        vcount,   const_cast<btScalar*>(verts), 3 * sizeof(btScalar));
+	    _trimesh.ivarray = iv;
+	    _trimesh.iface   = iv;
+	}
+
+	/* Applies local scaling to the triangle-mesh collision shape (if present).
+	 * No effect for non-triangle-mesh shapes.
+	 */
+	void gipBaseGameObject::setTriangleMeshLocalScaling(float sx, float sy, float sz) {
+	    if (_collisionshape && _shapetype == SHAPETYPE_TRIANGLEMESH) {
+	        _collisionshape->setLocalScaling(btVector3(sx, sy, sz));
+	    }
+	}
 

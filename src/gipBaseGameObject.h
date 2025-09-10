@@ -10,6 +10,7 @@
 
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
+#include "bullet/BulletCollision/CollisionDispatch/btInternalEdgeUtility.h"
 #include "glm/glm.hpp"
 #include <functional>
 #include "gModel.h"
@@ -44,7 +45,8 @@ public:
 		SHAPETYPE_SPHERE,
 		SHAPETYPE_CYLINDER,
 		SHAPETYPE_CAPSULE,
-		SHAPETYPE_CONE
+		SHAPETYPE_CONE,
+		SHAPETYPE_TRIANGLEMESH
 	};
 
 	enum OBJECTRENDERTYPE {
@@ -200,6 +202,10 @@ public:
 
 	void updateObjectLayers();
 
+	void setTriangleMeshSource(const btScalar* verts, int vcount, const int* indices, int tricount, bool takeownership = false);
+
+	void setTriangleMeshLocalScaling(float sx, float sy, float sz);
+
 protected:
 
 	/*
@@ -310,6 +316,18 @@ protected:
 	COLLISIONOBJECTTYPE _collsionobjecttype = COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY;
 
 	const glm::quat _resetquat = glm::quatLookAt(glm::vec3(0,0,-1), glm::vec3(0,1,0));
+
+	struct TriMeshData {
+	    btTriangleIndexVertexArray* ivarray = nullptr;
+	    btStridingMeshInterface*    iface   = nullptr; //alias (ivarray)
+	    btTriangleInfoMap*          triinfo = nullptr; //optional internal-edge info
+	    std::unique_ptr<int[]>      indexowner;        //if we copy indices
+	    std::unique_ptr<btScalar[]> vertexowner;       //if we copy vertices (x,y,z,...)
+	    int numverts = 0, numtris = 0;
+	    bool usingLocalScaling = true;
+	};
+
+	TriMeshData _trimesh;
 };
 
 
