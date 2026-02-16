@@ -53,7 +53,7 @@ void gipBulletPhysics::initializeWorld(WORLDCOORDINATETYPE worldcoordinate, WORL
     _dynamicsworld->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 
     /*Create custom debug drawer*/
-    gipDebugDraw *draw   = new gipDebugDraw((int)worldcoordinate);
+    gipDebugDraw* draw = new gipDebugDraw(worldcoordinate);
     draw->clearLines();
     draw->setDebugMode( draw->getDebugMode()
                         | btIDebugDraw::DBG_DrawWireframe | btIDebugDraw::DBG_MAX_DEBUG_DRAW_MODE);
