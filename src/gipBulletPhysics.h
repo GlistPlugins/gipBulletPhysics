@@ -15,7 +15,6 @@
 #include "gImageGameObject.h"
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
-#include "bullet/BulletCollision/btBulletCollisionCommon.h"
 #include "bullet/BulletCollision/CollisionDispatch/btGhostObject.h"
 #include "bullet/BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 
