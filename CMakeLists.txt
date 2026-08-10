@@ -31,7 +31,7 @@ list(APPEND PLUGIN_INCLUDES
 # iOS, the iOS simulator and Android have no prebuilt Bullet binaries shipped with
 # this plugin, so Bullet is checked out and compiled together with the engine there.
 # Any other platform can opt in with -DGIP_BULLET_FROM_SOURCE=ON.
-if(IOS OR ANDROID)
+if(IOS OR ANDROID OR LINUX)
 	set(GIP_BULLET_FROM_SOURCE_DEFAULT ON)
 else()
 	set(GIP_BULLET_FROM_SOURCE_DEFAULT OFF)
@@ -117,6 +117,15 @@ if(GIP_BULLET_FROM_SOURCE)
 	set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 	add_subdirectory(${GIP_BULLET_SOURCE_DIR} ${CMAKE_BINARY_DIR}/bullet3 EXCLUDE_FROM_ALL)
 	unset(CMAKE_POLICY_VERSION_MINIMUM)
+
+	# The engine is a shared library, so the Bullet static libs going into it have to be
+	# position independent. Without this, Bullet's thread local storage resolves to the
+	# local-exec model and the link fails with an R_X86_64_TPOFF32 relocation error.
+	foreach(GIP_BULLET_TARGET BulletDynamics BulletCollision LinearMath)
+		if(TARGET ${GIP_BULLET_TARGET})
+			set_target_properties(${GIP_BULLET_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
+		endif()
+	endforeach()
 
 	# Our headers include Bullet as "bullet/btBulletDynamicsCommon.h" while upstream
 	# keeps those headers directly under src/, so hand out a directory that has src/
