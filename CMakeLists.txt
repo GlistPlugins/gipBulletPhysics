@@ -234,6 +234,11 @@ elseif(WIN32)
 	if(EXISTS "${PLUGIN_PREBUILTS_DIR}/bin")
 		list(APPEND PLUGIN_LINKDIRS "${PLUGIN_PREBUILTS_DIR}/bin")
 	endif()
+elseif(ANDROID)
+	# Android libs (when prebuilt binaries are used)
+	if(EXISTS "${PLUGIN_LIBS_DIR}/lib/android/${ANDROID_ABI}")
+		list(APPEND PLUGIN_LINKDIRS "${PLUGIN_LIBS_DIR}/lib/android/${ANDROID_ABI}")
+	endif()
 elseif(LINUX)
 	#Linux libs here
 elseif(APPLE)
@@ -283,6 +288,10 @@ elseif(WIN32)
 				gwen
 				HACD
 				openvr_api
+	)
+elseif(ANDROID)
+	list(APPEND PLUGIN_LINKLIBS
+				# Android Bullet prebuilt link names (if not building from source)
 	)
 elseif(LINUX)
 	list(APPEND PLUGIN_LINKLIBS
