@@ -7,6 +7,7 @@ set(pluginname gipBulletPhysics)
 ##### PLUGIN PATHS #####
 set(PLUGIN_DIR ${PLUGINS_DIR}/${pluginname})
 set(PLUGIN_LIBS_DIR ${PLUGIN_DIR}/libs)
+set(PLUGIN_PREBUILTS_DIR ${PLUGIN_DIR}/prebuilts)
 
 
 ##### PLUGIN SOURCES #####
@@ -205,19 +206,34 @@ elseif(WIN32)
 endif()
 
 
-##### PLUGIN DEPENDENCY LOCATIONS (IF ANY) #####
+##### PLUGIN DEPENDENCY LOCATIONS & DLL COPYING (IF ANY) #####
 if(GIP_BULLET_FROM_SOURCE)
 	#Bullet is compiled from source, see above
 elseif(WIN32)
-	list(APPEND PLUGIN_LINKDIRS
-				${PLUGIN_LIBS_DIR}/lib/win32
-				${PLUGIN_LIBS_DIR}/bin
+	# Automatically copy all prebuilt runtime DLLs to application binary directory
+	file(GLOB PLUGIN_DLLS
+		"${PLUGIN_LIBS_DIR}/bin/*.dll"
+		"${PLUGIN_PREBUILTS_DIR}/bin/*.dll"
 	)
+	if(PLUGIN_DLLS)
+		file(COPY ${PLUGIN_DLLS} DESTINATION ${CMAKE_BINARY_DIR})
+	endif()
 
-	#set(PLUGIN_LIBDIRS ${PLUGIN_LIBS_DIR}/lib/win32)
-	list(APPEND PLUGIN_LIBDIRS
-				${PLUGIN_LIBS_DIR}/lib/win32
-	)
+	if(EXISTS "${PLUGIN_LIBS_DIR}/lib/win32")
+		list(APPEND PLUGIN_LINKDIRS "${PLUGIN_LIBS_DIR}/lib/win32")
+		list(APPEND PLUGIN_LIBDIRS "${PLUGIN_LIBS_DIR}/lib/win32")
+	endif()
+	if(EXISTS "${PLUGIN_LIBS_DIR}/bin")
+		list(APPEND PLUGIN_LINKDIRS "${PLUGIN_LIBS_DIR}/bin")
+	endif()
+
+	if(EXISTS "${PLUGIN_PREBUILTS_DIR}/lib/win32")
+		list(APPEND PLUGIN_LINKDIRS "${PLUGIN_PREBUILTS_DIR}/lib/win32")
+		list(APPEND PLUGIN_LIBDIRS "${PLUGIN_PREBUILTS_DIR}/lib/win32")
+	endif()
+	if(EXISTS "${PLUGIN_PREBUILTS_DIR}/bin")
+		list(APPEND PLUGIN_LINKDIRS "${PLUGIN_PREBUILTS_DIR}/bin")
+	endif()
 elseif(LINUX)
 	#Linux libs here
 elseif(APPLE)
