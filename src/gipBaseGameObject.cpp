@@ -12,7 +12,7 @@ gipBaseGameObject::gipBaseGameObject() {
 }
 
 gipBaseGameObject::~gipBaseGameObject() {
-	this->_physicworld->removeObject(this);
+	if (_physicworld != nullptr) _physicworld->removeObject(this);
 	if (_trimesh.triinfo) {
 		delete _trimesh.triinfo;
 		_trimesh.triinfo = nullptr;
@@ -489,7 +489,7 @@ gipBaseGameObject::~gipBaseGameObject() {
 	}
 
 	void gipBaseGameObject::destroy() {
-		this->_physicworld->removeObject(this);
+		if (_physicworld != nullptr) _physicworld->removeObject(this);
 
 	}
 

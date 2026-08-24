@@ -241,7 +241,9 @@ protected:
 	gImage* _image;
 	gModel* _model;
 	gMesh* _mesh;
-	gipBulletPhysics* _physicworld;
+	// Null until the object is given a world, so a game object built without one
+	// does not send its destructor through a pointer that was never written.
+	gipBulletPhysics* _physicworld = nullptr;
 	btTransform _transform;
 	btCollisionShape* _collisionshape;
 	btRigidBody* _rigidbody;
