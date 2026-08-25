@@ -200,12 +200,21 @@ void gipBulletPhysics::drawDebug() {
 }
 
 void gipBulletPhysics::removeObject(gipBaseGameObject* object) {
+	if (object == nullptr) return;
+	// An object can arrive here twice: once because the game called destroy() on it,
+	// and again from its destructor, which removes whatever is still registered.
+	// _selfindex is stale by then and points at whichever object was shifted into
+	// that slot - or past the end of the list once enough have gone - so the second
+	// pass used to erase a stranger and eventually index outside the vector. The
+	// object's own index is only trusted while the list agrees that it is the one
+	// standing there; anything else means it is already gone, or was never added.
+	size_t previousindex = object->_selfindex;
+	if (previousindex >= _objects.size() || _objects[previousindex] != object) return;
 	if (object->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
         _dynamicsworld->removeCollisionObject(object->getRigidBody());
     } else {
         _dynamicsworld->removeCollisionObject(object->_ghostobject);
     }
-	size_t previousindex = object->_selfindex;
 	_objects.erase(_objects.begin() + previousindex);
 	for (size_t i = previousindex; i < _objects.size(); ++i) {
 		_objects[i]->setSelfIndex(i);
