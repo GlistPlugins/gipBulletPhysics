@@ -200,13 +200,27 @@ void gipBulletPhysics::drawDebug() {
 }
 
 void gipBulletPhysics::removeObject(gipBaseGameObject* object) {
+	// destroy() removes an object without deleting it, and ~gipBaseGameObject
+	// removes it a second time, by which point _selfindex is stale. Erasing on
+	// a stale index drops an innocent object and leaves every remaining
+	// _selfindex disagreeing with _objects; the next removal then indexes past
+	// the end and deque::erase moves off the end of its block. Verify the index
+	// still names this object before touching anything.
+	size_t previousindex = object->_selfindex;
+	if (previousindex >= _objects.size() || _objects[previousindex] != object) {
+		return;
+	}
+
 	if (object->_collsionobjecttype == COLLISIONOBJECTTYPE::COLLISIONOBJECTTYPE_RIGIDBODY) {
         _dynamicsworld->removeCollisionObject(object->getRigidBody());
     } else {
         _dynamicsworld->removeCollisionObject(object->_ghostobject);
     }
-	size_t previousindex = object->_selfindex;
+
 	_objects.erase(_objects.begin() + previousindex);
+	// So a second removal of the same object is a no-op rather than an erase
+	// at an index that now belongs to somebody else.
+	object->setSelfIndex(static_cast<size_t>(-1));
 	for (size_t i = previousindex; i < _objects.size(); ++i) {
 		_objects[i]->setSelfIndex(i);
 	}
